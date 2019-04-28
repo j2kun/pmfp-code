@@ -1,0 +1,9 @@
+*.pyc
+*.swp
+__pycache__/
+*pytest_cache*
+venv
+.coverage
+cov_annotate/
+cov_html/
+node_modules/
