@@ -1,0 +1,68 @@
+from typing import Callable
+from typing import Generator
+from typing import List
+from typing import NewType
+from typing import TypeVar
+import math
+
+
+# just for type clarity
+Action = TypeVar('Action')
+RewardFn = NewType('RewardFn', Callable[[Action], float])
+
+
+def ucb1(actions: List[Action],
+         reward: RewardFn) -> Generator[Action, None, None]:
+    '''The Upper Confidence Bound 1 (UCB1) algorithm.
+
+    This function is an infinite generator that chooses an action to take
+    in each step, the rewards for which are produced by the `reward` callable.
+    UCB1 balances exploration (trying different actions) and exploitation
+    (playing actions with large rewards).
+
+    UCB1 guarantees that if each action corresponds to a fixed(but arbitrary)
+    distribution with values in [0, 1], and the rewards are drawn
+    independently from these distributions in each round, then the expected
+    regret of UCB1(compared to the best single action in hindsight) has the
+    order of magnitude sqrt(K * T * log(T)), where K is the number of actions
+    and T is the number of rounds.
+
+    Arguments:
+      - actions: a list of actions that can be taken by the algorithm
+      - reward: a callable accepting as input a single action and producing
+          as output a float representing the reward or cost of the action.
+
+    Returns:
+      A generator yielding an infinite stream of actions.
+    '''
+    num_actions = len(actions)
+    payoff_sums = [0] * num_actions
+
+    # Play each action once to initialize empirical sums.
+    for i, action in enumerate(actions):
+        payoff_sums[i] = reward(action)
+        yield action
+
+    num_plays = [1] * num_actions
+    t = num_actions
+
+    def upperBound(step, num_plays):
+        return math.sqrt(2 * math.log(step) / num_plays)
+
+    while True:
+        upper_confidence_bounds = [
+            payoff_sums[i] / num_plays[i] + upperBound(t, num_plays[i])
+            for i in range(num_actions)
+        ]
+        action_index = max(
+            range(num_actions),
+            key=lambda i: upper_confidence_bounds[i]
+        )
+        action = actions[action_index]
+
+        the_reward = reward(action)
+        num_plays[action_index] += 1
+        payoff_sums[action_index] += the_reward
+        t = t + 1
+
+        yield action
