@@ -1,14 +1,13 @@
 from typing import Callable
 from typing import Generator
 from typing import List
-from typing import NewType
 from typing import TypeVar
 import math
 
 
 # just for type clarity
 Action = TypeVar('Action')
-RewardFn = NewType('RewardFn', Callable[[Action], float])
+RewardFn = Callable[[Action], float]
 
 
 def ucb1(actions: List[Action],
@@ -35,34 +34,39 @@ def ucb1(actions: List[Action],
     Returns:
       A generator yielding an infinite stream of actions.
     '''
-    num_actions = len(actions)
-    payoff_sums = [0] * num_actions
+    num_actions: int = len(actions)
+    payoff_sums: List[float] = [0] * num_actions
 
     # Play each action once to initialize empirical sums.
     for i, action in enumerate(actions):
         payoff_sums[i] = reward(action)
         yield action
 
-    num_plays = [1] * num_actions
-    t = num_actions
+    num_plays: List[int] = [1] * num_actions
+    t: int = num_actions
 
-    def upperBound(step, num_plays):
+    def upperBound(step: int, num_plays: int) -> float:
+        '''Return the margin of the confidence bound from its mean.
+
+        This method does not need to know the expected value of the action
+        being attempted. The confidence bound depends only on the number of
+        total actions attempted and the number of times one particular action
+        has been tried.
+        '''
         return math.sqrt(2 * math.log(step) / num_plays)
 
     while True:
-        upper_confidence_bounds = [
+        upper_confidence_bounds: List[float] = [
             payoff_sums[i] / num_plays[i] + upperBound(t, num_plays[i])
             for i in range(num_actions)
         ]
-        action_index = max(
+        chosen_action_index: int = max(
             range(num_actions),
             key=lambda i: upper_confidence_bounds[i]
         )
-        action = actions[action_index]
+        chosen_action: Action = actions[chosen_action_index]
 
-        the_reward = reward(action)
-        num_plays[action_index] += 1
-        payoff_sums[action_index] += the_reward
+        num_plays[chosen_action_index] += 1
+        payoff_sums[chosen_action_index] += reward(chosen_action)
         t = t + 1
-
-        yield action
+        yield chosen_action
