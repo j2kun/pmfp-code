@@ -39,8 +39,8 @@ def ucb1(actions: List[Action],
 
     # Play each action once to initialize empirical sums.
     for i, action in enumerate(actions):
-        payoff_sums[i] = reward(action)
         yield action
+        payoff_sums[i] = reward(action)
 
     num_plays: List[int] = [1] * num_actions
     t: int = num_actions
@@ -65,8 +65,8 @@ def ucb1(actions: List[Action],
             key=lambda i: upper_confidence_bounds[i]
         )
         chosen_action: Action = actions[chosen_action_index]
+        yield chosen_action
 
         num_plays[chosen_action_index] += 1
         payoff_sums[chosen_action_index] += reward(chosen_action)
         t = t + 1
-        yield chosen_action
