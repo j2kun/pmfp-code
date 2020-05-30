@@ -60,8 +60,8 @@ def attribute_resource_usage(resources: List[Resource],
       Customers.
     '''
     # construct the array of transitions among transient states Q
-    Q = np.array([[1,2],[3,4]])
-    R = np.array([[1,2],[3,4]])
+    Q = np.array([[1, 2], [3, 4]])
+    R = np.array([[1, 2], [3, 4]])
 
     # invert N = (1-Q)^{-1}
     fundamental_matrix = np.linalg.inv(I - Q)
