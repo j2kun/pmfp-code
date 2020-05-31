@@ -18,10 +18,10 @@ UsageFn = Callable[[Provider, Consumer], float]
 Attribution = Dict[Resource, Dict[Consumer, float]]
 
 
-def attribute_resource_usage(resources: List[Resource],
-                             services: List[Service],
-                             customers: List[Customer],
-                             usageFn: UsageFn) -> Attribution:
+def attribute_resource_usage(
+    resources: List[Resource], services: List[Service],
+    customers: List[Customer], usageFn: UsageFn
+) -> Attribution:
     '''Attribute the resource usage among the terminal customers of services.
 
     In this context a Resource is something that is provided out of thin air,
@@ -60,11 +60,12 @@ def attribute_resource_usage(resources: List[Resource],
       Customers.
     '''
     # construct the array of transitions among transient states Q
-    Q = np.array([[1, 2], [3, 4]])
-    R = np.array([[1, 2], [3, 4]])
+    N = numpy.array([[2, 3], [4, 5]])
+    Q = numpy.array([[1, 2], [3, 4]])
+    R = numpy.array([[1, 2], [3, 4]])
 
     # invert N = (1-Q)^{-1}
-    fundamental_matrix = np.linalg.inv(I - Q)
+    fundamental_matrix = numpy.linalg.inv(numpy.identity(2) - Q)
 
     # compute N * R to get absorbing probabilities
     absorbing_probabilities = numpy.dot(N, R)
