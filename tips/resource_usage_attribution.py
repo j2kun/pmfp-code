@@ -7,6 +7,8 @@ from typing import Union
 from typing import cast
 import numpy
 
+EPSILON = 1e-10
+
 # just for type clarity
 Resource = TypeVar('Resource')
 Service = TypeVar('Service')
@@ -56,20 +58,25 @@ def attribute_resource_usage(
       A dict describing the attribution of each resource among the Customers.
     '''
     # construct transitions among transient states Q
-    transient_states = cast(List[Provider], resources) + cast(List[Provider], services)
+    providers = cast(List[Provider], resources) + cast(List[Provider], services)
+    consumers = cast(List[Consumer], services) + cast(List[Consumer], customers)
+    verify_proper_normalization(providers, consumers, usageFn)
+
     Q = resource_service_transition_matrix = numpy.array(
-        [[usageFn(a, b) for b in transient_states] for a in transient_states]
+        [[usageFn(a, b) for b in providers] for a in providers]
     )
 
     # compute transition to absorbing states
     R = absorbing_state_transition_matrix = numpy.array(
-        [[usageFn(a, b) for b in customers] for a in transient_states]
+        [[usageFn(a, b) for b in customers] for a in providers]
     )
+
+    if not Q.any() or not R.any():
+        return dict()
 
     # invert N = (1-Q)^{-1}
     Q_dim = len(resources) + len(services)
     fundamental_matrix = numpy.linalg.inv(numpy.identity(Q_dim) - Q)
-
     absorbing_probabilities = numpy.dot(fundamental_matrix, R)
 
     attribution_dict = {
@@ -81,3 +88,15 @@ def attribute_resource_usage(
     }
 
     return attribution_dict
+
+
+def verify_proper_normalization(
+    providers: List[Provider], consumers: List[Consumer], usageFn: UsageFn
+) -> None:
+    '''Confirm that the usageFn is properly normalized.'''
+    for provider in providers:
+        if abs(sum(usageFn(provider, consumer)
+                   for consumer in consumers) - 1) > EPSILON:
+            raise ValueError(
+                "Input usages are not normalized for %s" % provider
+            )

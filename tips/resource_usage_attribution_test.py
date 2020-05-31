@@ -8,6 +8,10 @@ import numpy
 
 from resource_usage_attribution import attribute_resource_usage
 
+RESOURCES = ['flour', 'leather']
+SERVICES = ['miller', 'leathersmith']
+CUSTOMERS = ['cake', 'handbag']
+
 
 def test_empty_inputs():
     resources = []
@@ -40,10 +44,6 @@ def test_single_path():
 
 
 def test_parallel_disjoint_edges():
-    resources = ['flour', 'leather']
-    services = ['miller', 'leathersmith']
-    customers = ['cake', 'handbag']
-
     usages = {
         ('flour', 'miller'): 1,
         ('miller', 'cake'): 1,
@@ -66,15 +66,43 @@ def test_parallel_disjoint_edges():
     }
 
     assert_that(
-        attribute_resource_usage(resources, services, customers, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
     ).is_equal_to(expected_attribution)
 
 
-def test_equal_split_at_service():
-    resources = ['flour', 'leather']
-    services = ['miller', 'leathersmith']
-    customers = ['cake', 'handbag']
+def test_err_on_unnormalized_inputs():
+    usages = {
+        ('flour', 'miller'): 1,
+        ('miller', 'cake'): 1,
+        ('leather', 'leathersmith'): 0.9,
+        ('leathersmith', 'handbag'): 1,
+    }
 
+    def usageFn(x, y):
+        return usages.get((x, y), 0)
+
+    assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
+        RESOURCES, SERVICES, CUSTOMERS, usageFn
+    )
+
+
+def test_err_on_unnormalized_inputs_2():
+    usages = {
+        ('flour', 'miller'): 1.1,
+        ('miller', 'cake'): 1,
+        ('leather', 'leathersmith'): 1,
+        ('leathersmith', 'handbag'): 1,
+    }
+
+    def usageFn(x, y):
+        return usages.get((x, y), 0)
+
+    assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
+        RESOURCES, SERVICES, CUSTOMERS, usageFn
+    )
+
+
+def test_equal_split_at_service():
     usages = {
         ('flour', 'miller'): 0.5,
         ('leather', 'miller'): 0.5,
@@ -111,15 +139,11 @@ def test_equal_split_at_service():
     }
 
     assert_that(
-        attribute_resource_usage(resources, services, customers, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
     ).is_equal_to(expected_attribution)
 
 
 def test_equal_split_at_customer():
-    resources = ['flour', 'leather']
-    services = ['miller', 'leathersmith']
-    customers = ['cake', 'handbag']
-
     usages = {
         ('flour', 'miller'): 1,
         ('leather', 'leathersmith'): 1,
@@ -156,15 +180,11 @@ def test_equal_split_at_customer():
     }
 
     assert_that(
-        attribute_resource_usage(resources, services, customers, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
     ).is_equal_to(expected_attribution)
 
 
 def test_unequal_split_at_both_service_and_customer():
-    resources = ['flour', 'leather']
-    services = ['miller', 'leathersmith']
-    customers = ['cake', 'handbag']
-
     usages = {
         ('flour', 'miller'): 0.6,
         ('flour', 'leathersmith'): 0.4,
@@ -196,11 +216,11 @@ def test_unequal_split_at_both_service_and_customer():
     }
 
     actual_attribution = attribute_resource_usage(
-        resources, services, customers, usageFn
+        RESOURCES, SERVICES, CUSTOMERS, usageFn
     )
 
-    for resource in resources:
-        for customer in customers:
+    for resource in RESOURCES:
+        for customer in CUSTOMERS:
             assert_that(actual_attribution[resource][customer]).described_as(
                 "attribution[%s][%s]" % (resource, customer)
             ).is_close_to(expected_attribution[resource][customer], 1e-10)
