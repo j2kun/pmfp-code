@@ -8,3 +8,4 @@ cov_annotate/
 cov_html/
 node_modules/
 *.mypy_cache*
+.hypothesis/
