@@ -43,10 +43,6 @@ def attribute_resource_usage(
 
     Each Resource has total supply 1, which can be rescaled by the caller.
 
-    If some Service consumes resources, but not all of its output is consumed
-    by Consumers, then the remaining fraction of resources used are considered
-    to be used by the Service as if it were a Customer.
-
     Arguments:
       - resources: a list of Resources
       - services: a list of Services
@@ -54,12 +50,10 @@ def attribute_resource_usage(
       - usageFn: a callable accepting as input a Provider (resource/service) P
           and a consuming Consumer (service/customer) U, and produces as output the
           fraction of the total output of P consumed by U. For a fixed P, the sum
-          of the outputs of usageFn(P, U) over all users U must be at most 1, or
-          a ValueError is raised.
+          of the outputs of usageFn(P, U) over all users U must be at most 1.
 
     Returns:
-      A dict describing the attribution of each resource among the Services and
-      Customers.
+      A dict describing the attribution of each resource among the Customers.
     '''
     # construct transitions among transient states Q
     transient_states = cast(List[Provider], resources) + cast(List[Provider], services)
