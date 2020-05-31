@@ -4,6 +4,7 @@ from typing import Dict
 from typing import List
 from typing import TypeVar
 from typing import Union
+from typing import cast
 import numpy
 
 # just for type clarity
@@ -61,7 +62,7 @@ def attribute_resource_usage(
       Customers.
     '''
     # construct transitions among transient states Q
-    transient_states = resources + services
+    transient_states = cast(List[Provider], resources) + cast(List[Provider], services)
     Q = resource_service_transition_matrix = numpy.array(
         [[usageFn(a, b) for b in transient_states] for a in transient_states]
     )
