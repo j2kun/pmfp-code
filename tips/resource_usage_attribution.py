@@ -1,3 +1,4 @@
+from itertools import combinations
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -59,16 +60,29 @@ def attribute_resource_usage(
       A dict describing the attribution of each resource among the Services and
       Customers.
     '''
-    # construct the array of transitions among transient states Q
-    N = numpy.array([[2, 3], [4, 5]])
-    Q = numpy.array([[1, 2], [3, 4]])
-    R = numpy.array([[1, 2], [3, 4]])
+    # construct transitions among transient states Q
+    transient_states = resources + services
+    Q = resource_service_transition_matrix = numpy.array(
+        [[usageFn(a, b) for b in transient_states] for a in transient_states]
+    )
+
+    # compute transition to absorbing states
+    R = absorbing_state_transition_matrix = numpy.array(
+        [[usageFn(a, b) for b in customers] for a in transient_states]
+    )
 
     # invert N = (1-Q)^{-1}
-    fundamental_matrix = numpy.linalg.inv(numpy.identity(2) - Q)
+    Q_dim = len(resources) + len(services)
+    fundamental_matrix = numpy.linalg.inv(numpy.identity(Q_dim) - Q)
 
-    # compute N * R to get absorbing probabilities
-    absorbing_probabilities = numpy.dot(N, R)
+    absorbing_probabilities = numpy.dot(fundamental_matrix, R)
 
-    # construct output dict
-    return dict()
+    attribution_dict = {
+        resource: {
+            customer: absorbing_probabilities[i, j]
+            for (j, customer) in enumerate(customers)
+        }
+        for (i, resource) in enumerate(resources)
+    }
+
+    return attribution_dict
