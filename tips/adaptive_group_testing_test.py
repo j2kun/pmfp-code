@@ -42,3 +42,26 @@ def test_reversed_find_10():
     )
 
     assert_that(actual).is_equal_to([10])
+
+
+def test_look_for_two_positive():
+    subjects = list(range(25))
+    test = intersecting_test([1, 0])
+
+    actual = adaptive_group_testing.generalized_binary_split(
+        subjects, test, 2
+    )
+
+    assert_that(actual).contains_only(1, 0)
+
+
+@given(lists(integers(min_value=0, max_value=24), min_size=1, max_size=10, unique=True))
+def test_finds_specific_subjects_with_exact_bound(positive_subjects):
+    subjects = list(range(25))
+
+    test = intersecting_test(positive_subjects)
+    actual = adaptive_group_testing.generalized_binary_split(
+        subjects, test, len(positive_subjects)
+    )
+
+    assert_that(actual).contains_only(*positive_subjects)
