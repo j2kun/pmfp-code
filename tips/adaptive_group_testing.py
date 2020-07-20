@@ -79,7 +79,6 @@ def binary_search(subjects: List[TestSubject],
     current_min = 0
     current_max = len(subjects)
     unknown = list()
-    split_index = current_min + 1
 
     while current_max - current_min > 1:
         split_index = int((current_max + current_min) / 2)
@@ -90,7 +89,7 @@ def binary_search(subjects: List[TestSubject],
         else:
             current_min = split_index
 
-    if test([current_min]):
+    if test([subjects[current_min]]):
         return subjects[current_min], unknown
 
     raise ValueError("No positively testing member was found!")
