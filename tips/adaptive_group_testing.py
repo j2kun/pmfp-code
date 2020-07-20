@@ -11,7 +11,7 @@ Test = Callable[Set[TestSubject], bool]
 
 def next_group_to_test(
     test_subjects: List[TestSubject], defective_count_bound: int
-) -> Iterable[TestSubject]:
+) -> Tuple[List[TestSubject], List[TestSubject]]:
     '''Return the next group to test according to the Genralized Binary Splitting Algorithm.
 
     Arguments:
@@ -19,8 +19,8 @@ def next_group_to_test(
       - defective_count_bound: the maximum number of defects in test_subjects
 
     Returns:
-      A pair (S, X), where S is subset of test_subjects to test,
-      and X is test_subjects - S.
+      A pair (S, X), where S is sublist of test_subjects to test,
+      and X is test_subjects - S. The list S is always a prefix of test_subjects
     '''
     n = len(test_subjects)
     d = defective_count_bound
