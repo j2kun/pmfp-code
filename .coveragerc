@@ -1,5 +1,5 @@
 [run]
-omit = venv/*,__pycache__/*,*test.py,*testing.py
+omit = venv/*,__pycache__/*,*_test.py
 
 [report]
 exclude_lines =
