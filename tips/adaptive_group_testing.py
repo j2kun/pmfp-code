@@ -89,7 +89,4 @@ def binary_search(subjects: List[TestSubject],
         else:
             current_min = split_index
 
-    if test([subjects[current_min]]):
-        return subjects[current_min], unknown
-
-    raise ValueError("No positively testing member was found!")
+    return subjects[current_min], unknown
