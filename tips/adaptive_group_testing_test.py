@@ -2,6 +2,7 @@ from assertpy import assert_that
 from hypothesis import given
 from hypothesis.strategies import lists
 from hypothesis.strategies import integers
+import math
 import pytest
 
 import adaptive_group_testing
@@ -48,14 +49,18 @@ def test_look_for_two_positive():
     subjects = list(range(25))
     test = intersecting_test([1, 0])
 
-    actual = adaptive_group_testing.generalized_binary_split(
-        subjects, test, 2
-    )
-
+    actual = adaptive_group_testing.generalized_binary_split(subjects, test, 2)
     assert_that(actual).contains_only(1, 0)
 
 
-@given(lists(integers(min_value=0, max_value=24), min_size=1, max_size=10, unique=True))
+@given(
+    lists(
+        integers(min_value=0, max_value=24),
+        min_size=1,
+        max_size=10,
+        unique=True
+    )
+)
 def test_finds_specific_subjects_with_exact_bound(positive_subjects):
     subjects = list(range(25))
 
@@ -65,3 +70,27 @@ def test_finds_specific_subjects_with_exact_bound(positive_subjects):
     )
 
     assert_that(actual).contains_only(*positive_subjects)
+
+
+@given(
+    lists(
+        integers(min_value=0, max_value=999),
+        min_size=1,
+        max_size=20,
+        unique=True
+    )
+)
+def test_optimality(positive_subjects):
+    subjects = list(range(1000))
+    d = len(positive_subjects)
+    n = len(subjects)
+
+    test = intersecting_test(positive_subjects)
+    actual = adaptive_group_testing.generalized_binary_split(
+        subjects, test, len(positive_subjects)
+    )
+
+    # this is a weak assertion because the number of tests only approaches
+    # d * log2(n/d) in expectation.
+    expected_count = d * math.log2(n / d)
+    assert_that(test.call_count / expected_count).is_less_than(1.5)
