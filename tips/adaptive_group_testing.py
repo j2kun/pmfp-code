@@ -27,8 +27,8 @@ def generalized_binary_split(
     Returns:
       The sublist of test subjects that test positively
     '''
-    if not test_subjects:
-        return set()
+    if not test_subjects or defective_count_bound <= 0:
+        return list()
 
     test_group, remainder = next_group_to_test(
         test_subjects, defective_count_bound
@@ -58,7 +58,7 @@ def next_group_to_test(
     n = len(test_subjects)
     d = defective_count_bound
     if n <= 2 * d - 2:
-        return (set(test_subjects[0]), test_subjects[1:])
+        return ([test_subjects[0]], test_subjects[1:])
 
     test_size = 2**(floor(log2((n - d + 1) / d)))
     return (test_subjects[:test_size], test_subjects[test_size:])
@@ -91,6 +91,6 @@ def binary_search(subjects: List[TestSubject],
             current_min = split_index
 
     if test([current_min]):
-        return [current_min], unknown
+        return subjects[current_min], unknown
 
     raise ValueError("No positively testing member was found!")
