@@ -62,3 +62,35 @@ def next_group_to_test(
 
     test_size = 2**(floor(log2((n - d + 1) / d)))
     return (test_subjects[:test_size], test_subjects[test_size:])
+
+
+def binary_search(subjects: List[TestSubject],
+                  test: Test) -> Tuple[TestSubject, List[TestSubject]]:
+    '''Perform a binary search to find a positive test subject.
+
+    Arguments:
+      - test_subjects: the subjects to test
+      - test: the test to run
+
+    Returns:
+      A pair (x, S), where x is a positively testing subject
+      and S is a list of TestSubject that may be positive.
+    '''
+    current_min = 0
+    current_max = len(subjects)
+    unknown = list()
+    split_index = current_min + 1
+
+    while current_max - current_min > 1:
+        split_index = int((current_max + current_min) / 2)
+        test_group = subjects[current_min:split_index]
+        if test(test_group):
+            unknown.extend(subjects[split_index:current_max])
+            current_max = split_index
+        else:
+            current_min = split_index
+
+    if test([current_min]):
+        return [current_min], unknown
+
+    raise ValueError("No positively testing member was found!")
