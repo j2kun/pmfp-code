@@ -1,6 +1,5 @@
 from bitstring import BitStream
 from bitstring import Bits
-import math
 import numpy
 
 
@@ -26,6 +25,17 @@ parity_check_matrix = numpy.concatenate(
 permutation = [4, 5, 0, 6, 1, 2, 3]
 generator_matrix = generator_matrix[:, permutation]
 parity_check_matrix = parity_check_matrix[:, permutation]
+
+
+syndrome_table = {
+  1:4,
+  2:2,
+  3:6,
+  4:1,
+  5:5,
+  6:3,
+  7:7,
+}
 
 
 def encode(bits: BitStream) -> BitStream:
@@ -74,26 +84,27 @@ def decode(bits: BitStream) -> BitStream:
     Returns:
       A BitStream representing the decoded message
     '''
-    num_blocks = math.ceil(len(bits) / 7)
+    num_blocks = len(bits) // 7
     blocks = numpy.zeros((num_blocks, 1), dtype=numpy.uint8)
     for i in range(num_blocks):
         blocks[i] = bits.read('uint:7')
     blocks = numpy.unpackbits(blocks, axis=1)[:, 1:]
 
-    error_locations = parity_check_matrix.dot(blocks.transpose()).transpose() % 2
+    syndromes = parity_check_matrix.dot(blocks.transpose()).transpose() % 2
 
-    # convert to error locations as integers in each block
-    error_locations = numpy.packbits(
+    # convert to syndromes as integers for each block
+    syndromes = numpy.packbits(
         numpy.concatenate(
-            (numpy.zeros((num_blocks, 5), dtype=numpy.uint8), error_locations),
+            (numpy.zeros((num_blocks, 5), dtype=numpy.uint8), syndromes),
             axis=1),
         axis=1).reshape((num_blocks,))
 
     # correct errors
-    for row, bit in enumerate(error_locations):
-        # if bit==0, there is no error, otherwise bit
-        # refers to the 1-indexed position of the error
-        if bit:
+    for row, syndrome in enumerate(syndromes):
+        # if bit==0, there is no error, otherwise error location
+        # can be looked up according to syndrome table
+        if syndrome:
+            bit = syndrome_table[syndrome]
             blocks[(row, bit - 1)] = 1 - blocks[(row, bit - 1)]
 
     # drop parity check bits and recombine
@@ -130,4 +141,4 @@ if __name__ == "__main__":
     encoded.invert(12)  # introduce an error in a parity bit
     encoded.pos = 0
     decoded = decode(encoded).tobytes().decode("utf-8")
-    print(f'decoded after error in message bit: {decoded}')
+    print(f'decoded after error in parity check bit: {decoded}')
