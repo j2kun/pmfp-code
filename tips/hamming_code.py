@@ -89,19 +89,15 @@ def decode(bits: BitStream) -> BitStream:
 
 
 if __name__ == "__main__":
-    msg = 'wat'
-    print(f'message: {msg}')
-    encoded = encode(BitStream(bytes(msg, 'utf-8')))
-    print(f'encoded: {encoded}')
-    decoded = decode(encoded).tobytes().decode('utf-8')
-    print(f'decoded: {decoded}')
+    import os
+    import timeit
+    print('Generating 1 KiB of random data')
+    msg = os.urandom(1024)  # 1 KiB
 
-    encoded.invert(3)  # introduce an error in a message bit
-    encoded.pos = 0
-    decoded = decode(encoded).tobytes().decode("utf-8")
-    print(f'decoded after error in message bit: {decoded}')
+    unencoded_input = BitStream(msg)
+    print('Timing encode')
+    print(timeit.timeit(lambda: encode(unencoded_input), number=10) / 10)
 
-    encoded.invert(12)  # introduce an error in a parity bit
-    encoded.pos = 0
-    decoded = decode(encoded).tobytes().decode("utf-8")
-    print(f'decoded after error in parity check bit: {decoded}')
+    encoded = encode(unencoded_input)
+    print('Timing decode')
+    print(timeit.timeit(lambda: decode(encoded), number=10) / 10)
