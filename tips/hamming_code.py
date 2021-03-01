@@ -1,40 +1,35 @@
 from bitstring import BitStream
 from bitstring import Bits
-import numpy
 
 
-P = numpy.array([
-    1, 1, 0,
-    1, 0, 1,
-    0, 1, 1,
-    1, 1, 1,
-], dtype=numpy.uint8).reshape((4, 3))
-
-generator_matrix = numpy.concatenate(
-    (numpy.identity(n=4, dtype=numpy.uint8), P),
-    axis=1
-)
-
-parity_check_matrix = numpy.concatenate(
-    (P.transpose(), numpy.identity(n=3, dtype=numpy.uint8)),
-    axis=1
-)
-
-# trick to make parity check exactly
-# describe the bit position of the error
-permutation = [4, 5, 0, 6, 1, 2, 3]
-generator_matrix = generator_matrix[:, permutation]
-parity_check_matrix = parity_check_matrix[:, permutation]
-
+encoder = {
+    0: 0,
+    1: 105,
+    2: 42,
+    3: 67,
+    4: 76,
+    5: 37,
+    6: 102,
+    7: 15,
+    8: 112,
+    9: 25,
+    10: 90,
+    11: 51,
+    12: 60,
+    13: 85,
+    14: 22,
+    15: 127
+}
 
 syndrome_table = {
-  1:4,
-  2:2,
-  3:6,
-  4:1,
-  5:5,
-  6:3,
-  7:7,
+    0: 0,
+    1: 1 << 3,
+    2: 1 << 5,
+    3: 1 << 1,
+    4: 1 << 6,
+    5: 1 << 2,
+    6: 1 << 4,
+    7: 1,
 }
 
 
@@ -42,35 +37,23 @@ def encode(bits: BitStream) -> BitStream:
     '''Encode a message to be resilient to errors.
 
     Arguments:
-      - bits: a bit stream to encode
+      - bits: a bit stream to encode, of length divisible by 4
 
     Returns:
       A bit stream containing the encoded message
     '''
-    # convert message into blocks of 4 bits
-    num_blocks = len(bits) // 4
-    blocks = numpy.zeros((num_blocks, 1), dtype=numpy.uint8)
-    for i in range(num_blocks):
-        blocks[i] = bits.read('uint:4')
-    blocks = numpy.unpackbits(blocks, axis=1)[:, 4:]
+    bits.pos = 0
+    output = BitStream()
+    for i in range(len(bits) // 4):
+        block = bits.read('uint:4')
+        output.append(Bits(uint=encoder[block], length=7))
+    return output
 
-    encoded_blocks = blocks.dot(generator_matrix) % 2
 
-    # convert encoded blocks back into bytes
-    encoded_blocks = numpy.packbits(
-        numpy.concatenate(
-            # 7-bit encoded means we need one extra zero in front
-            (numpy.zeros((len(encoded_blocks), 1), dtype=numpy.uint8),
-                encoded_blocks),
-            axis=1
-        )
-    )
-    s = BitStream()
-    for block in encoded_blocks:
-        s.append(Bits(uint=block, length=7))
-
-    s.pos = 0
-    return s
+def parity(x: int) -> int:
+    # python 3.10 will have bit_count,
+    # can replace this with (block & d).bit_count() & 1
+    return Bits(uint=x, length=7).count(1) & 1
 
 
 def decode(bits: BitStream) -> BitStream:
@@ -79,50 +62,30 @@ def decode(bits: BitStream) -> BitStream:
     If the number of errors is too large, the decoded message may be incorrect.
 
     Arguments:
-      - bits: the encoded stream of bits
+      - bits: the encoded stream of bits, in blocks of 7 bits
 
     Returns:
       A BitStream representing the decoded message
     '''
-    num_blocks = len(bits) // 7
-    blocks = numpy.zeros((num_blocks, 1), dtype=numpy.uint8)
-    for i in range(num_blocks):
-        blocks[i] = bits.read('uint:7')
-    blocks = numpy.unpackbits(blocks, axis=1)[:, 1:]
-
-    syndromes = parity_check_matrix.dot(blocks.transpose()).transpose() % 2
-
-    # convert to syndromes as integers for each block
-    syndromes = numpy.packbits(
-        numpy.concatenate(
-            (numpy.zeros((num_blocks, 5), dtype=numpy.uint8), syndromes),
-            axis=1),
-        axis=1).reshape((num_blocks,))
-
-    # correct errors
-    for row, syndrome in enumerate(syndromes):
-        # if bit==0, there is no error, otherwise error location
-        # can be looked up according to syndrome table
-        if syndrome:
-            bit = syndrome_table[syndrome]
-            blocks[(row, bit - 1)] = 1 - blocks[(row, bit - 1)]
-
-    # drop parity check bits and recombine
-    decoded_blocks = blocks[:, [2, 4, 5, 6]]
-    decoded_blocks = numpy.packbits(
-        numpy.concatenate(
-            # 4-bit decoded means we need 4 extra zeros in front
-            (numpy.zeros((len(decoded_blocks), 4), dtype=numpy.uint8),
-                decoded_blocks),
-            axis=1
+    bits.pos = 0
+    output = BitStream()
+    for i in range(len(bits) // 7):
+        block = bits.read('uint:7')
+        syndrome = (
+            4 * parity(block & 85)
+            + 2 * parity(block & 51)
+            + parity(block & 15)
         )
-    )
-    s = BitStream()
-    for block in decoded_blocks:
-        s.append(Bits(uint=block, length=4))
-    s.pos = 0
+        block ^= syndrome_table[syndrome]
+        decoded = (
+            ((block & 16) >> 1)
+            + (block & 4)
+            + (block & 2)
+            + (block & 1)
+        )
+        output.append(Bits(uint=decoded, length=4))
 
-    return s
+    return output
 
 
 if __name__ == "__main__":
