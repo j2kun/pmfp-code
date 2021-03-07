@@ -2,13 +2,8 @@ from bitstring import BitStream
 from bitstring import Bits
 
 
-encoder = [
-    0, 105, 42, 67, 76, 37, 102, 15, 112, 25, 90, 51, 60, 85, 22, 127
-]
-
-syndrome_table = [
-    0, 1 << 3, 1 << 5, 1 << 1, 1 << 6, 1 << 2, 1 << 4, 1
-]
+encoder = [0, 15, 19, 28, 37, 42, 54, 57, 70, 73, 85, 90, 99, 108, 112, 127]
+syndrome_table = [0, 1, 2, 16, 4, 32, 64, 8]
 
 
 def encode(bits: BitStream) -> BitStream:
@@ -50,17 +45,17 @@ def decode(bits: BitStream) -> BitStream:
     for i in range(len(bits) // 7):
         block = bits.read('uint:7')
         syndrome = (
-            4 * parity(block & 85)
-            + 2 * parity(block & 51)
-            + parity(block & 15)
+            4 * parity(block & 108)
+            + 2 * parity(block & 90)
+            + parity(block & 57)
         )
         block ^= syndrome_table[syndrome]
         decoded = (
-            ((block & 16) >> 1)
-            + (block & 4)
-            + (block & 2)
-            + (block & 1)
-        )
+            (block & 64)
+            + (block & 32)
+            + (block & 16)
+            + (block & 8)
+        ) >> 3
         output.append(Bits(uint=decoded, length=4))
 
     return output

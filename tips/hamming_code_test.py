@@ -32,7 +32,7 @@ def test_can_recover_from_single_bit_error(data_index):
 
 def test_encode_single_block():
     bits = BitStream(bin='0b1011')
-    expected = BitStream(bin='0b0110011')
+    expected = BitStream(bin='0b1011010')
     assert_that(encode(bits)).is_equal_to(expected)
     
 
