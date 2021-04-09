@@ -283,7 +283,7 @@ def decimal_as_float(draw):
 @settings(deadline=10000)  # 10 seconds
 @given(
     providers_to_customers_transition=arrays(
-        numpy.float, (2 * DIM, 2 * DIM), elements=decimal_as_float()
+        float, (2 * DIM, 2 * DIM), elements=decimal_as_float()
     )
 )
 def test_exact_solution_matches_simulated_approximation(
@@ -329,7 +329,7 @@ def test_exact_solution_matches_simulated_approximation(
         resources, services, customers, usageFn
     )
 
-    total_transition_matrix = numpy.zeros((3 * DIM, 3 * DIM), dtype=numpy.float)
+    total_transition_matrix = numpy.zeros((3 * DIM, 3 * DIM), dtype=float)
     total_transition_matrix[:2 * DIM, DIM:] = providers_to_customers_transition
     total_transition_matrix[2 * DIM:, 2 * DIM:] = numpy.identity(DIM)
 
@@ -340,7 +340,7 @@ def test_exact_solution_matches_simulated_approximation(
     )
 
     for (i, resource) in enumerate(resources):
-        state = numpy.zeros(3 * DIM, dtype=numpy.float)
+        state = numpy.zeros(3 * DIM, dtype=float)
         state[i] = 1.0
         state = numpy.dot(state, exponentiated_transition)
 
