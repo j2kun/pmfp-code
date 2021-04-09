@@ -61,10 +61,17 @@ def error_budget(
 
 
 if __name__ == "__main__":
+    from datetime import datetime
     from itertools import accumulate
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as dates
+    import numpy as np
+    import random
+
+    random.seed(123)
     samples = 1000
     requests = list(accumulate([1000 for i in range(samples)]))
-    errors = list(accumulate([i for i in range(samples)]))
+    errors = list(accumulate([random.randint(0, 2*i) for i in range(samples)]))
 
     budget = 0.35
     print('measurement_index, violated, burn_rate, est_time_remaining')
@@ -80,3 +87,47 @@ if __name__ == "__main__":
             print(s)
         else:
             print(f'{s} {result.time_until_exhausted}')
+
+
+    index = 600
+    result = error_budget(
+        requests[:index],
+        errors[:index],
+        budget,
+        window_minutes=10,
+    )
+
+    d = [datetime.now() + timedelta(minutes=i) for i in range(samples)]
+    values = [budget * requests[i] - errors[i] for i in range(samples)]
+    violation_time = d[index-1] + result.time_until_exhausted
+
+    plt.plot(d[:index], values[:index], linewidth=3, label=r"error budget")
+
+    xaxis_sample_width = dates.date2num(d[1]) - dates.date2num(d[0])
+    plt.axline(
+        (dates.date2num(d[index-1]), values[index-1]), 
+        slope=-result.burn_rate / xaxis_sample_width,
+        linewidth=1, 
+        color="black", 
+        linestyle="--",
+        label="burn rate",
+    )
+    plt.axvline(
+        violation_time,
+        linewidth=1, 
+        color="red", 
+        linestyle=":",
+        label="estimated violation",
+    )
+    plt.xlim(d[0], d[-200])
+    plt.xlabel("time")
+
+    plt.legend(bbox_to_anchor=(1.04,1), loc="upper left")
+    plt.tight_layout()
+
+    ax=plt.gca()
+    ax.xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    ax.set_ylim(bottom=0)
+
+    plt.gcf().autofmt_xdate()
+    plt.show()
