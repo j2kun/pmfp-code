@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/j2kun/pmfp-code/badge.svg?branch=main)](https://coveralls.io/github/j2kun/pmfp-code?branch=main)
+
 
 ```
 virtualenv -p python3 venv
