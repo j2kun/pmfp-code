@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     d = [datetime.now() + timedelta(minutes=i) for i in range(samples)]
     values = [budget * requests[i] - errors[i] for i in range(samples)]
-    violation_time = d[index-1] + result.time_until_exhausted
+    violation_time = d[index-1] + (result.time_until_exhausted or timedelta(minutes=0))
 
     plt.plot(d[:index], values[:index], linewidth=3, label=r"error budget")
 
