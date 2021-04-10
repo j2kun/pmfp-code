@@ -1,5 +1,5 @@
 [run]
-omit = venv/*,__pycache__/*,*_test.py,home/*
+omit = venv/*,__pycache__/*,*_test.py,*circleci*
 
 [report]
 exclude_lines =
