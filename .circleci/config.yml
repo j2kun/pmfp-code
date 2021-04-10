@@ -14,8 +14,10 @@ jobs:
       - run:
           name: Test
           command: |
-              pytest --mypy --cov-report html:cov_html --cov-report annotate:cov_annotate --cov
+              pytest --mypy --cov-report html:cov_html --cov-report annotate:cov_annotate --cov --junitxml=test-results/pytest/results.xml
               coveralls
+      - store_test_results:
+          path: test-results
 
 workflows:
   main:
