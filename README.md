@@ -1,4 +1,6 @@
+[![CircleCI](https://circleci.com/gh/j2kun/pmfp-code.svg?style=shield)](https://circleci.com/gh/j2kun/pmfp-code)
 [![Coverage Status](https://coveralls.io/repos/github/j2kun/pmfp-code/badge.svg?branch=main)](https://coveralls.io/github/j2kun/pmfp-code?branch=main)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/j2kun/pmfp-code.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/j2kun/pmfp-code/context:python)
 
 
 ```
