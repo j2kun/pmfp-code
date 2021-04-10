@@ -1,4 +1,5 @@
 from assertpy import assert_that
+from hypothesis import HealthCheck
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.extra.numpy import arrays
@@ -280,7 +281,10 @@ def decimal_as_float(draw):
     return float(x)
 
 
-@settings(deadline=10000)  # 10 seconds
+@settings(
+    deadline=10000,  # 10 seconds
+    suppress_health_check=[HealthCheck.too_slow],
+)
 @given(
     providers_to_customers_transition=arrays(
         float, (2 * DIM, 2 * DIM), elements=decimal_as_float()
