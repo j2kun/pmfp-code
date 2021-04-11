@@ -57,7 +57,6 @@ if __name__ == "__main__":
     from itertools import accumulate
     import matplotlib.pyplot as plt
     import matplotlib.dates as dates
-    import numpy as np
     import random
 
     random.seed(123)
