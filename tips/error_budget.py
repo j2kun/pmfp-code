@@ -11,7 +11,7 @@ TimeSeries = List[int]
 @dataclass
 class SloMetric:
     violated: bool = False
-    burn_rate: float = 0.0
+    budget_growth_rate: float = 0.0
     time_until_exhausted: Optional[timedelta] = None
 
 
@@ -42,13 +42,12 @@ def error_budget_remaining(
         (budget_at(-1) - budget_at(prev_index)) / window_minutes)
 
     if abs(estimated_budget_growth_rate) < 1e-06:
-        return SloMetric(violated=violated, burn_rate=0.0)
+        return SloMetric(violated=violated, budget_growth_rate=0.0)
 
     burn_minutes_remaining = budget_at(-1) / -estimated_budget_growth_rate
     return SloMetric(
         violated=violated,
-        # note burn rate is opposite of "budget growth_rate"
-        burn_rate=-estimated_budget_growth_rate,
+        budget_growth_rate=estimated_budget_growth_rate,
         time_until_exhausted=timedelta(minutes=burn_minutes_remaining),
     )
 
@@ -67,7 +66,7 @@ if __name__ == "__main__":
     errors = list(accumulate([random.randint(0, 2 * i) for i in range(samples)]))
 
     budget = 0.35
-    print('measurement_index, violated, burn_rate, est_time_remaining')
+    print('measurement_index, violated, budget_growth_rate, est_time_remaining')
     for index in range(5, 1000, 20):
         result = error_budget_remaining(
             requests[:index],
@@ -75,8 +74,8 @@ if __name__ == "__main__":
             budget,
             window_minutes=10,
         )
-        s = f'{index}, {result.violated}, {result.burn_rate:.2f},'
-        if result.burn_rate < 0 or result.violated:
+        s = f'{index}, {result.violated}, {result.budget_growth_rate:.2f},'
+        if result.budget_growth_rate > 0 or result.violated:
             print(s)
         else:
             print(f'{s} {result.time_until_exhausted}')
@@ -99,7 +98,7 @@ if __name__ == "__main__":
     xaxis_sample_width = dates.date2num(d[1]) - dates.date2num(d[0])
     plt.axline(
         (dates.date2num(d[index - 1]), values[index - 1]),
-        slope=-result.burn_rate / xaxis_sample_width,
+        slope=result.budget_growth_rate / xaxis_sample_width,
         linewidth=1,
         color="black",
         linestyle="--",
