@@ -15,7 +15,7 @@ class SloMetric:
     time_until_exhausted: Optional[timedelta] = None
 
 
-def error_budget(
+def error_budget_remaining(
         requests: TimeSeries,
         errors: TimeSeries,
         budget: float,
@@ -34,28 +34,21 @@ def error_budget(
     def budget_at(index):
         return int(budget * requests[index]) - errors[index]
 
-    remaining_budget = budget_at(-1)
-    violated = False
-    if remaining_budget <= 0:
-        violated = True
+    violated = budget_at(-1) <= 0
 
     # Estimate the first derivative of "remaining budget" curve
-    prev_index = max(0, len(requests)-1 - window_minutes)
-    estimated_budget_growth = (
-        (remaining_budget - budget_at(prev_index)) 
-        / window_minutes
-    )
+    prev_index = max(0, len(requests) - 1 - window_minutes)
+    estimated_budget_growth_rate = (
+        (budget_at(-1) - budget_at(prev_index)) / window_minutes)
 
-    if abs(estimated_budget_growth) < 1e-06:
+    if abs(estimated_budget_growth_rate) < 1e-06:
         return SloMetric(violated=violated, burn_rate=0.0)
 
-    # Solve budget_at(t + N) == 0 for N
-    burn_minutes_remaining = remaining_budget / -estimated_budget_growth
-
+    burn_minutes_remaining = budget_at(-1) / -estimated_budget_growth_rate
     return SloMetric(
         violated=violated,
-        # note burn rate is opposite of "budget growth"
-        burn_rate=-estimated_budget_growth,
+        # note burn rate is opposite of "budget growth_rate"
+        burn_rate=-estimated_budget_growth_rate,
         time_until_exhausted=timedelta(minutes=burn_minutes_remaining),
     )
 
@@ -71,12 +64,12 @@ if __name__ == "__main__":
     random.seed(123)
     samples = 1000
     requests = list(accumulate([1000 for i in range(samples)]))
-    errors = list(accumulate([random.randint(0, 2*i) for i in range(samples)]))
+    errors = list(accumulate([random.randint(0, 2 * i) for i in range(samples)]))
 
     budget = 0.35
     print('measurement_index, violated, burn_rate, est_time_remaining')
     for index in range(5, 1000, 20):
-        result = error_budget(
+        result = error_budget_remaining(
             requests[:index],
             errors[:index],
             budget,
@@ -88,9 +81,9 @@ if __name__ == "__main__":
         else:
             print(f'{s} {result.time_until_exhausted}')
 
-
+    # draw the estimated budget curve starting from index 600
     index = 600
-    result = error_budget(
+    result = error_budget_remaining(
         requests[:index],
         errors[:index],
         budget,
@@ -99,33 +92,33 @@ if __name__ == "__main__":
 
     d = [datetime.now() + timedelta(minutes=i) for i in range(samples)]
     values = [budget * requests[i] - errors[i] for i in range(samples)]
-    violation_time = d[index-1] + (result.time_until_exhausted or timedelta(minutes=0))
+    violation_time = d[index - 1] + (result.time_until_exhausted or timedelta(minutes=0))
 
     plt.plot(d[:index], values[:index], linewidth=3, label=r"error budget")
 
     xaxis_sample_width = dates.date2num(d[1]) - dates.date2num(d[0])
     plt.axline(
-        (dates.date2num(d[index-1]), values[index-1]), 
+        (dates.date2num(d[index - 1]), values[index - 1]),
         slope=-result.burn_rate / xaxis_sample_width,
-        linewidth=1, 
-        color="black", 
+        linewidth=1,
+        color="black",
         linestyle="--",
         label="burn rate",
     )
     plt.axvline(
         violation_time,
-        linewidth=1, 
-        color="red", 
+        linewidth=1,
+        color="red",
         linestyle=":",
         label="estimated violation",
     )
     plt.xlim(d[0], d[-200])
     plt.xlabel("time")
 
-    plt.legend(bbox_to_anchor=(1.04,1), loc="upper left")
+    plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
     plt.tight_layout()
 
-    ax=plt.gca()
+    ax = plt.gca()
     ax.xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M:%S'))
     ax.set_ylim(bottom=0)
 
