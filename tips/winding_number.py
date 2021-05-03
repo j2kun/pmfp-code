@@ -9,6 +9,7 @@ class Point:
     y: float
 
 
+# An ordered list of vertices whose first and last entry are the same
 Polygon = List[Point]
 
 
