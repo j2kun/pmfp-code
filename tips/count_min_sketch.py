@@ -22,7 +22,7 @@ def random_hash(modulus):
     return f
 
 
-class CountSketch:
+class CountMinSketch:
     def __init__(self, accuracy: float = 0.001, confidence: float = 1e-05):
         '''Create an empty sketch with the given accuracy parameters.
 
@@ -74,7 +74,7 @@ def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
     heap: List[Tuple[int, T]] = []
     candidates: Set[T] = set()
     count_processed = 0
-    sketch = CountSketch(accuracy=1 / (2 * k), confidence=1e-10)
+    sketch = CountMinSketch(accuracy=1 / (2 * k), confidence=1e-10)
 
     def remove_heap_items_below(value):
         while heap:

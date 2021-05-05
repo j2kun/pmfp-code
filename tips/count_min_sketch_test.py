@@ -9,7 +9,7 @@ from hypothesis.strategies import text
 import math
 import random
 
-from count_min_sketch import CountSketch
+from count_min_sketch import CountMinSketch
 from count_min_sketch import heavy_hitters
 
 
@@ -19,7 +19,7 @@ from count_min_sketch import heavy_hitters
     floats(min_value=1e-04, max_value=0.5, allow_nan=False, allow_infinity=False)
 )
 def test_sketch_error_guarantee_achieved(values, accuracy):
-    sketch = CountSketch(accuracy=accuracy, confidence=1e-10)
+    sketch = CountMinSketch(accuracy=accuracy, confidence=1e-10)
     for value in values:
         sketch.increment(value)
 
@@ -31,7 +31,7 @@ def test_sketch_error_guarantee_achieved(values, accuracy):
 
 @given(lists(text()))
 def test_sketch_len(values):
-    sketch = CountSketch(accuracy=0.01, confidence=0.01)
+    sketch = CountMinSketch(accuracy=0.01, confidence=0.01)
     for value in values:
         sketch.increment(value)
     assert len(sketch) == len(values)
