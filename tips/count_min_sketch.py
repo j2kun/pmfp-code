@@ -13,7 +13,7 @@ LARGE_RANDOM_PRIME = 175927138426321871
 
 
 def random_hash(modulus):
-    '''Return a random instance of a family of pairwise-independent hashes.'''
+    '''Return a random instance of a family of 2-universal hashes.'''
     a, b = random.randint(0, modulus - 1), random.randint(0, modulus - 1)
 
     def f(x):
