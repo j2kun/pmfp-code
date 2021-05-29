@@ -1,10 +1,12 @@
 from collections import deque
 from dataclasses import dataclass
-from pysat.solvers import Minisat22
+from itertools import combinations
 from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import Tuple
+
+from pysat.solvers import Minisat22
 
 
 Name = str
@@ -22,7 +24,7 @@ class PackageVersion:
         return (self.name, self.version)
 
 
-NameIndex = Callable[[Name, Version], PackageVersion]
+NameIndex = Callable[[Name], Dict[Version, PackageVersion]]
 IdIndex = Callable[[int], PackageVersion]
 
 
@@ -41,8 +43,25 @@ def select_dependent_versions(
     while to_process:
         next_package = to_process.pop()
         processed.add(next_package)
-        if not next_package.dependencies:
-            continue
+
+        '''
+        At most one version of any package may be installed.  While SAT 
+        solvers admit many ways to model "cardinality constraints", we
+        choose a simple "pairwise" model that adds the constraint
+
+            v1 => NOT v2
+
+        for two distinct versions v1, v2, of the same package. 
+        This is equivalent to
+
+            (NOT v1) OR (NOT v2)
+        '''
+        versions = [
+            p.package_id
+            for p in package_index(next_package.name).values()
+        ]
+        for (v1, v2) in combinations(versions, 2):
+            clauses.append([-v1, -v2])
 
         '''
         For each dependency DEP, we need a clause that says 
@@ -55,28 +74,23 @@ def select_dependent_versions(
 
             (!next_package OR DEP_v1 OR DEP_v2 OR ...)
         '''
-        clause = [-next_package.package_id]
         for name, allowed_versions in next_package.dependencies:
+            clause = [-next_package.package_id]
             for version in allowed_versions:
-                dep = package_index(name, version)
+                dep = package_index(name)[version]
                 clause.append(dep.package_id)
                 if dep not in processed:
                     to_process.appendleft(dep)
+            clauses.append(clause)
 
-        clauses.append(clause)
-
-    if len(processed) == 1:
-        return {package.name: package.version}
-    
     for clause in clauses:
         solver.add_clause(clause)
 
     # solve with the assumption that the input package is chosen
-    result = solver.solve(assumptions=[package.package_id])
-
-    if not result:
-        raise ValueError("Infeasible!")
+    if not solver.solve(assumptions=[package.package_id]):
+        # print(clauses)
         # return solver.get_core()
+        raise ValueError("Infeasible!")
 
     return dict(
         id_index(abs(v)).as_tuple()
