@@ -93,6 +93,6 @@ def select_dependent_versions(
         raise ValueError("Infeasible!")
 
     return dict(
-        id_index(abs(v)).as_tuple()
+        id_index(v).as_tuple()
         for v in solver.get_model() if v > 0
     )
