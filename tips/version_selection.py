@@ -6,7 +6,7 @@ from typing import Dict
 from typing import Iterable
 from typing import Tuple
 
-from pysat.solvers import Minisat22
+from pysat.solvers import Glucose4
 
 
 Name = str
@@ -34,7 +34,7 @@ def select_dependent_versions(
     id_index: IdIndex,
 ) -> Dict[Name, Version]:
     '''Select versions of dependent packages to install, or report impossible.'''
-    solver = Minisat22()
+    solver = Glucose4()
 
     clauses = []
     to_process = deque([package])
