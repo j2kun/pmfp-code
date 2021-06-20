@@ -23,7 +23,12 @@ def size_confidence_interval(sample: List[int], confidence: float) -> Tuple[floa
 
     This computes the c-percent downward-biased confidence interval [0, c] of
     the size of a population given a uniform random sample of its members
-    without replacement.
+    with replacement.
+
+    Caveat: this formula uses sampling with replacement, whereas the interval
+    for sampling without replacement is slightly narrower given the same
+    confidence level. For practical purposes you can probably ignore the
+    difference.
 
     Args:
       - sample: a uniform random subset of the population
