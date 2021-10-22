@@ -1,8 +1,9 @@
 import random
 import pytest
 
-from loglog import cardinality
 from loglog import LogLog
+from loglog import cardinality
+from loglog import trailing_zeros
 
 
 estimator_names = LogLog(log_bucket_count=1).estimator_names
@@ -10,6 +11,10 @@ estimator_names = LogLog(log_bucket_count=1).estimator_names
 
 def random_data(n=100000):
     return [random.random() for i in range(n)]
+
+
+def test_trailing_zeros_default():
+    assert trailing_zeros(0, 7) == 7
 
 
 @pytest.mark.parametrize("estimator_name", estimator_names)
