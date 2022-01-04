@@ -20,27 +20,54 @@ Coordinates = Tuple[int, int]
 def to_coordinates(index: HilbertIndex, n: int) -> Coordinates:
     '''Convert a Hilbert index to a 2d-coordinate.
 
+    The Hilbert curve defines a partition of a square into subsquares indexed
+    as
+    
+      1 | 2
+      -----
+      0 | 3
+    
+    each subsquare corresponds to a rotation and/or reflection of the
+    perspective, followed by a shift (an affine map). If these transformations
+    are denoted H_0, H_1, H_2, H_3 for each subsquare, and if the input index
+    is represented in base-4 digits (b_1, b_2, ..., b_k), then the the mapping from
+    coordinate to the Hilbert index is given as follows (where * denotes
+    function composition)
+
+      (H_{b_1} * H_{b_2} *  ...  * H_{b_k})(0, 0)
+
+    Hence, the algorithm proceeds by applying the transformation for the
+    least significant base-4 digit first.
+
     Args:
       - index: the Hilbert-curve index of the point
       - n: a power of 2 representing the width of the square grid of
            coordinates.
 
     Returns: 
-      The (x,y) coordinate of the corresponding data point.
+      The (i, j) coordinate of the corresponding data point.
     '''
-    s, t = (1, int(index))
-    x, y = (0, 0)
+    level = 0
+    i, j = (0, 0)
+    side_length = 1  # the length of the side of one subsquare being considered
 
-    while s < n:
-        rx = 1 & (t // 2)
-        ry = 1 & (t ^ rx)
-        (x, y) = rotate(s, x, y, rx, ry)
-        x += s * rx
-        y += s * ry
-        t //= 4
-        s *= 2
+    while side_length < n:
+        subsquare = 3 & index  # least-significant base-4 digit
 
-    return (x, y)
+        if subsquare == 0:
+            (i, j) = (j, i)
+        elif subsquare == 1:
+            (i, j) = (i + side_length, j)
+        elif subsquare == 2:
+            (i, j) = (i + side_length, j + side_length)
+        else:  # subsquare == 3
+            (i, j) = (side_length - 1 - j, 2 * side_length - 1 - i)
+
+        index >>= 2  # get the next lowest two bits ready for masking
+        level += 1
+        side_length *= 2
+
+    return (i, j)
 
 
 def to_hilbert_index(coords: Coordinates, n: int) -> HilbertIndex:
@@ -54,26 +81,56 @@ def to_hilbert_index(coords: Coordinates, n: int) -> HilbertIndex:
     Returns: 
       The Hilbert index of the data point.
     '''
-    rx, ry, s, t = (0, 0, n // 2, 0)
-    (x, y) = coords
+    # the side_length indexes both the level of recursion and the length of the
+    # side of one subsquare.
+    side_length = n // 2
+    index = 0
+    (i, j) = coords
 
-    while s > 0:
-        rx = int((x & s) > 0)
-        ry = int((y & s) > 0)
-        t += s * s * ((3 * rx) ^ ry)
-        (x, y) = rotate(n, x, y, rx, ry)
-        s //= 2
+    while side_length > 0:
+        subsquare_i = int((i & side_length) > 0)
+        subsquare_j = int((j & side_length) > 0)
 
-    return t
+        # The Hilbert curve defines a partition of a square into subsquares
+        # indexed as
+        #
+        #   1 | 2
+        #   -----
+        #   0 | 3
+        #
+        # subsquare_i is 1 if the i coordinate is in the upper half,
+        # which implies the subsquare is 1 or 2.
+        # subsquare_j is 1 if the j coordinate is in the upper half,
+        # which implies the subsquare is 0 or 3.
+        #
+        # So we need a function implementing the table
+        #
+        # subsquare_i | subsquare_j | subsquare
+        # ------------+-------------+-----------
+        #           0 |           0 |    00 = 0
+        #           0 |           1 |    11 = 3
+        #           1 |           0 |    01 = 1
+        #           1 |           1 |    10 = 2
+        #
+        # The second bit of the rightmost column is the xor of the two inputs,
+        # and the first bit is subsquare_j.
+        subsquare = (subsquare_j << 1) + (subsquare_i ^ subsquare_j)
 
+        if subsquare == 0:
+            (i, j) = (j, i)
+        elif subsquare == 1:
+            (i, j) = (i - side_length, j)
+        elif subsquare == 2:
+            (i, j) = (i - side_length, j - side_length)
+        else:  # subsquare == 3
+            (i, j) = (2 * side_length - 1 - j, side_length - 1 - i)
 
-def rotate(n: int, x: int, y: int, rx: int, ry: int) -> Tuple[int, int]:
-    if (ry == 0):
-        if (rx == 1):
-            (x, y) = (n - 1 - x, n - 1 - y)
-        (x, y) = (y, x)
+        # each subsquare contains side_length^2 many index points, so recursing
+        # to one subsquare causes the index skip over all those points.
+        index += subsquare * side_length * side_length
+        side_length >>= 1
 
-    return (x, y)
+    return index
 
 
 def naive_matrix_vector_product(A, v, output, n):
@@ -175,6 +232,9 @@ if __name__ == '__main__':
     end = time.time()
     print(f'hilbert data preprocessing: {end-start}s')
 
+    # this would show an improvement, but Python lists basically get
+    # no benefit from spaital locality. It is shown only as a complete
+    # example of how it might work, if ported to another language.
     total_h_seconds = timeit.timeit(
         lambda:
         hilbert_matrix_vector_product(flattened_A, v, output2, coordinate_iter),
