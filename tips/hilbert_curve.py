@@ -47,9 +47,10 @@ def to_coordinates(index: HilbertIndex, n: int) -> Coordinates:
     Returns: 
       The (i, j) coordinate of the corresponding data point.
     '''
-    level = 0
     i, j = (0, 0)
-    side_length = 1  # the length of the side of one subsquare being considered
+    # the side_length indexes both the level of recursion and the length of the
+    # side of one subsquare.
+    side_length = 1
 
     while side_length < n:
         subsquare = 3 & index  # least-significant base-4 digit
@@ -64,7 +65,6 @@ def to_coordinates(index: HilbertIndex, n: int) -> Coordinates:
             (i, j) = (side_length - 1 - j, 2 * side_length - 1 - i)
 
         index >>= 2  # get the next lowest two bits ready for masking
-        level += 1
         side_length *= 2
 
     return (i, j)
