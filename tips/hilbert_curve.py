@@ -133,17 +133,6 @@ def to_hilbert_index(coords: Coordinates, n: int) -> HilbertIndex:
     return index
 
 
-def naive_matrix_vector_product(A, v, output, n):
-    for i in range(n):
-        for j in range(n):
-            output[i] += A[i][j] * v[j]
-
-
-def hilbert_matrix_vector_product(flattened_A, v, output, coordinate_iter):
-    for t, (i, j) in coordinate_iter:
-        output[i] += flattened_A[t] * v[j]
-
-
 def hilbert_iter(depth: int) -> Iterator[Coordinates]:
     queue: Deque[Tuple[str, int]] = deque([('H', depth)])
     i, j = 0, 0
@@ -214,6 +203,11 @@ if __name__ == '__main__':
     end = time.time()
     print(f'initial data generation: {end-start}s')
 
+    def naive_matrix_vector_product(A, v, output, n):
+        for i in range(n):
+            for j in range(n):
+                output[i] += A[i][j] * v[j]
+
     timeit_count = 20
     total_n_seconds = timeit.timeit(
         lambda: naive_matrix_vector_product(A, v, output1, n),
@@ -232,9 +226,15 @@ if __name__ == '__main__':
     end = time.time()
     print(f'hilbert data preprocessing: {end-start}s')
 
+    def hilbert_matrix_vector_product(flattened_A, v, output, coordinate_iter):
+        for t, (i, j) in coordinate_iter:
+            output[i] += flattened_A[t] * v[j]
+
+
     # this would show an improvement, but Python lists basically get
     # no benefit from spaital locality. It is shown only as a complete
     # example of how it might work, if ported to another language.
+    # TODO: ported to rust, but still no speedup, what gives?
     total_h_seconds = timeit.timeit(
         lambda:
         hilbert_matrix_vector_product(flattened_A, v, output2, coordinate_iter),
