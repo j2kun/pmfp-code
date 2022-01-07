@@ -1,6 +1,8 @@
 from itertools import product
 from typing import List
 
+import numpy as np
+
 Matrix = List[List[int]]
 
 
@@ -17,10 +19,23 @@ SOBEL_VERTICAL_KERNEL = [
 
 
 def indices(num_rows: int, num_cols: int):
+    '''Return a generator over a 2D index space in row-major order.
+
+    A pure-python version of the (much faster) numpy.ndindex.
+    '''
     return product(range(num_rows), range(num_cols))
 
 
 def detect_edges(image: Matrix) -> Matrix:
+    '''Detect the edges in an image.
+
+    Arguments:
+      - image: a 2D array containing one color channel of the image to process
+
+    Returns:
+      A 2D array. Entries (i, j) with large magnitude detect the presence of an edge
+      at image position (i+1, j+1).
+    '''
     G_x = convolve(image, SOBEL_HORIZONTAL_KERNEL)
     G_y = convolve(image, SOBEL_VERTICAL_KERNEL)
     return [
@@ -30,6 +45,16 @@ def detect_edges(image: Matrix) -> Matrix:
 
 
 def convolve(matrix: Matrix, kernel: Matrix) -> Matrix:
+    '''Convolve a matrix with a kernel.
+
+    Arguments:
+      - matrx: a 2D array to be convolved
+      - kernel: a smaller 2D array to use as the convolution kernel.
+
+    Returns:
+      A 2D array. Entries (i, j) contain the sum
+          sum_{i_2, j_2} (kernel[i_2][j_j] * matrix[i+i_2][j+j_2])
+    '''
     output_num_rows, output_num_cols = (
         len(matrix) - len(kernel) + 1,
         len(matrix[0]) - len(kernel[0]) + 1,
@@ -47,6 +72,8 @@ def convolve(matrix: Matrix, kernel: Matrix) -> Matrix:
 
 
 def sobel_optimized(matrix: Matrix) -> Matrix:
+    # Use numpy or a compiled language if you want it to be truly fast. This
+    # simply unrolls the generic convolution loop for the Sobel operators.
     output_num_rows, output_num_cols = (len(matrix) - 2, len(matrix[0]) - 2)
 
     output = [[0] * output_num_cols for _ in range(output_num_rows)]
@@ -64,3 +91,53 @@ def sobel_optimized(matrix: Matrix) -> Matrix:
         output[row][col] = abs(x) + abs(y)
 
     return output
+
+
+def np_convolve2d(matrix: np.ndarray, kernel: np.ndarray):
+    '''An optimized 2d convolution routine using numpy.
+
+    Kudos to the many answers on StackOverflow describing the use of
+    as_strided and einsum.
+    '''
+    sub_shape = kernel.shape
+    view_shape = tuple(np.subtract(matrix.shape, sub_shape) + 1) + sub_shape
+    strides = 2 * matrix.strides
+    sub_matrix = np.lib.stride_tricks.as_strided(matrix, shape=view_shape, strides=strides)
+    return np.einsum('kl,ijkl->ij', kernel, sub_matrix)
+
+
+def np_detect_edges(image: np.ndarray) -> np.ndarray:
+    '''A numpy version of detect_edges.'''
+    np_horizontal = np.array(SOBEL_HORIZONTAL_KERNEL)
+    np_vertical = np.array(SOBEL_VERTICAL_KERNEL)
+    G_x = np_convolve2d(image, np_horizontal)
+    G_y = np_convolve2d(image, np_vertical)
+    return np.abs(G_x) + np.abs(G_y)
+
+
+if __name__ == '__main__':
+    import argparse
+    import os
+
+    from PIL import Image
+
+    parser = argparse.ArgumentParser(description='Apply the Sobel filter to an image.')
+    parser.add_argument('source_file')
+    args = parser.parse_args()
+
+    with Image.open(args.source_file) as im:
+        # Convert to grayscale, one value per pixel. Could alternatively
+        # compute Sobel on each color channel and recombine.
+        pixel_array = np.array(im.convert('L'))
+        print(pixel_array.shape)
+
+    print('detecting edges')
+    sobel_pixel_array = np_detect_edges(pixel_array)
+    sobel_pixel_array = np.floor(255 * sobel_pixel_array / np.max(sobel_pixel_array))
+
+    print('converting back to image')
+    edge_image = Image.fromarray(sobel_pixel_array.astype(np.uint8), mode='L')
+    # edge_image.show()
+    source_dir, source_name = os.path.split(args.source_file)
+    outfile = os.path.join(source_dir, f'edges_{source_name}')
+    edge_image.save(outfile)

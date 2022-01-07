@@ -2,9 +2,12 @@ from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
+import numpy as np
 import pytest
 from sobel import convolve
 from sobel import detect_edges
+from sobel import np_convolve2d
+from sobel import np_detect_edges
 from sobel import sobel_optimized
 
 
@@ -25,6 +28,26 @@ def test_convolve_4by4_with_2by2():
         [-10, -2, 2],
     ]
     assert convolve(matrix, kernel) == expected
+
+
+def test_np_convolve_4by4_with_2by2():
+    matrix = np.array([
+        [1, 2, 3, 4],
+        [2, -3, 4, -1],
+        [3, 3, 0, 2],
+        [1, 9, -2, 2],
+    ])
+    kernel = np.array([
+        [1, 2],
+        [-1, -2],
+    ])
+    expected = np.array([
+        [9, 3, 9],
+        [-13, 2, -2],
+        [-10, -2, 2],
+    ])
+    actual = np_convolve2d(matrix, kernel)
+    np.testing.assert_array_equal(actual, expected)
 
 
 @composite
@@ -72,6 +95,17 @@ def test_dimension_fuzz_test(matrix_and_kernel):
     # dimensions, to check whether the dimension calculations are off.
     matrix, kernel = matrix_and_kernel
     result = convolve(matrix, kernel)
+    assert len(result) == len(matrix) - len(kernel) + 1
+    assert len(result[0]) == len(matrix[0]) - len(kernel[0]) + 1
+
+
+@given(random_matrix_and_kernel(min_dim=1, max_dim=10))
+def test_np_dimension_fuzz_test(matrix_and_kernel):
+    # This test merely runs the convolve on matrices and kernels of varying
+    # dimensions, to check whether the dimension calculations are off.
+    matrix, kernel = matrix_and_kernel
+    matrix, kernel = np.array(matrix), np.array(kernel)
+    result = np_convolve2d(matrix, kernel)
     assert len(result) == len(matrix) - len(kernel) + 1
     assert len(result[0]) == len(matrix[0]) - len(kernel[0]) + 1
 
@@ -126,9 +160,11 @@ def random_matrix(draw, min_dim=1, max_dim=10):
         ))
     return matrix
 
-@given(random_matrix(min_dim=1, max_dim=10))
+
+@given(random_matrix(min_dim=4, max_dim=20))
 def test_consistency_between_impls(matrix):
     result1 = detect_edges(matrix)
     result2 = sobel_optimized(matrix)
+    result3 = np_detect_edges(np.array(matrix))
     assert result1 == result2
-
+    np.testing.assert_array_equal(np.array(result1), result3)
