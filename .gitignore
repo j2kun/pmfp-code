@@ -9,3 +9,4 @@ cov_html/
 node_modules/
 *.mypy_cache*
 .hypothesis/
+.dmypy.json
