@@ -2,8 +2,10 @@ from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
+import pytest
 from sobel import convolve
 from sobel import detect_edges
+from sobel import sobel_optimized
 
 
 def test_convolve_4by4_with_2by2():
@@ -74,7 +76,8 @@ def test_dimension_fuzz_test(matrix_and_kernel):
     assert len(result[0]) == len(matrix[0]) - len(kernel[0]) + 1
 
 
-def test_detect_edges_simple_vert():
+@pytest.mark.parametrize("detect_edges_fn", [detect_edges, sobel_optimized])
+def test_detect_edges_simple_vert(detect_edges_fn):
     matrix = [
         [0, 1, 0, 0],
         [0, 1, 0, 0],
@@ -85,9 +88,11 @@ def test_detect_edges_simple_vert():
         [0, 4],
         [0, 4],
     ]
-    assert detect_edges(matrix) == expected
+    assert detect_edges_fn(matrix) == expected
 
-def test_detect_edges_simple_horizontal():
+
+@pytest.mark.parametrize("detect_edges_fn", [detect_edges, sobel_optimized])
+def test_detect_edges_simple_horizontal(detect_edges_fn):
     matrix = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -98,4 +103,32 @@ def test_detect_edges_simple_horizontal():
         [4, 4],
         [0, 0],
     ]
-    assert detect_edges(matrix) == expected
+    assert detect_edges_fn(matrix) == expected
+
+
+@composite
+def random_matrix(draw, min_dim=1, max_dim=10):
+    """Generate a matrix, and a kernel with strictly smaller dimension."""
+    matrix_dim = integers(
+        min_value=min_dim,
+        max_value=max_dim,
+    )
+    values = integers(min_value=-100, max_value=100)
+    matrix_row_count = draw(matrix_dim)
+    matrix_col_count = draw(matrix_dim)
+    matrix = draw(
+        lists(
+            lists(values,
+                  min_size=matrix_col_count,
+                  max_size=matrix_col_count),
+            min_size=matrix_row_count,
+            max_size=matrix_row_count
+        ))
+    return matrix
+
+@given(random_matrix(min_dim=1, max_dim=10))
+def test_consistency_between_impls(matrix):
+    result1 = detect_edges(matrix)
+    result2 = sobel_optimized(matrix)
+    assert result1 == result2
+

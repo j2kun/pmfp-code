@@ -44,3 +44,23 @@ def convolve(matrix: Matrix, kernel: Matrix) -> Matrix:
         output[row][col] = value
 
     return output
+
+
+def sobel_optimized(matrix: Matrix) -> Matrix:
+    output_num_rows, output_num_cols = (len(matrix) - 2, len(matrix[0]) - 2)
+
+    output = [[0] * output_num_cols for _ in range(output_num_rows)]
+    for (row, col) in indices(output_num_rows, output_num_cols):
+        m00 = matrix[row][col]
+        m01 = matrix[row][col + 1]
+        m02 = matrix[row][col + 2]
+        m10 = matrix[row + 1][col]
+        m12 = matrix[row + 1][col + 2]
+        m20 = matrix[row + 2][col]
+        m21 = matrix[row + 2][col + 1]
+        m22 = matrix[row + 2][col + 2]
+        x = m00 - m02 + 2 * (m10 - m12) + m20 - m22
+        y = m00 - m20 + 2 * (m01 - m21) + m02 - m22
+        output[row][col] = abs(x) + abs(y)
+
+    return output
