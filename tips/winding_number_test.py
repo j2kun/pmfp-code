@@ -1,5 +1,4 @@
 from hypothesis import given
-from hypothesis.strategies import lists
 from hypothesis.strategies import composite
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
@@ -123,7 +122,7 @@ def test_convex_polygon():
         [352.1996595278678, 422.81739758979796],
         [321.00477970452636, 452.52297223804726],
     ]
-    polygon = [Point(x=x, y=y) for (x,y) in coords]
+    polygon = [Point(x=x, y=y) for (x, y) in coords]
 
     # both examples are in the bounding box of the convex polygon
     assert point_in_polygon(Point(x=321, y=298), polygon)
@@ -1118,8 +1117,9 @@ comb_coords = [
     [97.843900, 0.081840],
 ]
 
+
 def test_non_convex_polygon():
-    polygon = [Point(x=x, y=y) for (x,y) in comb_coords]
+    polygon = [Point(x=x, y=y) for (x, y) in comb_coords]
 
     # inside the base of the comb
     assert point_in_polygon(Point(x=10, y=0.5), polygon)
