@@ -1,3 +1,15 @@
+'''Edge detection using the Sobel kernel.
+
+This module contains three implementations:
+
+    - A pure-python, generic convolution operator. It is quite slow.
+    - A pure-python, loop-unrolled implementation of Sobel convolution.
+    - A faster numpy-based implementation using a generic numpy-based
+      convolution.
+
+Running this file via `python tips/sobel.py path/to/file.jpg` applies the Sobel
+kernel to an image, and saves the resulting image to disk.
+'''
 from itertools import product
 from typing import List
 
@@ -38,6 +50,8 @@ def detect_edges(image: Matrix) -> Matrix:
     '''
     G_x = convolve(image, SOBEL_HORIZONTAL_KERNEL)
     G_y = convolve(image, SOBEL_VERTICAL_KERNEL)
+
+    # sum of absolute values is an approximation of the norm, sqrt(x^2 + y^2)
     return [
         [abs(x) + abs(y) for (x, y) in zip(row_G_x, row_G_y)]
         for (row_G_x, row_G_y) in zip(G_x, G_y)
