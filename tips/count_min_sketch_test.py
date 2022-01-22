@@ -1,16 +1,14 @@
 from collections import Counter
-from hypothesis import assume
+import random
+
+from count_min_sketch import CountMinSketch
+from count_min_sketch import heavy_hitters
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
 from hypothesis.strategies import text
-import math
-import random
-
-from count_min_sketch import CountMinSketch
-from count_min_sketch import heavy_hitters
 
 
 @settings(deadline=2000)
@@ -40,7 +38,7 @@ def test_sketch_len(values):
 @given(integers(min_value=2, max_value=20))
 def test_heavy_hitters_guarantee_achieved(k):
     n = 100
-    elements = list(range(1, n+1))
+    elements = list(range(1, n + 1))
     threshold = n // (2 * k)
 
     heavy_hitter = elements[0]
@@ -63,4 +61,3 @@ def test_heavy_hitters_guarantee_achieved(k):
     assert heavy_hitter in output, str(Counter(data))
     for x in set(underweight):
         assert x not in output, str(Counter(data))
-
