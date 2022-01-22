@@ -72,13 +72,13 @@ def test_n_player_tournament():
     player_skills = [1000 + i * 50 for i in players]
 
     standard_deviation = 50
-    alpha = 0.3
+    alpha = 0.4
 
     perf_dists = [NormalDist(mu=skill, sigma=standard_deviation)
                   for skill in player_skills]
     elos = [EloSkill(mean=1500, variance=standard_deviation**2) for _ in players]
 
-    num_games = 20000
+    num_games = 30000
     for _ in range(num_games):
         i = random.choice(players)
         j = random.choice(players)

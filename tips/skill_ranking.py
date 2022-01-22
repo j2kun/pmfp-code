@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from math import erf
-from math import pi
 from math import sqrt
 from typing import Tuple
 
@@ -49,7 +48,7 @@ def elo_update(
             f"p1={e1.variance}, p2={e2.variance}")
 
     std_dev = sqrt(e1.variance)
-    scale = alpha * std_dev * sqrt(pi)  # also called the K-factor
+    scale = alpha * std_dev  # also called the K-factor
     deviation_from_expected = ((outcome + 1) / 2) - elo_player1_win_prob(e1, e2)
     p1_score_change = round(scale * deviation_from_expected)
 
