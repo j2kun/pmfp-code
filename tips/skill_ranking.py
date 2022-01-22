@@ -23,6 +23,10 @@ def elo_player1_win_prob(e1: EloSkill, e2: EloSkill):
         (e1.mean - e2.mean) / sqrt(e1.variance + e2.variance))
 
 
+def truncate(x, xmin: int = 0, xmax: int = 3000):
+    return min(max(x, xmin), xmax)
+
+
 def elo_update(
     e1: EloSkill, e2: EloSkill, outcome: int, alpha: float
 ) -> Tuple[EloSkill, EloSkill]:
@@ -39,11 +43,17 @@ def elo_update(
     Returns:
       A pair (EloSkill, EloSkill) containing the updated skill ratings
     """
-    std_dev = sqrt(e1.variance)  # assuming variances are equal
-    scale = alpha * std_dev * sqrt(pi)
-    score_change = round(scale * ((outcome + 1) / 2) - elo_player1_win_prob(e1, e2))
+    if e1.variance != e2.variance:
+        raise ValueError(
+            f"Variances must agree, but were "
+            f"p1={e1.variance}, p2={e2.variance}")
+
+    std_dev = sqrt(e1.variance)
+    scale = alpha * std_dev * sqrt(pi)  # also called the K-factor
+    deviation_from_expected = ((outcome + 1) / 2) - elo_player1_win_prob(e1, e2)
+    p1_score_change = round(scale * deviation_from_expected)
 
     return (
-        EloSkill(e1.mean + score_change, e1.variance),
-        EloSkill(e2.mean + score_change, e2.variance),
+        EloSkill(truncate(e1.mean + p1_score_change), e1.variance),
+        EloSkill(truncate(e2.mean - p1_score_change), e2.variance),
     )
