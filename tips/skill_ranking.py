@@ -1,4 +1,4 @@
-'''Various implementations of skill ranking.'''
+'''An implementation of Elo skill ranking.'''
 
 from dataclasses import dataclass
 from math import erf
