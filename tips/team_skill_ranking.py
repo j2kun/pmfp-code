@@ -27,7 +27,7 @@ def define_model(p1_prior, p2_prior, perf_stddev):
         p1_perf = pm.Normal("P1 performance", mu=p1_skill, sigma=perf_stddev)
         p2_perf = pm.Normal("P2 performance", mu=p2_skill, sigma=perf_stddev)
 
-        pm.Deterministic("P1 wins", p1_perf > p2_perf)
+        pm.Deterministic("P1 wins", p1_perf > p2_perf, observed=[1, 1, 1, 0, 1, 1, 0, 1])
 
     return model
 
@@ -37,10 +37,13 @@ def update_skills(game_outcome):
 
 
 if __name__ == "__main__":
-    p1_prior = SkillDistribution()
+    p1_prior = SkillDistribution(mean=1200, stddev=50)
+    p1_prior = SkillDistribution(mean=1300, stddev=25)
     p2_prior = SkillDistribution()
     model = define_model(p1_prior, p2_prior, 10)
 
     # requires `pip install graphviz`
-    graph = pm.model_graph.model_to_graphviz(model=model)
-    graph.render('team_skill_ranking_model.gv', view=True)
+    # graph = pm.model_graph.model_to_graphviz(model=model)
+    # graph.render('team_skill_ranking_model.gv', view=True)
+
+    # data = pm.sample(2000, model=model, tune=1500, return_inferencedata=True)
