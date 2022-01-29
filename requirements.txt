@@ -16,6 +16,7 @@ dill==0.3.4
 docopt==0.6.2
 fastprogress==1.0.0
 filelock==3.0.12
+graphviz==0.19.1
 greenlet==1.1.2
 hypothesis==6.8.9
 idna==2.10
