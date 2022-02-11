@@ -1,8 +1,11 @@
 '''A Bayesian network for a TrueSkill-like team-based skill ranking.'''
-
-from dataclasses import dataclass
+from typing import Dict
 from typing import List
+from typing import NewType
+from dataclasses import dataclass
+from statistics import mean
 
+import numpy as np
 import pymc3 as pm
 
 
@@ -14,36 +17,47 @@ class SkillDistribution:
     performance, in both cases a Normal distribution.
     '''
     mean: float = 1500
-    stddev: float = 10
+    stddev: float = 50
 
 
-def define_model(p1_prior, p2_prior, perf_stddev):
+@dataclass
+class Team:
+    members: List[int]
+
+
+PlayerRatings = NewType("PlayerRatings", Dict[int, SkillDistribution])
+
+
+def update_ratings(team1: Team, team2: Team, ratings:PlayerRatings) -> PlayerRatings:
     # Starting with Elo for simplicity, to get something working
     model = pm.Model()
     with model:
-        p1_skill = pm.Normal("P1 skill", mu=p1_prior.mean, sigma=p1_prior.stddev)
-        p2_skill = pm.Normal("P2 skill", mu=p2_prior.mean, sigma=p2_prior.stddev)
+        p1_skill = pm.Normal("p1_skill", mu=p1_prior.mean, sigma=p1_prior.stddev)
+        p2_skill = pm.Normal("p2_skill", mu=p2_prior.mean, sigma=p2_prior.stddev)
 
-        p1_perf = pm.Normal("P1 performance", mu=p1_skill, sigma=perf_stddev)
-        p2_perf = pm.Normal("P2 performance", mu=p2_skill, sigma=perf_stddev)
+        p1_perf = pm.Normal("p1_perf", mu=p1_skill, sigma=20)
+        p2_perf = pm.Normal("p2_perf", mu=p2_skill, sigma=20)
 
-        pm.Deterministic("P1 wins", p1_perf > p2_perf, observed=[1, 1, 1, 0, 1, 1, 0, 1])
+        perf_diff = p1_perf - p2_perf
+        pm.Bernoulli(
+            "p1_win", logit_p=from_elo_scale(perf_diff), observed=np.array(outcome)
+        )
 
     return model
 
 
-def update_skills(game_outcome):
-    pass
-
-
 if __name__ == "__main__":
-    p1_prior = SkillDistribution(mean=1200, stddev=50)
-    p1_prior = SkillDistribution(mean=1300, stddev=25)
-    p2_prior = SkillDistribution()
-    model = define_model(p1_prior, p2_prior, 10)
+    p1_prior = SkillDistribution(mean=1564, stddev=50)
+    p2_prior = SkillDistribution(mean=1442, stddev=50)
+    matches = [0]
+    print(f"P1: {p1_prior.mean}, P2: {p2_prior.mean}")
 
-    # requires `pip install graphviz`
-    # graph = pm.model_graph.model_to_graphviz(model=model)
-    # graph.render('team_skill_ranking_model.gv', view=True)
-
-    # data = pm.sample(2000, model=model, tune=1500, return_inferencedata=True)
+    for i, match in enumerate(matches):
+        print(f"-------------\nRound {i}\n-------------")
+        model = define_model(p1_prior, p2_prior, 10)
+        trace = pm.sample(model=model)
+        # outcomes = pm.find_MAP(model=model)
+        # posterior mean is new prior
+        p1_prior = SkillDistribution(mean=mean(trace['p1_skill']), stddev=50)
+        p2_prior = SkillDistribution(mean=mean(trace['p2_skill']), stddev=50)
+        print(f"P1: {p1_prior.mean}, P2: {p2_prior.mean}")
