@@ -60,6 +60,21 @@ class Gaussian:
         return f'N({self.mean():.2f}, {self.stddev():.2f})'
 
 
+@dataclass(frozen=True)
+class CumulativeGaussian:
+    '''A class representing a cumulative Gaussian distribution.'''
+    mean: float
+    stddev: float
+
+    def approx_mul(self, other: "Gaussian") -> "Gaussian":
+        '''Approximate the product of a cumulative Gaussian and a Gaussian as a Gaussian.'''
+        # TODO: finish
+        return Gaussian.from_mean_variance(self.mean, self.stddev**2)
+
+    def __repr__(self):
+        return f'CumGauss(x - {self.mean:.2f}/ ({self.stddev:.2f} sqrt(2)))'
+
+
 Message = Union[Gaussian, int]
 
 
@@ -77,7 +92,7 @@ class Node:
         if destination in self.outgoing_messages:
             msg = self.outgoing_messages[destination]
             print(f"(cached) Message from {self} to {destination}: {msg}")
-            return masg
+            return msg
         print(f"Computing new message from {self} to {destination}...")
         msg = self.compute_outgoing_message(destination, context)
         self.outgoing_messages[destination] = msg
@@ -170,10 +185,16 @@ class ComparisonFactor(Node):
     def compute_outgoing_message(
             self, destination: Node, context: Optional[Gaussian]) -> Message:
         integrate_over = self.left if destination == self.right else self.right
+        message_to_integrate = integrate_over.outgoing_message(self)
         output_obs = self.output.outgoing_message(self)
-        if output_obs > 0:
+        if output_obs > 0 and destination == self.left:
+            message = CumulativeGaussian(
+                mean=message_to_integrate.mean(),
+                stddev=message_to_integrate.stddev(),
+            )
 
-
+        approximate_message = message
+        return approximate_message
 
     def __repr__(self) -> str:
         return f"ComparisonFactor({self.output.name} = {self.left.name} > {self.right.name})"
