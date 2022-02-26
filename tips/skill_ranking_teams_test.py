@@ -145,3 +145,65 @@ def test_team_asymmetry_draw():
     # prior skill contribution to the team
     assert (abs(new_p2_rating.mean - p2_rating.mean) > abs(new_p3_rating.mean - p3_rating.mean))
     assert (abs(new_p2_rating.mean - p2_rating.mean) > abs(new_p4_rating.mean - p4_rating.mean))
+
+
+def test_huge_upset_via_win():
+    # this test exists to test the boundaries of the CDF/PDF functions
+    # and the limiting formula to handle them.
+    p1_rating = Rating(mean=2, stddev=0.1)
+    p2_rating = Rating(mean=2, stddev=0.1)
+    p3_rating = Rating(mean=10, stddev=0.1)
+    p4_rating = Rating(mean=100, stddev=0.1)
+
+    team1 = Team(ratings={
+        p1: p1_rating,
+        p2: p2_rating,
+    })
+    team2 = Team(ratings={
+        p3: p3_rating,
+        p4: p4_rating,
+    })
+
+    outcome = 1
+    new_ratings = update_ratings(team1, team2, outcome)
+
+    new_p1_rating = new_ratings[p1]
+    new_p2_rating = new_ratings[p2]
+    new_p3_rating = new_ratings[p3]
+    new_p4_rating = new_ratings[p4]
+
+    assert new_p1_rating.mean > p1_rating.mean
+    assert new_p2_rating.mean > p2_rating.mean
+    assert new_p3_rating.mean < p3_rating.mean
+    assert new_p4_rating.mean < p4_rating.mean
+
+
+def test_huge_upset_via_draw():
+    # this test exists to test the boundaries of the CDF/PDF functions
+    # and the limiting formula to handle them.
+    p1_rating = Rating(mean=2, stddev=0.1)
+    p2_rating = Rating(mean=2, stddev=0.1)
+    p3_rating = Rating(mean=10, stddev=0.1)
+    p4_rating = Rating(mean=100, stddev=0.1)
+
+    team1 = Team(ratings={
+        p1: p1_rating,
+        p2: p2_rating,
+    })
+    team2 = Team(ratings={
+        p3: p3_rating,
+        p4: p4_rating,
+    })
+
+    outcome = 0
+    new_ratings = update_ratings(team1, team2, outcome)
+
+    new_p1_rating = new_ratings[p1]
+    new_p2_rating = new_ratings[p2]
+    new_p3_rating = new_ratings[p3]
+    new_p4_rating = new_ratings[p4]
+
+    assert new_p1_rating.mean > p1_rating.mean
+    assert new_p2_rating.mean > p2_rating.mean
+    assert new_p3_rating.mean < p3_rating.mean
+    assert new_p4_rating.mean < p4_rating.mean
