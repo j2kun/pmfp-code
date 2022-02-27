@@ -136,6 +136,10 @@ def update_one_team(
     losing_mean = t2_mean if outcome >= 0 else t1_mean
     perf_diff = winning_mean - losing_mean
 
+    # This is where the code sample differs from the text in support for draws.
+    # If the outcome is zero, it's a draw, and we must use special "two-sided"
+    # Gaussian truncation formulas representing the fact that the difference in
+    # performance values was close to zero.
     if outcome == 0:
         v = truncated_twosided_gaussian_v(
             perf_diff / c, -draw_margin / c, draw_margin / c)
