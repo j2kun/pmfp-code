@@ -21,6 +21,7 @@ packaging==20.9
 Pillow==9.0.0
 pluggy==0.13.1
 py==1.10.0
+pymc3==3.11.4
 pyparsing==2.4.7
 pytest==6.2.3
 pytest-cov==2.11.1
