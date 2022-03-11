@@ -1,12 +1,7 @@
 '''An implementation of a media mix model.'''
 
-from typing import Dict
-from typing import Iterable
-from dataclasses import dataclass
-
 import pymc3 as pm
 import numpy as np
-
 
 # TODO: add adstock function
 
@@ -20,7 +15,7 @@ def tanh_saturation(x, users_at_saturation, initial_cost_per_user):
     This is PyMC Labs's reparameterization of the original HelloFresh model, cf.
     https://web.archive.org/web/20211224060713/https://www.pymc-labs.io/blog-posts/reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/
     '''
-    return users_at_saturation * np.tanh(x / (users_at_saturation * initial_cost_per_user))
+    return users_at_saturation * pm.math.tanh(x / (users_at_saturation * initial_cost_per_user))
 
 
 def logistic_saturation(x, mu):
@@ -35,14 +30,17 @@ def logistic_saturation(x, mu):
 
 
 # TODO: Turn args into dataclasses & document their semantics
-def make_model(channel_data, acquired_users):
+def make_model(channel_data, sales):
     with pm.Model() as model:
         channel_models = []
 
         for (channel, weekly_spending) in channel_data.items():
-            acquisition_rate = pm.HalfNormal(f'acquisition_rate_{channel}', sd=5)
-            saturation_users = pm.HalfNormal(f'saturation_users_{channel}', sd=50)
-            initial_cost = pm.HalfNormal(f'initial_cost_{channel}', sd=1)
+            acquisition_rate = pm.Gamma(f'acquisition_rate_{channel}', alpha=2, beta=1)
+
+            # in the tanh saturation function, we require the product of these
+            # two terms is nonzero to avoid dividing by zero.
+            saturation_users = pm.Gamma(f'saturation_users_{channel}', alpha=15, beta=0.5)
+            initial_cost = pm.Gamma(f'initial_cost_{channel}', alpha=5, beta=1)
             channel_models.append(
                 acquisition_rate * tanh_saturation(
                     weekly_spending, saturation_users, initial_cost
@@ -53,24 +51,50 @@ def make_model(channel_data, acquired_users):
         # as overall trends in interest/disinterest in the product, or seasonal
         # factors.
         # TODO: explore adding a control component.
-        # control_coeff = pm.Normal(f'control_coefs_{channel}', sd=1)
+        # control_coeff = pm.Normal('control_coefs', sd=1)
 
-        baseline = pm.HalfNormal(f'baseline_{channel}', sd=1)
-        output_noise = pm.Exponential(f'output_noise_{channel}', 10)
-        new_customers = baseline + sum(channel_models)
+        baseline = pm.HalfNormal('baseline', sigma=1)
+        output_noise = pm.HalfNormal('output_noise', sigma=1)
+        new_sales = baseline + sum(channel_models)
         _ = pm.Normal(
-            'likelihood', mu=new_customers, sd=output_noise, observed=acquired_users
+            'likelihood', mu=new_sales, sd=output_noise, observed=sales
         )
 
     return model
 
 
 if __name__ == "__main__":
-    channel_data = {
-        'tv': np.array([10, 20]),
-        'radio': np.array([20, 5]),
-    }
-    acquired_users = np.array([10, 8])
-    model = make_model(channel_data, acquired_users)
-    outcomes = pm.find_MAP(model=model)
-    print(outcomes)
+    import arviz as az
+    import matplotlib.pyplot as plt
+    import csv
+
+    data = []
+    with open('data/media_mix_data.csv', 'r') as infile:
+        reader = csv.reader(infile)
+        is_header = True
+        headers = []
+        for row in reader:
+            if is_header:
+                headers = row
+                is_header = False
+            else:
+                data.append(dict(zip(headers, row)))
+
+    channel_data = {k: [float(d[k]) for d in data] for k in data[0]}
+    sales = channel_data['sales']
+    del channel_data['week']
+    del channel_data['sales']
+
+    model = make_model(channel_data, sales)
+    with model:
+        trace = pm.sample(10, return_inferencedata=False)
+        summary = az.summary(trace, round_to=2)
+        print(summary)
+
+        az.plot_trace(trace)
+        plt.tight_layout()
+        plt.savefig('plot.pdf')
+
+    # outcomes = pm.find_MAP(model=model)
+    # for k, v in outcomes.items():
+    #     print(f'{k}: {v}')
