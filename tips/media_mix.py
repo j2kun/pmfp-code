@@ -63,13 +63,9 @@ def make_model(channel_data, sales):
     return model
 
 
-if __name__ == "__main__":
-    import arviz as az
-    import matplotlib.pyplot as plt
-    import csv
-
+def load_data(filepath: str):
     data = []
-    with open('data/media_mix_data.csv', 'r') as infile:
+    with open(filepath, 'r') as infile:
         reader = csv.reader(infile)
         is_header = True
         headers = []
@@ -84,6 +80,22 @@ if __name__ == "__main__":
     sales = channel_data['sales']
     del channel_data['week']
     del channel_data['sales']
+    return channel_data, sales
+
+
+if __name__ == "__main__":
+    import arviz as az
+    import matplotlib.pyplot as plt
+    import csv
+
+    # channel_data, sales = load_data('data/media_mix_data.csv')
+    channel_data = {
+        'tv': [230.1, 44.5, 17.2, 151.5, 180.8, 8.7, 57.5, 120.2, 8.6, 199.8],
+        'radio': [37.8, 39.3, 45.9, 41.3, 10.8, 48.9, 32.8, 19.6, 2.1, 2.6],
+        'newspaper': [69.2, 45.1, 69.3, 58.5, 58.4, 75.0, 23.5, 11.6, 1.0, 21.2],
+    }
+    sales = [22.1, 10.4, 9.3, 18.5, 12.9, 7.2, 11.8, 13.2, 4.8, 10.6]
+    print(channel_data, sales)
 
     model = make_model(channel_data, sales)
     with model:
