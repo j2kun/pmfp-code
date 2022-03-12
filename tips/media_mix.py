@@ -1,12 +1,11 @@
 '''An implementation of a media mix model.'''
 
 import pymc3 as pm
-import numpy as np
 
 # TODO: add adstock function
 
 
-def tanh_saturation(x, users_at_saturation, initial_cost_per_user):
+def tanh_saturation(x, revenue_at_saturation, initial_roas):
     '''A saturation function based on the hyperbolic tangent.
 
     The saturation function represents the diminishing returns of an
@@ -15,18 +14,7 @@ def tanh_saturation(x, users_at_saturation, initial_cost_per_user):
     This is PyMC Labs's reparameterization of the original HelloFresh model, cf.
     https://web.archive.org/web/20211224060713/https://www.pymc-labs.io/blog-posts/reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/
     '''
-    return users_at_saturation * pm.math.tanh(x / (users_at_saturation * initial_cost_per_user))
-
-
-def logistic_saturation(x, mu):
-    '''A saturation function based on a logistic-like curve.
-
-    This is HelloFresh's original model, cf.
-    https://web.archive.org/web/20210123170937/https://discourse.pymc.io/t/a-bayesian-approach-to-media-mix-modeling-by-michael-johns-zhenyu-wang/6024
-
-    With a per-channel prior on mu as pm.Gamma(alpha=3, beta=1).
-    '''
-    return (1 - np.exp(-mu * x)) / (1 + np.exp(-mu * x))
+    return revenue_at_saturation * pm.math.tanh(initial_roas * x / revenue_at_saturation)
 
 
 # TODO: Turn args into dataclasses & document their semantics
@@ -35,15 +23,23 @@ def make_model(channel_data, sales):
         channel_models = []
 
         for (channel, weekly_spending) in channel_data.items():
-            acquisition_rate = pm.Gamma(f'acquisition_rate_{channel}', alpha=2, beta=1)
+            # The coefficient determining how much revenue can be attributed to
+            # this channel after the effects of saturation have been accounted
+            # for.
+            return_post_reach = pm.HalfNormal(f'return_post_reach_{channel}', sigma=5)
 
-            # in the tanh saturation function, we require the product of these
-            # two terms is nonzero to avoid dividing by zero.
-            saturation_users = pm.Gamma(f'saturation_users_{channel}', alpha=15, beta=0.5)
-            initial_cost = pm.Gamma(f'initial_cost_{channel}', alpha=5, beta=1)
+            # The maximum amount of revenue (before scaling by
+            # return_post_reach) this channel can generate in a given time
+            # period, i.e., at full saturation.
+            revenue_at_saturation = pm.HalfNormal(f'revenue_at_saturation_{channel}', sigma=50)
+
+            # The initial return on advertising spend (before scaling by
+            # return_post_reach) at zero dollars spent. I.e., the slope of the
+            # most linear part of the saturation curve.
+            initial_roas = pm.Gamma(f'initial_roas_{channel}', alpha=5, beta=1)
             channel_models.append(
-                acquisition_rate * tanh_saturation(
-                    weekly_spending, saturation_users, initial_cost
+                return_post_reach * tanh_saturation(
+                    weekly_spending, revenue_at_saturation, initial_roas
                 )
             )
 
@@ -64,6 +60,8 @@ def make_model(channel_data, sales):
 
 
 def load_data(filepath: str):
+    import csv
+
     data = []
     with open(filepath, 'r') as infile:
         reader = csv.reader(infile)
@@ -86,7 +84,6 @@ def load_data(filepath: str):
 if __name__ == "__main__":
     import arviz as az
     import matplotlib.pyplot as plt
-    import csv
 
     # channel_data, sales = load_data('data/media_mix_data.csv')
     channel_data = {
@@ -98,15 +95,18 @@ if __name__ == "__main__":
     print(channel_data, sales)
 
     model = make_model(channel_data, sales)
+    print(model.check_test_point())
     with model:
-        trace = pm.sample(10, return_inferencedata=False)
+        trace = pm.sample(draws=1000, chains=4, tune=1000, return_inferencedata=False)
         summary = az.summary(trace, round_to=2)
         print(summary)
 
         az.plot_trace(trace)
         plt.tight_layout()
-        plt.savefig('plot.pdf')
+        plt.savefig('media_mix_plot.pdf')
 
-    # outcomes = pm.find_MAP(model=model)
-    # for k, v in outcomes.items():
-    #     print(f'{k}: {v}')
+    # add posterior predictive
+    
+    outcomes = pm.find_MAP(model=model)
+    for k, v in outcomes.items():
+        print(f'{k}: {v}')
