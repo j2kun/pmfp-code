@@ -24,19 +24,17 @@ def make_model(channel_data, sales):
 
         for (channel, weekly_spending) in channel_data.items():
             # The coefficient determining how much revenue can be attributed to
-            # this channel after the effects of saturation have been accounted
-            # for.
+            # this channel after the effects of saturation have been accounted for.
             return_post_reach = pm.HalfNormal(f'return_post_reach_{channel}', sigma=5)
 
-            # The maximum amount of revenue (before scaling by
-            # return_post_reach) this channel can generate in a given time
-            # period, i.e., at full saturation.
+            # The maximum amount of revenue (before scaling by return_post_reach)
+            # this channel can generate in a given time period, i.e., at full saturation.
             revenue_at_saturation = pm.HalfNormal(f'revenue_at_saturation_{channel}', sigma=50)
 
             # The initial return on advertising spend (before scaling by
             # return_post_reach) at zero dollars spent. I.e., the slope of the
             # most linear part of the saturation curve.
-            initial_roas = pm.Gamma(f'initial_roas_{channel}', alpha=5, beta=1)
+            initial_roas = pm.HalfNormal(f'initial_roas_{channel}', sigma=2)
             channel_models.append(
                 return_post_reach * tanh_saturation(
                     weekly_spending, revenue_at_saturation, initial_roas
@@ -53,7 +51,7 @@ def make_model(channel_data, sales):
         output_noise = pm.HalfNormal('output_noise', sigma=1)
         new_sales = baseline + sum(channel_models)
         _ = pm.Normal(
-            'likelihood', mu=new_sales, sd=output_noise, observed=sales
+            'likelihood', mu=new_sales, sigma=output_noise, observed=sales
         )
 
     return model
@@ -85,13 +83,10 @@ if __name__ == "__main__":
     import arviz as az
     import matplotlib.pyplot as plt
 
-    # channel_data, sales = load_data('data/media_mix_data.csv')
-    channel_data = {
-        'tv': [230.1, 44.5, 17.2, 151.5, 180.8, 8.7, 57.5, 120.2, 8.6, 199.8],
-        'radio': [37.8, 39.3, 45.9, 41.3, 10.8, 48.9, 32.8, 19.6, 2.1, 2.6],
-        'newspaper': [69.2, 45.1, 69.3, 58.5, 58.4, 75.0, 23.5, 11.6, 1.0, 21.2],
-    }
-    sales = [22.1, 10.4, 9.3, 18.5, 12.9, 7.2, 11.8, 13.2, 4.8, 10.6]
+    channel_data, sales = load_data('data/media_mix_data.csv')
+    data_prefix = 20
+    channel_data = {k: v[:data_prefix] for (k, v) in channel_data.items()}
+    sales = sales[:data_prefix]
     print(channel_data, sales)
 
     model = make_model(channel_data, sales)
@@ -101,12 +96,17 @@ if __name__ == "__main__":
         summary = az.summary(trace, round_to=2)
         print(summary)
 
+        divergent = trace["diverging"]
+        print("Number of Divergent %d" % divergent.nonzero()[0].size)
+        divperc = divergent.nonzero()[0].size / len(trace) * 100
+        print("Percentage of Divergent %.1f" % divperc)
+
         az.plot_trace(trace)
         plt.tight_layout()
         plt.savefig('media_mix_plot.pdf')
 
     # add posterior predictive
-    
+
     outcomes = pm.find_MAP(model=model)
     for k, v in outcomes.items():
         print(f'{k}: {v}')
