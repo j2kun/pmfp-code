@@ -26,5 +26,5 @@ def aggregate_responses(responses: List[bool]) -> Tuple[float, float]:
     # Use n-1 when estimating variance, as per Bessel's correction.
     # The second term represents the additional variance introduced
     # by the private mechanism.
-    variance = mean * (1 - mean) / (n - 1) + 1 / (n - 1)
+    variance = 3 / (4 * (n - 1))
     return (mean, variance)

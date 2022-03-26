@@ -2,32 +2,32 @@ import math
 
 from hypothesis import given
 from hypothesis import example
-from hypothesis.strategies import booleans
-from hypothesis.strategies import lists
+from hypothesis.strategies import integers
 
 from randomized_response import respond_privately
 from randomized_response import aggregate_responses
 
 
-@given(lists(booleans(), min_size=50, max_size=1000))
-@example([False] * 200)
-@example([True] * 200)
-@example([False] * 200 + [True] * 200)
-@example([False] * 200 + [True] * 50)
-@example([False] * 50 + [True] * 200)
-def test_private_response(true_answers):
-    n = len(true_answers)
-    true_mean = sum(true_answers) / n
-    true_variance = true_mean * (1 - true_mean) / n + 1 / n
+@given(integers(min_value=25, max_value=1000),
+       integers(min_value=25, max_value=1000))
+@example(200, 0)
+@example(0, 200)
+@example(200, 200)
+@example(200, 50)
+@example(50, 200)
+def test_private_response(false_count, true_count):
+    n = false_count + true_count
+    true_mean = true_count / n
+    true_variance = 3 / (4 * n)
 
-    # allow 2 * true_stddev estimator error to simulate a confidence interval
-    allowed_error = 2 * math.sqrt(true_variance)
-
+    true_answers = [True] * true_count + [False] * false_count
     responses = [respond_privately(ans) for ans in true_answers]
-    mean, variance = aggregate_responses(responses)
+    mean, claimed_variance = aggregate_responses(responses)
 
-    # the estimate is within 2 standard deviations
-    assert abs(mean - true_mean) < allowed_error
+    deviation_bound_true = 3 * math.sqrt(true_variance)
+    deviation_bound_claimed = 3 * math.sqrt(claimed_variance)
 
-    # the estimate of standard deviation is within 3%
-    assert abs(math.sqrt(variance) - math.sqrt(true_variance)) < 0.03
+    # the estimate is within 2 standard deviations both using the claimed
+    # variance and the true variance
+    assert abs(mean - true_mean) < deviation_bound_true
+    assert abs(mean - true_mean) < deviation_bound_claimed
