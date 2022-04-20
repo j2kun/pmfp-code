@@ -1,19 +1,15 @@
 import math
 from collections import Counter
-from collections import defaultdict
 
 from hypothesis import strategies as st
 from hypothesis import given
 from hypothesis import example
 import numpy as np
 
-from differential_privacy import LaplaceGenerator
+from differential_privacy import InsecureLaplaceMechanism
 from differential_privacy import privatize_histogram
+from differential_privacy import next_power_of_two
 
-
-class NumpyLaplaceGenerator(LaplaceGenerator):
-    def sample(self, scale) -> float:
-        return np.random.default_rng().laplace(0, scale, 1)[0]
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):
@@ -56,6 +52,8 @@ def distributions_are_close(hist1, hist2, L2_tolerance):
 
 @st.composite
 def neighboring_histograms(draw, elements, min_size=1, max_size=10):
+    """Generate two neighboring histograms, i.e., two histograms that differ by
+    1 in a single bin."""
     hist = draw(st.lists(elements, min_size=min_size, max_size=max_size))
     hist1 = tuple(hist)
 
@@ -81,7 +79,7 @@ def test_next_power_of_two(x):
 def test_privatize_single_number():
     number, privacy_parameter = 17, 0.5
 
-    rng = NumpyLaplaceGenerator()
+    rng = InsecureLaplaceMechanism()
     sample_size = 100000
 
     def sample(num):
@@ -101,9 +99,9 @@ def test_privatize_single_number():
 #         )
 # @example(((1, 2, 1, 2), (1, 2, 2, 2)), 0.5)
 def test_privatize_histogram():  # neighboring_hists, privacy_parameter):
-    neighboring_hists, privacy_parameter = ((17,), (18,)), 0.5
+    neighboring_hists, privacy_parameter = ((17,), (18,)), math.log(3)
 
-    rng = NumpyLaplaceGenerator()
+    rng = InsecureLaplaceMechanism()
     hist1, hist2 = neighboring_hists
     sample_size = 200000
 

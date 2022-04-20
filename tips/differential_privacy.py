@@ -1,11 +1,13 @@
 '''An implementation of the Laplacian mechanism for privately releasing a
 histogram where each underlying user contributes to a single bin.'''
 
-from typing import List
 from abc import ABC, abstractmethod
+from typing import List
+import math
 
-import sys
 import bitstring
+import numpy as np
+import sys
 
 
 Histogram = List[int]
@@ -38,20 +40,131 @@ def next_power_of_two(x: float) -> float:
     return bitstring.pack('>Q', rounded).float
 
 
-class LaplaceGenerator(ABC):
-    '''An interface for a random number generator that generates 0-mean
-    Laplacian noise, i.e., with density h(y) proportional to exp(−|y|/scale),
-    where scale is a parameter.
+def sample_geometric(rng, exponent):
+    ...
+    """ Returns a sample drawn from the geometric distribution of parameter p =
+    1 - e^-exponent, i.e., the number of Bernoulli trials until the first
+    success where the success probability is 1 - e^-exponent.
+    """
+
+    max_value = 1 << 64
+    # Return truncated sample in the case that the sample exceeds the max value.
+    if (rng.nextDouble() > -1.0 * math.expm1(-1.0 * exponent * max_value)):
+        return max_value
+
+    # Perform a binary search for the sample in the interval from 1 to max long. Each iteration
+    # splits the interval in two and randomly keeps either the left or the right subinterval
+    # depending on the respective probability of the sample being contained in them. The search
+    # ends once the interval only contains a single sample.
+    left = 0  # exclusive
+    right = max_value  # inclusive
+
+    while (left + 1 < right):
+        # Compute a midpoint that divides the probability mass of the current
+        # interval approximately evenly between the left and right subinterval.
+        # The resulting midpoint will be less or equal to the arithmetic mean
+        # of the interval. This reduces the expected number of iterations of
+        # the binary search compared to a search that uses the arithmetic mean
+        # as a midpoint. The speed up is more pronounced, the higher the
+        # success probability p is.
+        mid = math.ceil(
+            left - (math.log(0.5) + math.log1p(math.exp(exponent * (left - right)))) / exponent
+        )
+
+        # Ensure that mid is contained in the search interval. This is a
+        # safeguard to account for potential mathematical inaccuracies due to
+        # finite precision arithmetic.
+        mid = min(max(mid, left + 1), right - 1)
+
+        # Probability that the sample is at most mid, i.e.,
+        #
+        #    q = Pr[X ≤ mid | left < X ≤ right]
+        #
+        # where X denotes the sample. The value of q should be approximately
+        # one half.
+        q = math.expm1(exponent * (left - mid)) / math.expm1(exponent * (left - right))
+        if (rng.nextDouble() <= q):
+            right = mid
+        else:
+            left = mid
+
+    return right
+
+
+def sample_two_sided_geometric(rng, exponent):
+    """Returns a sample drawn from a geometric distribution that is mirrored at
+    0. The non-negative part of the distribution's PDF matches the PDF of a
+    geometric distribution of parameter p = 1 - e^-exponent that is
+    shifted to the left by 1 and scaled accordingly.
+    """
+    geometric_sample = 0
+    sign = False
+
+    # Keep a sample of 0 only if the sign is positive. Otherwise, the
+    # probability of 0 would be twice as high as it should be.
+    while (geometric_sample == 0 and not sign):
+        geometric_sample = sample_geometric(rng, exponent) - 1
+        sign = rng.nextBoolean()
+
+    return geometric_sample if sign else -geometric_sample
+
+
+class LaplaceMechanism(ABC):
+    '''An interface for a random number generator that adds Laplacian noise to
+    a single number, generated from a 0-mean discrete Laplacian distribution,
+    i.e., with density h(y) proportional to exp(−|y|/scale), where scale is a
+    parameter.
+
+    Because the scale and the details of the mechanism depend on the privacy
+    parameter, the method does not accept scale directly, but must instead
+    derive the appropriate scale from the privacy parameters.
+
+    Args:
+     - value: the value to add noise to
+     - privacy_parameter: the epsilon in differential privacy
+     - sensitivity: the maximum value a single user can influence the number
+         being masked.
+
+    Returns:
+      A masked version of the number that satisfies epsilon differential
+      privacy.
     '''
     @abstractmethod
-    def sample(self, scale) -> float:
+    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
         ...
+
+
+class InsecureLaplaceMechanism(LaplaceMechanism):
+    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
+        scale = sensitivity / privacy_parameter
+        return value + round(np.random.default_rng().laplace(0, scale, 1)[0])
+
+
+class SecureLaplaceMechanism(LaplaceMechanism):
+    GRANULARITY_PARAM = float(1 << 40)
+
+    def __init__(self, rng):
+        self.rng = rng
+
+    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
+        eps = privacy_parameter
+        granularity = next_power_of_two((1 / eps) / self.GRANULARITY_PARAM)
+        noise = sample_two_sided_geometric(
+            self.rng, granularity * eps / (sensitivity + granularity))
+        if granularity <= 1:
+            return round(noise * granularity)
+        else:
+            granularity = int(granularity)
+            rounded = granularity * (
+                int(value / granularity) + round((value % granularity) / granularity)
+            )
+            return rounded + noise * granularity
 
 
 def privatize_histogram(
         hist: Histogram,
         privacy_parameter: float,
-        rng: LaplaceGenerator):
+        laplace: LaplaceMechanism):
     '''Privatize a histogram for public release.
 
     This implementation relies on the following properties:
@@ -66,8 +179,8 @@ def privatize_histogram(
     of information any attacker (using any method or extra side data) can learn
     about one individual in the dataset.
     '''
-    # TODO: get a secure RNG
-    laplace_scale = 1 / privacy_parameter
-    noisy_hist = [bin_value + rng.sample(laplace_scale) for bin_value in hist]
-    rounded_noisy_hist = [max(0, round(val)) for val in noisy_hist]
-    return rounded_noisy_hist
+    noisy_hist = [
+        laplace.add_noise(bin_value, privacy_parameter, sensitivity=1)
+        for bin_value in hist
+    ]
+    return [max(0, val) for val in noisy_hist]
