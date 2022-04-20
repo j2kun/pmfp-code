@@ -2,11 +2,40 @@
 histogram where each underlying user contributes to a single bin.'''
 
 from typing import List
-
 from abc import ABC, abstractmethod
+
+import sys
+import bitstring
 
 
 Histogram = List[int]
+
+EXPONENT_MASK = bitstring.pack('>Q', 0x7ff0000000000000)
+MANTISSA_MASK = bitstring.pack('>Q', 0x000fffffffffffff)
+EXPONENT_ONE = 0x0010000000000000
+
+
+def next_power_of_two(x: float) -> float:
+    assert x > 0 and x != float('inf'), (
+        f"Expecting a finite, positive number, got {x}")
+
+    bits = bitstring.pack('>d', x)
+
+    # For a finite positive IEEE float, x is a power of 2 if and only if its
+    # mantissa is zero.
+    if (bits & MANTISSA_MASK).int == 0:
+        return x
+
+    exponent_bits = bits & EXPONENT_MASK
+    max_exponent_bits = bitstring.pack('>d', sys.float_info.max) & EXPONENT_MASK
+
+    assert exponent_bits.int < max_exponent_bits.int, (
+        f"Expecting a number less than 2^1023, got {x}")
+
+    # Add 1 to the exponent bits to get the next power of 2, resetting mantissa
+    # to zero.
+    rounded = exponent_bits.int + EXPONENT_ONE
+    return bitstring.pack('>Q', rounded).float
 
 
 class LaplaceGenerator(ABC):

@@ -67,6 +67,17 @@ def neighboring_histograms(draw, elements, min_size=1, max_size=10):
     return (hist1, hist2)
 
 
+@given(st.floats(
+    min_value=0.0, max_value=2**1023, allow_infinity=False, allow_nan=False, exclude_min=True
+))
+@example(float(2**-1023))
+@example(float(2**1023))
+def test_next_power_of_two(x):
+    output = next_power_of_two(x)
+    expected = min(float(2**i) for i in range(-1022, 1024) if 2**i >= x)
+    assert expected == output
+
+
 def test_privatize_single_number():
     number, privacy_parameter = 17, 0.5
 
