@@ -104,8 +104,8 @@ def test_privatize_single_number(name, mechanism):
              for _ in range(sample_size)])
 
     sample_outputs = sample(number)
-    baseline = Counter([max(0, round(x)) for x in np.random.default_rng().laplace(
-        17, 1.0 / privacy_parameter, sample_size)])
+    baseline = Counter([max(0, round(x)) for x in np.random.default_rng(1).laplace(
+        number, 1.0 / privacy_parameter, sample_size)])
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
 
