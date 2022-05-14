@@ -41,7 +41,6 @@ def next_power_of_two(x: float) -> float:
 
 
 def sample_geometric(rng, exponent):
-    ...
     """ Returns a sample drawn from the geometric distribution of parameter p =
     1 - e^-exponent, i.e., the number of Bernoulli trials until the first
     success where the success probability is 1 - e^-exponent.
@@ -49,7 +48,7 @@ def sample_geometric(rng, exponent):
 
     max_value = 1 << 64
     # Return truncated sample in the case that the sample exceeds the max value.
-    if (rng.nextDouble() > -1.0 * math.expm1(-1.0 * exponent * max_value)):
+    if (rng.random() > -1.0 * math.expm1(-1.0 * exponent * max_value)):
         return max_value
 
     # Perform a binary search for the sample in the interval from 1 to max long. Each iteration
@@ -83,7 +82,7 @@ def sample_geometric(rng, exponent):
         # where X denotes the sample. The value of q should be approximately
         # one half.
         q = math.expm1(exponent * (left - mid)) / math.expm1(exponent * (left - right))
-        if (rng.nextDouble() <= q):
+        if (rng.random() <= q):
             right = mid
         else:
             left = mid
@@ -104,7 +103,7 @@ def sample_two_sided_geometric(rng, exponent):
     # probability of 0 would be twice as high as it should be.
     while (geometric_sample == 0 and not sign):
         geometric_sample = sample_geometric(rng, exponent) - 1
-        sign = rng.nextBoolean()
+        sign = rng.random() < 0.5
 
     return geometric_sample if sign else -geometric_sample
 
