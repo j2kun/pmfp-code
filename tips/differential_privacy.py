@@ -134,9 +134,12 @@ class LaplaceMechanism(ABC):
 
 
 class InsecureLaplaceMechanism(LaplaceMechanism):
+    def __init__(self, rng=None):
+        self.rng = rng or np.random.default_rng(1)
+
     def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
         scale = sensitivity / privacy_parameter
-        return value + round(np.random.default_rng().laplace(0, scale, 1)[0])
+        return value + round(self.rng.laplace(0, scale, 1)[0])
 
 
 class SecureLaplaceMechanism(LaplaceMechanism):
