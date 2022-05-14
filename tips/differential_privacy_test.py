@@ -139,6 +139,7 @@ def test_privatize_single_bin_histogram(name, mechanism):
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
 @pytest.mark.parametrize("neighboring_hists", [
     ((1, 2, 1, 2), (1, 2, 2, 2)),
+    ((10, 15, 9, 14), (9, 15, 9, 14)),
 ])
 def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
     privacy_parameter = math.log(3)
