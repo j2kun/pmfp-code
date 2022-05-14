@@ -184,3 +184,10 @@ def privatize_histogram(
         for bin_value in hist
     ]
     return [max(0, val) for val in noisy_hist]
+
+
+if __name__ == "__main__":
+    import cProfile
+    cProfile.run(
+        'for i in range(100000): '
+        'privatize_histogram((17,), math.log(3), SecureLaplaceMechanism(random.SystemRandom()))')
