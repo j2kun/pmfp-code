@@ -3,6 +3,8 @@ omit = venv/*,__pycache__/*,*_test.py,*site-packages*
 
 [report]
 exclude_lines =
+    @abstractmethod
+    @abc.abstractmethod
     pragma: no cover
     def __repr__
     raise NotImplementedError
