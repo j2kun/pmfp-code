@@ -2,42 +2,42 @@
 histogram where each underlying user contributes to a single bin.'''
 
 from abc import ABC, abstractmethod
+from struct import pack
+from struct import unpack
 from typing import List
 import math
 
-import bitstring
 import numpy as np
 import sys
 
 
 Histogram = List[int]
 
-EXPONENT_MASK = bitstring.pack('>Q', 0x7ff0000000000000)
-MANTISSA_MASK = bitstring.pack('>Q', 0x000fffffffffffff)
+EXPONENT_MASK = 0x7ff0000000000000
+MANTISSA_MASK = 0x000fffffffffffff
 EXPONENT_ONE = 0x0010000000000000
+MAX_EXPONENT_BITS = unpack('>Q', pack('>d', sys.float_info.max))[0] & EXPONENT_MASK
 
 
 def next_power_of_two(x: float) -> float:
     assert x > 0 and x != float('inf'), (
         f"Expecting a finite, positive number, got {x}")
 
-    bits = bitstring.pack('>d', x)
+    bits = unpack('>Q', pack('>d', x))[0]
 
     # For a finite positive IEEE float, x is a power of 2 if and only if its
     # mantissa is zero.
-    if (bits & MANTISSA_MASK).int == 0:
+    if bits & MANTISSA_MASK == 0:
         return x
 
     exponent_bits = bits & EXPONENT_MASK
-    max_exponent_bits = bitstring.pack('>d', sys.float_info.max) & EXPONENT_MASK
 
-    assert exponent_bits.int < max_exponent_bits.int, (
-        f"Expecting a number less than 2^1023, got {x}")
+    assert exponent_bits < MAX_EXPONENT_BITS, f"Expecting a number less than 2^1023, got {x}"
 
     # Add 1 to the exponent bits to get the next power of 2, resetting mantissa
     # to zero.
-    rounded = exponent_bits.int + EXPONENT_ONE
-    return bitstring.pack('>Q', rounded).float
+    rounded = exponent_bits + EXPONENT_ONE
+    return unpack('>d', pack('>Q', rounded))[0]
 
 
 def sample_geometric(rng, exponent):
