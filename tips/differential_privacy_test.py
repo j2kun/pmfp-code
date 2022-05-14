@@ -50,17 +50,29 @@ def distributions_are_close(hist1, hist2, L2_tolerance):
     return test_value < threshold
 
 
-@st.composite
-def neighboring_histograms(draw, elements, min_size=1, max_size=10):
-    """Generate two neighboring histograms, i.e., two histograms that differ by
-    1 in a single bin."""
-    hist = draw(st.lists(elements, min_size=min_size, max_size=max_size))
-    hist1 = tuple(hist)
+def dp_test_statistic(s1, s2, privacy_parameter):
+    '''Compute the epsilon-delta differential privacy test statistic.
 
-    index = draw(st.integers(min_value=0, max_value=len(hist) - 1))
-    change = draw(st.sampled_from([-1, 1]))
-    hist[index] += change
-    hist2 = tuple(hist)
+    This checks whether the differential privacy mechanism, which outputs
+    samples s1 and s2 from two neighboring databases, approximately satisfies
+    differential privacy. Because the code in this Tip focuses on epsilon-DP,
+    not epsilon-delta DP, but epsilon-DP is not testable in general, we resort
+    to testing for epsilon-delta DP with a very small delta, hard coded in the
+    tests that call this function.
+
+    This statistic is from Gilbert-McMillan 2018, "Property Testing for
+    Differential Privacy", Theorem 14 and Algorithm 2.
+    https://arxiv.org/abs/1806.06427
+
+    Also see a reference implementation at
+    https://github.com/google/differential-privacy/blob/c2376f0daaf406e1524b462accaa9cbb548fd6d1/java/main/com/google/privacy/differentialprivacy/testing/StatisticalTestsUtil.java#L88-L137
+    '''
+    n = sum(s1.values())
+    assert n == sum(s2.values())
+    return sum(
+        max(0.0, (s1[k] - math.exp(privacy_parameter) * s2.get(k, 0)) / n)
+        for k in s1.keys()
+    )
 
     return (hist1, hist2)
 
@@ -118,16 +130,8 @@ def test_privatize_histogram():  # neighboring_hists, privacy_parameter):
     print(f'{plot1}')
     print(f'{plot2}')
 
-    def dp_test_statistic(s1, s2):
-        n = sum(s1.values())
-        assert n == sum(s2.values())
-        return sum(
-            max(0.0, (s1[k] - math.exp(privacy_parameter) * s2.get(k, 0)) / n)
-            for k in s1.keys()
-        )
-
-    test_stat1 = dp_test_statistic(sample_hist1, sample_hist2)
-    test_stat2 = dp_test_statistic(sample_hist2, sample_hist1)
+    test_stat1 = dp_test_statistic(sample_hist1, sample_hist2, privacy_parameter)
+    test_stat2 = dp_test_statistic(sample_hist2, sample_hist1, privacy_parameter)
 
     tolerance = 0.0025
     assert test_stat1 < tolerance
