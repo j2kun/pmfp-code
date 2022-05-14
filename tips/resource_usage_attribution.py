@@ -1,4 +1,3 @@
-from itertools import combinations
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -62,12 +61,13 @@ def attribute_resource_usage(
     consumers = cast(List[Consumer], services) + cast(List[Consumer], customers)
     verify_proper_normalization(providers, consumers, usageFn)
 
-    Q = resource_service_transition_matrix = numpy.array(
+    # transition matrix for services and resources
+    Q = numpy.array(
         [[usageFn(a, b) for b in providers] for a in providers]
     )
 
-    # compute transition to absorbing states
-    R = absorbing_state_transition_matrix = numpy.array(
+    # compute transition matrix to absorbing states
+    R = numpy.array(
         [[usageFn(a, b) for b in customers] for a in providers]
     )
 
