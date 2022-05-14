@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from struct import pack
 from struct import unpack
 from typing import List
+from typing import Tuple
 import math
 
 import numpy as np
@@ -125,11 +126,14 @@ class LaplaceMechanism(ABC):
          being masked.
 
     Returns:
-      A masked version of the number that satisfies epsilon differential
-      privacy.
+      A pair of numbers, which when added together is a masked version of
+      `value` that satisfies epsilon differential privacy. The first argument
+      represents the `value`, which may be rounded to a multiple of a power of
+      2 for security, and the second argument represents the noise to add to
+      the first argument.
     '''
     @abstractmethod
-    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> Tuple[int, int]:
         ...
 
 
@@ -137,9 +141,9 @@ class InsecureLaplaceMechanism(LaplaceMechanism):
     def __init__(self, rng=None):
         self.rng = rng or np.random.default_rng(1)
 
-    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> Tuple[int, int]:
         scale = sensitivity / privacy_parameter
-        return value + round(self.rng.laplace(0, scale, 1)[0])
+        return (value, round(self.rng.laplace(0, scale, 1)[0]))
 
 
 class SecureLaplaceMechanism(LaplaceMechanism):
@@ -159,21 +163,27 @@ class SecureLaplaceMechanism(LaplaceMechanism):
     def __init__(self, rng):
         self.rng = rng
 
-    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> Tuple[int, int]:
         eps = privacy_parameter
         granularity = next_power_of_two((sensitivity / eps) / self.GRANULARITY_PARAM)
         noise = sample_two_sided_geometric(
             self.rng, granularity * eps / (sensitivity + granularity))
 
-        # note this is where we rely on `value` being an integer.
+        # note this is where we rely on `value` being an integer, otherwise
+        # we'd need to round `value` to a multiple of granularity.
         if granularity <= 1:
-            return value + round(noise * granularity)
+            return (value, round(noise * granularity))
         else:
+            # Technically this else statement is not necessary for this Tip,
+            # because the sensitivity is 1 and epsilon should not be so
+            # unreasonably small that it makes the granularity bigger than 1.
+            # However, I ported this from the reference implementation, and
+            # I'm leaving it for completeness.
             granularity = int(granularity)
             rounded = granularity * (
                 value // granularity + round((value % granularity) / granularity)
             )
-            return rounded + noise * granularity
+            return (rounded, noise * granularity)
 
 
 def privatize_histogram(
@@ -195,7 +205,7 @@ def privatize_histogram(
     about one individual in the dataset.
     '''
     noisy_hist = [
-        laplace.add_noise(bin_value, privacy_parameter, sensitivity=1)
+        sum(laplace.add_noise(bin_value, privacy_parameter, sensitivity=1))
         for bin_value in hist
     ]
     return [max(0, val) for val in noisy_hist]

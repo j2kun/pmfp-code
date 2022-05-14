@@ -98,6 +98,14 @@ def test_sample_geometric_truncation():
     assert sample_geometric(random.Random(1), 1e-100) == 1 << 64
 
 
+def test_large_granularity():
+    mechanism = SecureLaplaceMechanism(random.Random(1))
+    output = mechanism.add_noise(11, 0.3, 1 << 40)  # results in a ganularity of 4
+    # This proves that when the granularity is large, the value is first
+    # rounded to a multiple of granularity before the noise is added.
+    assert output[0] == 12
+
+
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
 def test_privatize_single_number(name, mechanism):
     number, privacy_parameter = 17, 0.5
