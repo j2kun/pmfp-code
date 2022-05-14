@@ -1,15 +1,17 @@
-import math
 from collections import Counter
+import math
+import random
 
 from hypothesis import strategies as st
 from hypothesis import given
 from hypothesis import example
 import numpy as np
+import pytest
 
 from differential_privacy import InsecureLaplaceMechanism
-from differential_privacy import privatize_histogram
+from differential_privacy import SecureLaplaceMechanism
 from differential_privacy import next_power_of_two
-
+from differential_privacy import privatize_histogram
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):
@@ -74,7 +76,10 @@ def dp_test_statistic(s1, s2, privacy_parameter):
         for k in s1.keys()
     )
 
-    return (hist1, hist2)
+
+def make_mechanisms():
+    mechs = [InsecureLaplaceMechanism(), SecureLaplaceMechanism(random.SystemRandom())]
+    return [(x.__class__.__name__, x) for x in mechs]
 
 
 @given(st.floats(
@@ -88,15 +93,14 @@ def test_next_power_of_two(x):
     assert expected == output
 
 
-def test_privatize_single_number():
+@pytest.mark.parametrize("name,mechanism", make_mechanisms())
+def test_privatize_single_number(name, mechanism):
     number, privacy_parameter = 17, 0.5
-
-    rng = InsecureLaplaceMechanism()
     sample_size = 100000
 
     def sample(num):
         return Counter(
-            [privatize_histogram([num], privacy_parameter, rng)[0]
+            [privatize_histogram([num], privacy_parameter, mechanism)[0]
              for _ in range(sample_size)])
 
     sample_outputs = sample(number)
@@ -105,21 +109,15 @@ def test_privatize_single_number():
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
 
-# @given(neighboring_histograms(st.integers(min_value=0, max_value=100)),
-#        st.floats(min_value=0.001, max_value=0.5, allow_infinity=False,
-#                  allow_nan=False),
-#         )
-# @example(((1, 2, 1, 2), (1, 2, 2, 2)), 0.5)
-def test_privatize_histogram():  # neighboring_hists, privacy_parameter):
+@pytest.mark.parametrize("name,mechanism", make_mechanisms())
+def test_privatize_single_bin_histogram(name, mechanism):
     neighboring_hists, privacy_parameter = ((17,), (18,)), math.log(3)
-
-    rng = InsecureLaplaceMechanism()
     hist1, hist2 = neighboring_hists
     sample_size = 200000
 
     def sample(hist):
         return Counter(
-            [tuple(privatize_histogram(hist, privacy_parameter, rng))
+            [tuple(privatize_histogram(hist, privacy_parameter, mechanism))
              for _ in range(sample_size)])
 
     sample_hist1 = sample(hist1)
