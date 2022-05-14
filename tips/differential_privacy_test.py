@@ -134,3 +134,29 @@ def test_privatize_single_bin_histogram(name, mechanism):
     tolerance = 0.0025
     assert test_stat1 < tolerance
     assert test_stat2 < tolerance
+
+
+@pytest.mark.parametrize("name,mechanism", make_mechanisms())
+@pytest.mark.parametrize("neighboring_hists", [
+    ((1, 2, 1, 2), (1, 2, 2, 2)),
+])
+def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
+    privacy_parameter = math.log(3)
+    mechanism = InsecureLaplaceMechanism()
+    hist1, hist2 = neighboring_hists
+    sample_size = 250000
+
+    def sample(hist):
+        return Counter(
+            [tuple(privatize_histogram(hist, privacy_parameter, mechanism))
+             for _ in range(sample_size)])
+
+    sample_hist1 = sample(hist1)
+    sample_hist2 = sample(hist2)
+
+    test_stat1 = dp_test_statistic(sample_hist1, sample_hist2, privacy_parameter)
+    test_stat2 = dp_test_statistic(sample_hist2, sample_hist1, privacy_parameter)
+
+    tolerance = 0.05
+    assert test_stat1 < tolerance
+    assert test_stat2 < tolerance
