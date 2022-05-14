@@ -119,7 +119,7 @@ class LaplaceMechanism(ABC):
     derive the appropriate scale from the privacy parameters.
 
     Args:
-     - value: the value to add noise to
+     - value: the integer value to add noise to
      - privacy_parameter: the epsilon in differential privacy
      - sensitivity: the maximum value a single user can influence the number
          being masked.
@@ -129,27 +129,40 @@ class LaplaceMechanism(ABC):
       privacy.
     '''
     @abstractmethod
-    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
         ...
 
 
 class InsecureLaplaceMechanism(LaplaceMechanism):
-    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
         scale = sensitivity / privacy_parameter
         return value + round(np.random.default_rng().laplace(0, scale, 1)[0])
 
 
 class SecureLaplaceMechanism(LaplaceMechanism):
+    '''A secure random generator for use in Differential Privacy.
+
+    Follows the outline of
+    https://github.com/google/differential-privacy/blob/main/common_docs/Secure_Noise_Generation.pdf
+    and the reference implementation at
+    https://github.com/google/differential-privacy/blob/c2376f0daaf406e1524b462accaa9cbb548fd6d1/java/main/com/google/privacy/differentialprivacy/LaplaceNoise.java
+
+    For simplicity, we only support adding noise to integers. Adding noise to
+    float values requires additional rounding of the input value to be a
+    multiple of the granularity.
+    '''
     GRANULARITY_PARAM = float(1 << 40)
 
     def __init__(self, rng):
         self.rng = rng
 
-    def add_noise(self, value, privacy_parameter, sensitivity) -> int:
+    def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
         eps = privacy_parameter
         granularity = next_power_of_two((1 / eps) / self.GRANULARITY_PARAM)
         noise = sample_two_sided_geometric(
             self.rng, granularity * eps / (sensitivity + granularity))
+
+        # note this is where we rely on `value` being an integer.
         if granularity <= 1:
             return round(noise * granularity)
         else:
