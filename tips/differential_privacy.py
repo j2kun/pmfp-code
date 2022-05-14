@@ -158,7 +158,7 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
     def add_noise(self, value: int, privacy_parameter: float, sensitivity: float) -> int:
         eps = privacy_parameter
-        granularity = next_power_of_two((1 / eps) / self.GRANULARITY_PARAM)
+        granularity = next_power_of_two((sensitivity / eps) / self.GRANULARITY_PARAM)
         noise = sample_two_sided_geometric(
             self.rng, granularity * eps / (sensitivity + granularity))
 
