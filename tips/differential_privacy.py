@@ -164,7 +164,7 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
         # note this is where we rely on `value` being an integer.
         if granularity <= 1:
-            return round(noise * granularity)
+            return value + round(noise * granularity)
         else:
             granularity = int(granularity)
             rounded = granularity * (
