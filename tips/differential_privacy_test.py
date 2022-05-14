@@ -12,6 +12,7 @@ from differential_privacy import InsecureLaplaceMechanism
 from differential_privacy import SecureLaplaceMechanism
 from differential_privacy import next_power_of_two
 from differential_privacy import privatize_histogram
+from differential_privacy import sample_geometric
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):
@@ -91,6 +92,10 @@ def test_next_power_of_two(x):
     output = next_power_of_two(x)
     expected = min(float(2**i) for i in range(-1022, 1024) if 2**i >= x)
     assert expected == output
+
+
+def test_sample_geometric_truncation():
+    assert sample_geometric(random.Random(1), 1e-100) == 1 << 64
 
 
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
