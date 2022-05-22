@@ -197,7 +197,7 @@ def privatize_histogram(
      - Each user contributes at most a count of one to at most one bin.
      - The categories (bin definitions) of the histogram are fixed and public.
 
-    If these are satisfied, then the mechanism satsifies epsilon-differential
+    If these are satisfied, then the mechanism satisfies epsilon-differential
     privacy for epsilon = `privacy_parameter`, meaning that if any individual
     is removed from the dataset, the probability of this mechanism producing a
     different output is at most exp(privacy_parameter). This limits the amount
