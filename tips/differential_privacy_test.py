@@ -126,7 +126,7 @@ def test_privatize_single_number(name, mechanism):
 def test_privatize_single_bin_histogram(name, mechanism):
     neighboring_hists, privacy_parameter = ((17,), (18,)), math.log(3)
     hist1, hist2 = neighboring_hists
-    sample_size = 600000
+    sample_size = 700000
 
     def sample(hist):
         return Counter(
