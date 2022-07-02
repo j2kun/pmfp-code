@@ -50,34 +50,19 @@ int main(int argc, char *argv[]) {
       output[i] = 0;
     }
 
-    // Preprocessing time for best case: store entire Hilbert coordinate lookup
-    // table in memory. Then flatten the matrix to a single array in the
-    // Hilbert order.
-    start_t = current_timestamp();
-    int *x_coord_lookup = (int *)malloc(rows * rows * sizeof(int));
-    int *y_coord_lookup = (int *)malloc(rows * rows * sizeof(int));
-    int *flattened_A = (int *)malloc(rows * rows * sizeof(int));
-    for (int d = 0; d < rows*rows; d++) {
-        int x = 0, y = 0;
-        to_coordinates(d, rows, &x, &y);
-        x_coord_lookup[d] = x;
-        y_coord_lookup[d] = y;
-        flattened_A[d] = A[x][y];
-    }
-    end_t = current_timestamp();
-
-    printf("preprocessing time = %lldms\n", end_t - start_t);
-
-    // Wall clock time of Hilbert matrix-vector multiplication (best case)
+    // Wall clock time of naive matrix-vector multiplication
     start_t = current_timestamp();
     CALLGRIND_START_INSTRUMENTATION;
-    for (int d = 0; d < rows*rows; d++) {
-        output[x_coord_lookup[d]] += flattened_A[d] * v[y_coord_lookup[d]];
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < rows; j++) {
+        output[i] = A[i][j] * v[j];
+      }
     }
     CALLGRIND_STOP_INSTRUMENTATION;
     end_t = current_timestamp();
 
-    printf("Matrix-vector mul time = %lldms\n", end_t - start_t);
+    printf("Naive matrix-vector multiplication time = %lldms\n", 
+        end_t - start_t);
 
     return 0;
 }
