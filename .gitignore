@@ -10,3 +10,7 @@ node_modules/
 *.mypy_cache*
 .hypothesis/
 .dmypy.json
+
+*.o
+hilbert_loop
+hilbert_test
