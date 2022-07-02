@@ -12,56 +12,56 @@ long long current_timestamp() {
     return te.tv_sec*1000LL + te.tv_usec/1000;
 }
 
-void mulvH(int n, double *flattenedA, double *v, double *output, int i, int j) {
+void mulvH(int n, double **A, double *v, double *output, int i, int j) {
   if (n == 1) {
-     output[i] += flattenedA[n * i + j] * v[j];
+     output[i] += A[n * i + j] * v[j];
   } else {
-    mulvA(n / 2, flattenedA, v, output, i, j); i++; // up
-    mulvH(n / 2, flattenedA, v, output, i, j); j++; // right
-    mulvH(n / 2, flattenedA, v, output, i, j); i--; // down
-    mulvB(n / 2, flattenedA, v, output, i, j);
+    mulvA(n / 2, A, v, output, i, j); i++; // up
+    mulvH(n / 2, A, v, output, i, j); j++; // right
+    mulvH(n / 2, A, v, output, i, j); i--; // down
+    mulvB(n / 2, A, v, output, i, j);
   }
 }
 
-void mulvA(int n, double *flattenedA, double *v, double *output, int i, int j) {
+void mulvA(int n, double **A, double *v, double *output, int i, int j) {
   if (n == 1) {
-     output[i] += flattenedA[n * i + j] * v[j];
+     output[i] += A[n * i + j] * v[j];
   } else {
-    mulvH(n / 2, flattenedA, v, output, i, j); j++; // right
-    mulvA(n / 2, flattenedA, v, output, i, j); i++; // up
-    mulvA(n / 2, flattenedA, v, output, i, j); j--; // left
-    mulvC(n / 2, flattenedA, v, output, i, j);
+    mulvH(n / 2, A, v, output, i, j); j++; // right
+    mulvA(n / 2, A, v, output, i, j); i++; // up
+    mulvA(n / 2, A, v, output, i, j); j--; // left
+    mulvC(n / 2, A, v, output, i, j);
   }
 }
 
-void mulvB(int n, double *flattenedA, double *v, double *output, int i, int j) {
+void mulvB(int n, double **A, double *v, double *output, int i, int j) {
   if (n == 1) {
-     output[i] += flattenedA[n * i + j] * v[j];
+     output[i] += A[n * i + j] * v[j];
   } else {
-    mulvC(n / 2, flattenedA, v, output, i, j); j--; // left
-    mulvB(n / 2, flattenedA, v, output, i, j); i--; // down
-    mulvB(n / 2, flattenedA, v, output, i, j); j++; // right
-    mulvH(n / 2, flattenedA, v, output, i, j);
+    mulvC(n / 2, A, v, output, i, j); j--; // left
+    mulvB(n / 2, A, v, output, i, j); i--; // down
+    mulvB(n / 2, A, v, output, i, j); j++; // right
+    mulvH(n / 2, A, v, output, i, j);
   }
 }
 
-void mulvC(int n, double *flattenedA, double *v, double *output, int i, int j) {
+void mulvC(int n, double **A, double *v, double *output, int i, int j) {
   if (n == 1) {
-     output[i] += flattenedA[n * i + j] * v[j];
+     output[i] += A[n * i + j] * v[j];
   } else {
-    mulvB(n / 2, flattenedA, v, output, i, j); i--; // down
-    mulvC(n / 2, flattenedA, v, output, i, j); j--; // left
-    mulvC(n / 2, flattenedA, v, output, i, j); i++; // up
-    mulvA(n / 2, flattenedA, v, output, i, j);
+    mulvB(n / 2, A, v, output, i, j); i--; // down
+    mulvC(n / 2, A, v, output, i, j); j--; // left
+    mulvC(n / 2, A, v, output, i, j); i++; // up
+    mulvA(n / 2, A, v, output, i, j);
   }
 }
 
-void flattenMatrix(int n, double **A, double *flattenedA) {
+void flattenMatrix(int n, double **A, double **flattenedA) {
   int d = 0;
   flattenH(n, A, flattenedA, 0, 0, &d);
 }
 
-void flattenH(int n, double **A, double *flattenedA, int i, int j, int *d) {
+void flattenH(int n, double **A, double **flattenedA, int i, int j, int *d) {
   if (n == 1) {
      printf("%d = (%d, %d)\n", *d, i, j);
      flattenedA[*d] += A[i][j];
@@ -74,7 +74,7 @@ void flattenH(int n, double **A, double *flattenedA, int i, int j, int *d) {
   }
 }
 
-void flattenA(int n, double **A, double *flattenedA, int i, int j, int *d) {
+void flattenA(int n, double **A, double **flattenedA, int i, int j, int *d) {
   if (n == 1) {
      printf("%d = (%d, %d)\n", *d, i, j);
      flattenedA[*d] += A[i][j];
@@ -87,7 +87,7 @@ void flattenA(int n, double **A, double *flattenedA, int i, int j, int *d) {
   }
 }
 
-void flattenB(int n, double **A, double *flattenedA, int i, int j, int *d) {
+void flattenB(int n, double **A, double **flattenedA, int i, int j, int *d) {
   if (n == 1) {
      printf("%d = (%d, %d)\n", *d, i, j);
      flattenedA[*d] += A[i][j];
@@ -100,7 +100,7 @@ void flattenB(int n, double **A, double *flattenedA, int i, int j, int *d) {
   }
 }
 
-void flattenC(int n, double **A, double *flattenedA, int i, int j, int *d) {
+void flattenC(int n, double **A, double **flattenedA, int i, int j, int *d) {
   if (n == 1) {
      printf("%d = (%d, %d)\n", *d, i, j);
      flattenedA[*d] += A[i][j];

@@ -40,4 +40,4 @@ loop: hilbert_loop hilbert_loop_naive
 	hilbert_loop && hilbert_loop_naive
 
 clean :
-	rm -f *.o hilbert_test hilbert_loop hilbert_loop_naive hilbert_loop_2
+	rm -f *.o *.gch *.out* hilbert_test hilbert_loop hilbert_loop_naive hilbert_loop_2
