@@ -1,6 +1,6 @@
 # Practical Math for Programmers
 
-[![CircleCI](https://circleci.com/gh/j2kun/pmfp-code.svg?style=shield)](https://circleci.com/gh/j2kun/pmfp-code)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/j2kun/pmfp-code/tree/main.svg?style=shield&circle-token=839c7890099903e5f304bf8b1adb2c69e5e0cca6)](https://dl.circleci.com/status-badge/redirect/gh/j2kun/pmfp-code/tree/main)
 [![Coverage Status](https://coveralls.io/repos/github/j2kun/pmfp-code/badge.svg?branch=main)](https://coveralls.io/github/j2kun/pmfp-code?branch=main)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/j2kun/pmfp-code.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/j2kun/pmfp-code/context:python)
 
