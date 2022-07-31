@@ -87,7 +87,7 @@ def deferred_acceptance(
     student_index = {student.id: student for student in students}
     school_index = {school.id: school for school in schools}
 
-    while len(to_apply) > 0:
+    while to_apply:
         rejections = run_round(student_index, school_index, to_apply)
         for student in rejections:
             student.best_unrejected += 1
