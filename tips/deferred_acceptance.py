@@ -22,9 +22,6 @@ class Student:
     def __hash__(self):
         return self.id
 
-    def __eq__(self, other):
-        return isinstance(other, Student) and self.id == other.id
-
 
 @dataclass
 class School:
@@ -36,33 +33,19 @@ class School:
     """A list of size at most self.capacity containing held applications."""
     held: List[int] = field(default_factory=list)
 
-    def __hash__(self):
-        return self.id
-
-    def __eq__(self, other):
-        return isinstance(other, School) and self.id == other.id
-
 
 @dataclass
 class Matching:
     matches: Dict[Student, School]
-    unassigned: Set[Student]
-
-    def __str__(self):
-        matches = {st.id: sch.id for (st, sch) in self.matches.items()}
-        unass = {st.id for st in self.unassigned}
-        return f"Matching(matches={matches}, unassigned={unass})"
+    unassigned: Set[Student] = field(default_factory=set)
 
 
 def run_round(
     students: Dict[int, Student],
     schools: Dict[int, School],
-    to_apply: Iterable[Student] = None,
+    to_apply: Iterable[Student],
 ) -> Set[Student]:
     """Run one round of deferred acceptance, returning a list of rejections."""
-    if not to_apply:
-        return set()
-
     applications: Dict[int, List[int]] = {
         id: school.held[:]
         for (id, school) in schools.items()
