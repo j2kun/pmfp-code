@@ -48,6 +48,11 @@ class Matching:
     matches: Dict[Student, School]
     unassigned: Set[Student]
 
+    def __str__(self):
+        matches = {st.id: sch.id for (st, sch) in self.matches.items()}
+        unass = {st.id for st in self.unassigned}
+        return f"Matching(matches={matches}, unassigned={unass})"
+
 
 def run_round(
     students: Dict[int, Student],
@@ -56,9 +61,9 @@ def run_round(
 ) -> Set[Student]:
     """Run one round of deferred acceptance, returning a list of rejections."""
     if not to_apply:
-        return True
+        return set()
 
-    applications: Dict[int, int] = {
+    applications: Dict[int, List[int]] = {
         id: school.held[:]
         for (id, school) in schools.items()
     }
@@ -68,7 +73,7 @@ def run_round(
         applications[chosen_school.id].append(student.id)
 
     new_held_students = {
-        id: heapq.nlargest(
+        id: heapq.nsmallest(
             schools[id].capacity, app_ids, key=schools[id].preferences.index
         )
         for (id, app_ids) in applications.items()
@@ -95,7 +100,7 @@ def deferred_acceptance(
         A dict {Student: School} assigning each student to a school.
     """
     to_apply = set(students)
-    unassigned = set()
+    unassigned: Set[Student] = set()
     student_index = {student.id: student for student in students}
     school_index = {school.id: school for school in schools}
 
@@ -123,7 +128,7 @@ def deferred_acceptance(
 
 
 def find_unstable_pair(
-    students: Iterable[Student], schools: Iterable[Student], matching: Matching
+    students: Iterable[Student], schools: Iterable[School], matching: Matching
 ) -> Optional[Tuple[Student, School]]:
     """Returns an unstable pair in the matching, or None if none exists."""
 
@@ -146,8 +151,8 @@ def find_unstable_pair(
         # Returns true if a school prefers the input student over at least one
         # of their assigned students.
         assigned_students = [
-            student for (student, school) in matching.matches.items()
-            if school == school
+            student for (student, sch) in matching.matches.items()
+            if sch == school
         ]
         student_cmps = [
             precedes(school.preferences, student.id, assigned_student.id)
@@ -161,3 +166,5 @@ def find_unstable_pair(
                     and student_prefers(student, school)
                     and school_prefers(school, student)):
                 return (student, school)
+
+    return None

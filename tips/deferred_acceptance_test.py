@@ -1,3 +1,4 @@
+import hypothesis
 from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
@@ -48,6 +49,7 @@ def market(
 
 
 @given(market())
+@hypothesis.settings(print_blob=True)
 def test_stability(students_and_schools):
     students, schools = students_and_schools
     matching = deferred_acceptance(students, schools)
