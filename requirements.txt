@@ -22,7 +22,7 @@ Pillow==9.0.1
 pluggy==0.13.1
 py==1.10.0
 pyparsing==2.4.7
-pytest==6.2.3
+pytest==7.1.2
 pytest-cov==2.11.1
 pytest-mypy==0.8.1
 python-coveralls==2.9.3
@@ -33,6 +33,7 @@ requests==2.25.1
 six==1.15.0
 sortedcontainers==2.3.0
 toml==0.10.2
+tomli==2.0.1
 typed-ast==1.4.3
 typing-extensions==3.7.4.3
 urllib3==1.26.5
