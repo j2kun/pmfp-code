@@ -1,6 +1,7 @@
 import math
 
 from hypothesis import given
+from hypothesis import reproduce_failure
 from hypothesis import settings
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
@@ -10,8 +11,8 @@ from instability_chaining import Couple
 from instability_chaining import Matching
 from instability_chaining import ResidencyProgram
 from instability_chaining import Student
-from instability_chaining import stable_matching
 from instability_chaining import find_unstable_pairs
+from instability_chaining import stable_matching
 
 
 def build_partner_mapping(couples):
@@ -70,7 +71,7 @@ def market(
     partner_mapping = build_partner_mapping(couples)
     single_students = [s for s in students if s not in partner_mapping]
 
-    return (single_students, couples, programs, partner_mapping)
+    return (single_students + couples, programs)
 
 
 def err_msg(matching, unstable_pair):
@@ -105,16 +106,17 @@ def err_msg(matching, unstable_pair):
     return msg
 
 
-def assert_stable(programs, matching, partner_mapping=None):
-    partner_mapping = partner_mapping or dict()
-    unstable_pairs = find_unstable_pairs(programs, matching, partner_mapping)
+def assert_stable(matching: Matching):
+    unstable_pairs = find_unstable_pairs(matching)
     assert unstable_pairs == [], err_msg(matching, next(iter(unstable_pairs)))
 
 
 """
 TODO: test cases
 
+ - Increase joint couple preferences to include any permutation of [n]x[n]
  - Test with a cycle
+ - Test withdrawal causing a couple to become unstable
 
 TODO: Cycle detection & randomization
 
@@ -129,8 +131,12 @@ def test_unstable_pairs_stable():
         ResidencyProgram(id=0, capacity=1, preferences=[0, 1]),
         ResidencyProgram(id=1, capacity=1, preferences=[1, 0]),
     ]
-    matching = Matching(matches={students[0]: programs[0], students[1]: programs[1]})
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    matching = Matching(
+        matches={students[0]: programs[0], students[1]: programs[1]},
+        applicants=students,
+        programs=programs,
+    )
+    assert_stable(matching)
 
 
 def test_unstable_pairs_unstable():
@@ -139,8 +145,12 @@ def test_unstable_pairs_unstable():
         ResidencyProgram(id=0, capacity=1, preferences=[0, 1]),
         ResidencyProgram(id=1, capacity=1, preferences=[0, 1]),
     ]
-    matching = Matching(matches={students[0]: programs[0], students[1]: programs[1]})
-    result = find_unstable_pairs(programs, matching, dict())
+    matching = Matching(
+        matches={students[0]: programs[0], students[1]: programs[1]},
+        applicants=students,
+        programs=programs,
+    )
+    result = find_unstable_pairs(matching)
     assert len(result) == 1
     assert result[0] == (students[0], programs[1])
 
@@ -156,18 +166,53 @@ def test_unstable_pairs_stable_with_couple():
         ResidencyProgram(id=1, capacity=1, preferences=[1, 0, 2]),
         ResidencyProgram(id=2, capacity=1, preferences=[1, 0, 2]),
     ]
-    partner_mapping = {
-        students[0]: students[1],
-        students[1]: students[0],
-    }
+    couples = [Couple(members=(students[0], students[1]))]
     matching = Matching(
         matches={
             students[0]: programs[1],
             students[1]: programs[2],
             students[2]: programs[0],
-        }
+        },
+        applicants=[students[2]] + couples,
+        programs=programs,
     )
-    assert find_unstable_pairs(programs, matching, partner_mapping) == []
+    assert_stable(matching)
+
+
+def test_unstable_pairs_unstable_with_couple():
+    students = [
+        Student(id=0, preferences=[0, 1, 2]),
+        Student(id=1, preferences=[1, 2, 0]),
+        Student(id=2, preferences=[0, 1, 2]),
+    ]
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[0, 1, 2]),
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 0, 2]),
+        ResidencyProgram(id=2, capacity=1, preferences=[0, 1, 2]),
+    ]
+    couples = [Couple(members=(students[0], students[1]))]
+    matching = Matching(
+        matches={
+            students[0]: programs[1],
+            students[1]: programs[2],
+            students[2]: programs[0],
+        },
+        applicants=[students[2]] + couples,
+        programs=programs,
+    )
+    result = find_unstable_pairs(matching)
+
+    # Output is represented as forming one unstable pair with each program,
+    # so this returns two unstable pairs. It might have been better to
+    # represent the "program" side of an unstable pairs as a pair of programs.
+    # Oh well.
+    assert len(result) == 2
+    assert set(result) == set(
+        [
+            (couples[0], programs[0]),
+            (couples[0], programs[1]),
+        ]
+    )
 
 
 """
@@ -181,9 +226,9 @@ def test_stable_matching_two():
         ResidencyProgram(id=0, capacity=1, preferences=[0, 1]),
         ResidencyProgram(id=1, capacity=1, preferences=[1, 0]),
     ]
-    matching = stable_matching(students, [], programs)
+    matching = stable_matching(students, programs)
     assert matching.matches == {students[0]: programs[0], students[1]: programs[1]}
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    assert_stable(matching)
 
 
 def test_stable_matching_six():
@@ -205,7 +250,7 @@ def test_stable_matching_six():
         ResidencyProgram(id=5, capacity=1, preferences=[0, 1, 2, 3, 4, 5]),
     ]
 
-    matching = stable_matching(students, [], programs)
+    matching = stable_matching(students, programs)
     assert matching.matches == {
         students[0]: programs[3],
         students[1]: programs[2],
@@ -214,7 +259,7 @@ def test_stable_matching_six():
         students[4]: programs[4],
         students[5]: programs[1],
     }
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    assert_stable(matching)
 
 
 def test_stable_matching_all_tied():
@@ -236,7 +281,7 @@ def test_stable_matching_all_tied():
         ResidencyProgram(id=5, capacity=1, preferences=[0, 1, 2, 3, 4, 5]),
     ]
 
-    matching = stable_matching(students, [], programs)
+    matching = stable_matching(students, programs)
     assert matching.matches == {
         students[0]: programs[5],
         students[1]: programs[4],
@@ -245,7 +290,7 @@ def test_stable_matching_all_tied():
         students[4]: programs[1],
         students[5]: programs[0],
     }
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    assert_stable(matching)
 
 
 def test_stable_matching_capacity_2():
@@ -267,7 +312,7 @@ def test_stable_matching_capacity_2():
         ResidencyProgram(id=5, capacity=2, preferences=[0, 1, 2, 3, 4, 5]),
     ]
 
-    matching = stable_matching(students, [], programs)
+    matching = stable_matching(students, programs)
     assert matching.matches == {
         students[0]: programs[5],
         students[1]: programs[5],
@@ -276,16 +321,15 @@ def test_stable_matching_capacity_2():
         students[4]: programs[3],
         students[5]: programs[3],
     }
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    assert_stable(matching)
 
 
 @given(market(include_couples=False))
 @settings(print_blob=True)
 def test_stability_with_no_couples(students_and_programs):
-    students, couples, programs, partner_mapping = students_and_programs
-    couples = []
-    matching = stable_matching(students, couples, programs)
-    assert_stable(programs, matching)
+    applicants, programs = students_and_programs
+    matching = stable_matching(applicants, programs)
+    assert_stable(matching)
 
 
 """
@@ -293,7 +337,7 @@ def test_stability_with_no_couples(students_and_programs):
 """
 
 
-def test_one_couple_not_displaced():
+def test_couple_displaces_single():
     students = [
         Student(id=0, preferences=[0, 1, 2]),
         Student(id=1, preferences=[1, 2, 0]),
@@ -308,16 +352,16 @@ def test_one_couple_not_displaced():
 
     couples = [Couple(members=(students[0], students[1]))]
 
-    matching = stable_matching(students, couples, programs)
+    matching = stable_matching(students + couples, programs)
     assert matching.matches == {
         students[0]: programs[0],
         students[1]: programs[1],
         students[2]: programs[2],
     }
-    assert find_unstable_pairs(programs, matching, dict()) == []
+    assert_stable(matching)
 
 
-def test_one_couple_second_choice():
+def test_couple_does_not_displace_single():
     students = [
         Student(id=0, preferences=[0, 2, 1]),
         Student(id=1, preferences=[1, 0, 2]),
@@ -331,16 +375,14 @@ def test_one_couple_second_choice():
     ]
 
     couples = [Couple(members=(students[0], students[1]))]
-    partner_mapping = build_partner_mapping(couples)
-    single_students = [students[2]]
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(students + couples, programs)
     assert matching.matches == {
         students[0]: programs[1],
         students[1]: programs[2],
         students[2]: programs[0],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_one_couple_with_repeating_joint_preferences():
@@ -360,16 +402,15 @@ def test_one_couple_with_repeating_joint_preferences():
     ]
 
     couples = [Couple(members=(students[0], students[1]))]
-    partner_mapping = build_partner_mapping(couples)
     single_students = [students[2]]
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[2],
         students[1]: programs[1],
         students[2]: programs[0],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_couple_displaces_entire_second_couple():
@@ -395,17 +436,16 @@ def test_couple_displaces_entire_second_couple():
         Couple(members=(students[0], students[1])),
         Couple(members=(students[2], students[3])),
     ]
-    partner_mapping = build_partner_mapping(couples)
     single_students = []
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[2],
         students[1]: programs[2],
         students[2]: programs[0],
         students[3]: programs[1],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_couple_displaces_first_member_of_second_couple():
@@ -429,17 +469,16 @@ def test_couple_displaces_first_member_of_second_couple():
         Couple(members=(students[0], students[1])),
         Couple(members=(students[2], students[3])),
     ]
-    partner_mapping = build_partner_mapping(couples)
     single_students = []
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[1],
         students[1]: programs[2],
         students[2]: programs[0],
         students[3]: programs[2],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_couple_displaces_two_singles():
@@ -459,17 +498,16 @@ def test_couple_displaces_two_singles():
     couples = [
         Couple(members=(students[0], students[1])),
     ]
-    partner_mapping = build_partner_mapping(couples)
     single_students = [students[2], students[3]]
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[0],
         students[1]: programs[1],
         students[2]: programs[2],
         students[3]: programs[2],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_couple_applies_to_same_program():
@@ -489,17 +527,16 @@ def test_couple_applies_to_same_program():
     couples = [
         Couple(members=(students[0], students[1])),
     ]
-    partner_mapping = build_partner_mapping(couples)
     single_students = [students[2], students[3]]
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[0],
         students[1]: programs[0],
         students[2]: programs[2],
         students[3]: programs[1],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 def test_withdrawal_creates_unstable_pair():
@@ -531,10 +568,9 @@ def test_withdrawal_creates_unstable_pair():
         Couple(members=(students[0], students[1])),
         Couple(members=(students[3], students[4])),
     ]
-    partner_mapping = build_partner_mapping(couples)
     single_students = [students[2]]
 
-    matching = stable_matching(single_students, couples, programs)
+    matching = stable_matching(single_students + couples, programs)
     assert matching.matches == {
         students[0]: programs[2],
         students[1]: programs[2],
@@ -542,12 +578,13 @@ def test_withdrawal_creates_unstable_pair():
         students[3]: programs[1],
         students[4]: programs[2],
     }
-    assert_stable(programs, matching, partner_mapping)
+    assert_stable(matching)
 
 
 @given(market(include_couples=True))
+@reproduce_failure('6.8.9', b'AXicY2ZmQALMTAyMKAIQwMjIyMAIAAIbABQ=')
 @settings(print_blob=True)
 def test_stability_with_couples(students_and_programs):
-    students, couples, programs, partner_mapping = students_and_programs
-    matching = stable_matching(students, couples, programs)
-    assert_stable(programs, matching, partner_mapping=partner_mapping)
+    applicants, programs = students_and_programs
+    matching = stable_matching(applicants, programs)
+    assert_stable(matching)
