@@ -1,3 +1,5 @@
+import math
+
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import composite
@@ -20,7 +22,7 @@ def build_partner_mapping(couples):
 @composite
 def market(
     draw,
-    num_students=integers(min_value=1, max_value=5),
+    num_students=integers(min_value=2, max_value=5),
     num_programs=integers(min_value=1, max_value=5),
     program_capacity=integers(min_value=1, max_value=5),
     include_couples=True,
@@ -28,6 +30,8 @@ def market(
     """A hypothesis rule to generate a random matching market."""
     student_ids = list(range(draw(num_students)))
     program_ids = list(range(draw(num_programs)))
+
+    min_capacity = int(math.ceil(len(student_ids) / len(program_ids)))
 
     students = []
     programs = []
@@ -50,21 +54,21 @@ def market(
             ResidencyProgram(
                 id=program_id,
                 preferences=preferences,
-                capacity=draw(program_capacity),
+                capacity=max(min_capacity, draw(program_capacity)),
             )
         )
 
     couples = []
     if include_couples:
-        num_couples = draw(integers(min_value=1, max_value=num_students // 2))
+        num_couples = draw(integers(min_value=1, max_value=len(student_ids) // 2))
         couplings = draw(permutations(student_ids))
         for i in range(num_couples):
             s1 = student_index[couplings[2 * i]]
             s2 = student_index[couplings[2 * i + 1]]
-            couples.apppend(Couple(members=(s1, s2)))
+            couples.append(Couple(members=(s1, s2)))
 
     partner_mapping = build_partner_mapping(couples)
-    single_students = [s for s in students if s.id not in partner_mapping]
+    single_students = [s for s in students if s not in partner_mapping]
 
     return (single_students, couples, programs, partner_mapping)
 
@@ -110,8 +114,6 @@ def assert_stable(programs, matching, partner_mapping=None):
 """
 TODO: test cases
 
- - Test with one couple
- - Test with a chain of two couples bumping each other
  - Test with a cycle
 
 TODO: Cycle detection & randomization
@@ -295,7 +297,7 @@ def test_one_couple_not_displaced():
     students = [
         Student(id=0, preferences=[0, 1, 2]),
         Student(id=1, preferences=[1, 2, 0]),
-        Student(id=2, preferences=[0, 1, 2]),  # 2 tries to displace 0 and fail
+        Student(id=2, preferences=[0, 1, 2]),  # The couple displaces the single student
     ]
 
     programs = [
@@ -315,11 +317,11 @@ def test_one_couple_not_displaced():
     assert find_unstable_pairs(programs, matching, dict()) == []
 
 
-def test_one_couple_displaced():
+def test_one_couple_second_choice():
     students = [
         Student(id=0, preferences=[0, 2, 1]),
         Student(id=1, preferences=[1, 0, 2]),
-        Student(id=2, preferences=[0, 1, 2]),  # 2 displaces 0
+        Student(id=2, preferences=[0, 1, 2]),  # 2 beats 0
     ]
 
     programs = [
@@ -338,6 +340,214 @@ def test_one_couple_displaced():
         students[1]: programs[2],
         students[2]: programs[0],
     }
-    # TODO: fix this assertion!
-    import ipdb; ipdb.set_trace()
     assert_stable(programs, matching, partner_mapping)
+
+
+def test_one_couple_with_repeating_joint_preferences():
+    # A test where the couple's joint preferences have a cycle when projecting
+    # to just one member.
+    students = [
+        Student(id=0, preferences=[0, 1, 0, 1, 2, 2]),
+        Student(id=1, preferences=[1, 1, 0, 0, 1, 2]),
+        Student(id=2, preferences=[0, 1, 2]),  # 2 gets the spot at program 0
+    ]
+
+    # The couple has to go down to their second to last preference of (2, 1).
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[2, 0, 1]),
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 0, 2]),
+        ResidencyProgram(id=2, capacity=1, preferences=[1, 0, 2]),
+    ]
+
+    couples = [Couple(members=(students[0], students[1]))]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = [students[2]]
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[2],
+        students[1]: programs[1],
+        students[2]: programs[0],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+def test_couple_displaces_entire_second_couple():
+    # A test where one couple displaces another in both members.
+    students = [
+        Student(id=0, preferences=[0, 1, 0, 1, 2]),
+        Student(id=1, preferences=[1, 1, 0, 0, 2]),
+        Student(id=2, preferences=[0]),
+        Student(id=3, preferences=[1]),
+    ]
+
+    # first couple (0, 1) gets (0, 1). Then second couple displaces both,
+    # and the first couple has to go all the way to last preference.
+
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[2, 3, 0, 1]),
+        ResidencyProgram(id=1, capacity=1, preferences=[3, 2, 1, 0]),
+        # lots of space over here at 2
+        ResidencyProgram(id=2, capacity=4, preferences=[0, 1, 2, 3]),
+    ]
+
+    couples = [
+        Couple(members=(students[0], students[1])),
+        Couple(members=(students[2], students[3])),
+    ]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = []
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[2],
+        students[1]: programs[2],
+        students[2]: programs[0],
+        students[3]: programs[1],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+def test_couple_displaces_first_member_of_second_couple():
+    # A test where one couple displaces another in both members.
+    students = [
+        Student(id=0, preferences=[0, 1]),
+        Student(id=1, preferences=[1, 2]),
+        Student(id=2, preferences=[0]),
+        Student(id=3, preferences=[2]),
+    ]
+
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[2, 3, 0, 1]),
+        # Because program 1 favors student 1 the most, the only way
+        # student 1 leaves program 1 is by withdrawing.
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 2, 3, 0]),
+        ResidencyProgram(id=2, capacity=4, preferences=[0, 1, 2, 3]),
+    ]
+
+    couples = [
+        Couple(members=(students[0], students[1])),
+        Couple(members=(students[2], students[3])),
+    ]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = []
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[1],
+        students[1]: programs[2],
+        students[2]: programs[0],
+        students[3]: programs[2],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+def test_couple_displaces_two_singles():
+    students = [
+        Student(id=0, preferences=[0]),
+        Student(id=1, preferences=[1]),
+        Student(id=2, preferences=[0, 1, 2]),
+        Student(id=3, preferences=[1, 0, 2]),
+    ]
+
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[0, 2, 3, 1]),
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 3, 2, 0]),
+        ResidencyProgram(id=2, capacity=4, preferences=[0, 1, 2, 3]),
+    ]
+
+    couples = [
+        Couple(members=(students[0], students[1])),
+    ]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = [students[2], students[3]]
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[0],
+        students[1]: programs[1],
+        students[2]: programs[2],
+        students[3]: programs[2],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+def test_couple_applies_to_same_program():
+    students = [
+        Student(id=0, preferences=[0]),
+        Student(id=1, preferences=[0]),
+        Student(id=2, preferences=[0, 1, 2]),
+        Student(id=3, preferences=[0, 1, 2]),
+    ]
+
+    programs = [
+        ResidencyProgram(id=0, capacity=2, preferences=[0, 1, 2, 3]),
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 3, 2, 0]),
+        ResidencyProgram(id=2, capacity=4, preferences=[0, 1, 2, 3]),
+    ]
+
+    couples = [
+        Couple(members=(students[0], students[1])),
+    ]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = [students[2], students[3]]
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[0],
+        students[1]: programs[0],
+        students[2]: programs[2],
+        students[3]: programs[1],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+def test_withdrawal_creates_unstable_pair():
+    # Scenario is:
+    #
+    # - student 0 starts at their mutual #1 pick, program 0.
+    # - student 1, partner of student 0, gets bumped by couple (3, 4).
+    # - couple (0, 1) both end up at program 2.
+    # - student 2 is next pick for program 0, and student 2 prefers program 0
+    #     but was re-assigned to program 2 after student 0 bumped them.
+    # - algorithm must put program 0 on the stack, detect student 2 forms an
+    #     unstable pair, then re-run deferred acceptance for student 2.
+    students = [
+        Student(id=0, preferences=[0, 2, 1]),
+        Student(id=1, preferences=[1, 2, 0]),
+        Student(id=2, preferences=[0, 2, 1]),
+        # couple (3, 4) causes 1 to get bumped, 0 to withdraw.
+        Student(id=3, preferences=[1, 2, 0]),
+        Student(id=4, preferences=[2, 1, 0]),
+    ]
+
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[0, 2, 1, 3, 4]),
+        ResidencyProgram(id=1, capacity=1, preferences=[3, 1, 2, 0, 4]),
+        ResidencyProgram(id=2, capacity=4, preferences=[4, 1, 2, 3, 0]),
+    ]
+
+    couples = [
+        Couple(members=(students[0], students[1])),
+        Couple(members=(students[3], students[4])),
+    ]
+    partner_mapping = build_partner_mapping(couples)
+    single_students = [students[2]]
+
+    matching = stable_matching(single_students, couples, programs)
+    assert matching.matches == {
+        students[0]: programs[2],
+        students[1]: programs[2],
+        students[2]: programs[0],
+        students[3]: programs[1],
+        students[4]: programs[2],
+    }
+    assert_stable(programs, matching, partner_mapping)
+
+
+@given(market(include_couples=True))
+@settings(print_blob=True)
+def test_stability_with_couples(students_and_programs):
+    students, couples, programs, partner_mapping = students_and_programs
+    matching = stable_matching(students, couples, programs)
+    assert_stable(programs, matching, partner_mapping=partner_mapping)

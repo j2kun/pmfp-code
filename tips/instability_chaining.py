@@ -3,14 +3,21 @@ from dataclasses import dataclass
 from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import TypeVar
 from typing import Set
 from typing import Tuple
 from typing import Union
 import heapq
 
 
-T = TypeVar("T")
+def split_by(lst, f):
+    trues = []
+    falses = []
+    for x in lst:
+        if f(x):
+            trues.append(x)
+        else:
+            falses.append(x)
+    return trues, falses
 
 
 @dataclass
@@ -38,6 +45,9 @@ class Student:
     def __lt__(self, other):
         return self.id < other.id
 
+    def reset_best(self):
+        self.best_unrejected = 0
+
 
 @dataclass
 class Couple:
@@ -56,6 +66,10 @@ class Couple:
 
     def __hash__(self):
         return hash(self.members)
+
+    def reset_best(self):
+        for member in self.members:
+            member.reset_best()
 
 
 Applicant = Union[Student, Couple]
@@ -94,8 +108,9 @@ class Matching:
     # For simplicity in this Tip, we assume there is no unassigned bucket.
 
     def reject(self, student):
-        del self.matches[student]
-        student.best_unrejected += 1
+        if student in self.matches:
+            del self.matches[student]
+            student.best_unrejected += 1
 
     def students_matched_to(self, program: ResidencyProgram) -> Set[Student]:
         # Inefficient, but let's keep it simple.
@@ -119,15 +134,6 @@ class InstabilityChaining:
         # Processing couples last reduces the chance of not finding a stable matching.
         self.processing_order: List[Applicant] = single_students + couples
 
-        # Whether to randomly process the applicant stack and program stack
-        self.random = None
-
-    def pop_stack(self, stack: List[T]) -> T:
-        if self.random:
-            return stack.pop(self.random.randrange(len(stack)))
-        else:
-            return stack.pop()
-
     def run(self) -> Matching:
         for applicant in self.processing_order:
             self.process_one(applicant)
@@ -139,15 +145,20 @@ class InstabilityChaining:
 
         while self.applicant_stack or self.program_stack:
             while self.applicant_stack:
+                print(f"Applicant stack: {str(self.applicant_stack)}")
                 # This could be improved to ensure a couple is always selected
                 # over a single student, if a couple is in the stack.
-                self.apply(self.pop_stack(self.applicant_stack))
+                self.apply(self.applicant_stack.pop())
 
+            print(f"Program stack: {str(self.program_stack)}")
             if self.program_stack:
-                program = self.pop_stack(list(self.program_stack))
-                self.applicant_stack.extend(
-                    unstable_pairs(program, self.matching, self.partner_mapping, self.program_index)
+                program = self.program_stack.pop()
+                unstable_applicants = unstable_pairs(
+                    program, self.matching, self.partner_mapping, self.program_index
                 )
+                for applicant in unstable_applicants:
+                    applicant.reset_best()
+                self.applicant_stack.extend(unstable_applicants)
 
     def apply(self, applicant: Applicant) -> None:
         if isinstance(applicant, Student):
@@ -194,8 +205,6 @@ class InstabilityChaining:
             self.matching.matches[proposer] = program
             if partner:
                 self.matching.matches[partner] = partner_program
-            for bumped in displ:
-                self.matching.reject(bumped)
 
             # Not being rejected means that we have to handle all the displaced applicants.
             # This can come in two cases:
@@ -207,24 +216,30 @@ class InstabilityChaining:
             #    matched program (if any) and the program is added to the program stack.
             #    Pick one such couple and continue with them applying jointly down their
             #    preference lists, and put the remaining couples on the applicant stack.
-            singles = [x for x in displ if x not in self.partner_mapping]
+            couples, singles = split_by(displ, lambda s: s in self.partner_mapping)
+            for bumped in singles:
+                self.matching.reject(bumped)
+
             if len(singles) == len(displ):
-                displ = list(displ)
-                proposer = displ[0]
-                self.applicant_stack.extend(displ[1:])
+                proposer = displ.pop()
+                partner = None
+                self.applicant_stack.extend(displ)
                 continue
 
-            displaced_couples: List[Couple] = []
-            for bumped in displ:
-                # If a member of a couple is bumped, their partner withdraws.
-                if bumped in self.partner_mapping:
-                    withdrawer = self.partner_mapping[bumped]
-                    displaced_couples.append(Couple(members=(bumped, withdrawer)))
-                    self.program_stack.add(self.matching.matches[withdrawer])
-                    self.matching.reject(withdrawer)
+            displaced_couples: Set[Couple] = set()
+            for bumped in couples:
+                withdrawer = self.partner_mapping[bumped]
+                couple = Couple(members=(bumped, withdrawer))
+                if couple in displaced_couples:
+                    continue
 
-            proposer, partner = displaced_couples[0].members
-            self.applicant_stack.extend(displaced_couples[1:])
+                displaced_couples.add(couple)
+                self.program_stack.add(self.matching.matches[withdrawer])
+                self.matching.reject(bumped)
+                self.matching.reject(withdrawer)
+
+            proposer, partner = displaced_couples.pop().members
+            self.applicant_stack.extend(displaced_couples)
             self.applicant_stack.extend(singles)
 
 
@@ -262,8 +277,8 @@ def unstable_pairs(
 ) -> Set[Applicant]:
     """Returns all applicants in the market that are unstable with `program`."""
 
-    def make_pool(student):
-        return set([student]) | matching.students_matched_to(program)
+    def make_pool(students, program):
+        return set(students) | matching.students_matched_to(program)
 
     def precedes(L, item1, item2):
         return L.index(item1) < L.index(item2)
@@ -280,10 +295,11 @@ def unstable_pairs(
             # a non-preference.
             return False
 
-    def program_prefers(program, student):
-        # Returns true if a program prefers the input student over at least one
+    def program_prefers(program, *students):
+        # Returns true if a program prefers all input students over some subset
         # of their assigned students.
-        return student not in program.select(make_pool(student))
+        displ = program.select(make_pool(students, program))
+        return not set(students) & displ
 
     def joint_mutual_pref(s1, p1, s2, p2):
         s1_existing_or_pref = p1 == matching.matches[s1] or (
@@ -292,7 +308,13 @@ def unstable_pairs(
         s2_existing_or_pref = p2 == matching.matches[s2] or (
             student_prefers(s2, p2) and program_prefers(p2, s2)
         )
-        return s1_existing_or_pref and s2_existing_or_pref
+
+        if s1_existing_or_pref and s2_existing_or_pref:
+            # If they're both applying to the same program: they must both be
+            # preferred at the same time displaing two candidates.
+            return p1 != p2 or program_prefers(p1, s1, s2)
+
+        return False
 
     all_students = list(matching.matches.keys())
     unstable_applicants: Set[Applicant] = set()
@@ -309,7 +331,7 @@ def unstable_pairs(
                 # of a couple. They must be joinly unstable with their
                 # partner's preferences. I.e., there must be some pair (p1, p2)
                 # earlier in their joint list of preferences for which both
-                # program p1 preferes student and p2 prefers partner over at
+                # program p1 prefers student and p2 prefers partner over at
                 # least one of their respective matches.
                 partner = partner_mapping[student]
                 joint_prefs = [
@@ -317,7 +339,7 @@ def unstable_pairs(
                     for (p1, p2) in zip(student.preferences, partner.preferences)
                 ]
                 # We only need to consider more preferred pairs in the list
-                joint_prefs = joint_prefs[: student.best_unrejected-1]
+                joint_prefs = joint_prefs[: student.best_unrejected - 1]
                 if any(
                     joint_mutual_pref(student, p1, partner, p2)
                     for (p1, p2) in joint_prefs
