@@ -111,14 +111,127 @@ def assert_stable(matching: Matching):
     assert unstable_pairs == [], err_msg(matching, next(iter(unstable_pairs)))
 
 
-"""
-TODO: test cases
+def test_student_eq():
+    s1 = Student(id=0, preferences=[0, 1, 2])
+    s2 = Student(id=0, preferences=[0, 2, 3])
+    s3 = Student(id=1, preferences=[0, 2, 3])
+    assert s1 == s2
+    assert s1 != s3
 
- - Increase joint couple preferences to include any permutation of [n]x[n]
 
-TODO: re-read algorithm paper https://web.stanford.edu/~alroth/papers/rothperansonaer.PDF
-to make sure I'm not missing anything.
-"""
+def test_matching_str():
+    students = [
+        Student(id=0, preferences=[0, 1, 2]),
+        Student(id=1, preferences=[1, 2, 0]),
+        Student(id=2, preferences=[0, 1, 2]),  # The couple displaces the single student
+    ]
+
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[1, 0, 2]),
+        ResidencyProgram(id=1, capacity=1, preferences=[1, 0, 2]),
+        ResidencyProgram(id=2, capacity=1, preferences=[1, 0, 2]),
+    ]
+
+    couples = [Couple(members=(students[0], students[1]))]
+
+    matching = stable_matching(students + couples, programs)
+    assert str(matching) == (
+        "Student(0) -> Program(0)\n"
+        "Student(1) -> Program(1)\n"
+        "Student(2) -> Program(2)"
+    )
+
+
+def test_student_prefers_missing_from_matching():
+    students = [Student(id=0, preferences=[0])]
+    programs = [ResidencyProgram(id=0, capacity=1, preferences=[0])]
+    matching = Matching(
+        matches={},
+        applicants=students,
+        programs=programs,
+    )
+    assert students[0].prefers((programs[0], None), matching)
+
+
+def test_student_prefers_missing_from_preference_list():
+    students = [Student(id=0, preferences=[0])]
+    programs = [
+        ResidencyProgram(id=0, capacity=1, preferences=[0]),
+        ResidencyProgram(id=1, capacity=1, preferences=[0]),
+    ]
+    matching = Matching(
+        matches={students[0]: programs[0]},
+        applicants=students,
+        programs=programs,
+    )
+    assert not students[0].prefers((programs[1], None), matching)
+
+
+def test_couple_prefers_both_missing_from_matching():
+    students = [
+        Student(id=0, preferences=[0]),
+        Student(id=1, preferences=[0]),
+    ]
+    couple = Couple(members=(students[0], students[1]))
+    programs = [ResidencyProgram(id=0, capacity=2, preferences=[1, 0])]
+    matching = Matching(
+        matches={},
+        applicants=[couple],
+        programs=programs,
+    )
+    assert couple.prefers((programs[0], programs[0]), matching)
+
+
+def test_couple_prefers_first_missing_from_matching():
+    students = [
+        Student(id=0, preferences=[0]),
+        Student(id=1, preferences=[1]),
+    ]
+    couple = Couple(members=(students[0], students[1]))
+    programs = [
+        ResidencyProgram(id=0, capacity=2, preferences=[1, 0]),
+        ResidencyProgram(id=1, capacity=2, preferences=[1, 0]),
+    ]
+    matching = Matching(
+        matches={students[1]: programs[0]},
+        applicants=[couple],
+        programs=programs,
+    )
+    assert couple.prefers((programs[0], programs[1]), matching)
+
+
+def test_couple_prefers_second_missing_from_matching():
+    students = [
+        Student(id=0, preferences=[0]),
+        Student(id=1, preferences=[1]),
+    ]
+    couple = Couple(members=(students[0], students[1]))
+    programs = [
+        ResidencyProgram(id=0, capacity=2, preferences=[1, 0]),
+        ResidencyProgram(id=1, capacity=2, preferences=[1, 0]),
+    ]
+    matching = Matching(
+        matches={students[0]: programs[0]},
+        applicants=[couple],
+        programs=programs,
+    )
+    # not this time because 0 is not in student 0's preference list
+    assert not couple.prefers((programs[0], programs[0]), matching)
+
+
+def test_couple_prefers_missing_from_preference_list():
+    students = [
+        Student(id=0, preferences=[]),
+        Student(id=1, preferences=[]),
+    ]
+    couple = Couple(members=(students[0], students[1]))
+    programs = [ResidencyProgram(id=0, capacity=2, preferences=[1, 0])]
+    matching = Matching(
+        matches={students[0]: programs[0], students[1]: programs[0]},
+        applicants=[couple],
+        programs=programs,
+    )
+    assert not couple.prefers((programs[0], programs[0]), matching)
 
 
 def test_unstable_pairs_stable():
@@ -212,7 +325,7 @@ def test_unstable_pairs_unstable_with_couple():
 
 
 """
-    Tests that involve no couples
+    End to end tests that involve no couples
 """
 
 
@@ -329,7 +442,7 @@ def test_stability_with_no_couples(students_and_programs):
 
 
 """
-    Tests that involve couples
+    End to end tests that involve couples
 """
 
 

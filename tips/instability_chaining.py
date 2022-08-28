@@ -90,8 +90,11 @@ class Student(Applicant):
         matching: "Matching",
     ) -> bool:
         program, _ = programs
-        if self not in matching.matches and program.id in self.preferences:
-            return True
+        if (
+            self not in matching.matches
+            or matching.matches[self].id not in self.preferences  # weird
+        ):
+            return program.id in self.preferences
 
         try:
             # This implies that a student cannot prefer a program that they are
@@ -158,7 +161,6 @@ class Couple(Applicant):
         # The two members must both jointly prefer the program pair over their
         # current matches.
         joint_prefs = self.joint_preferences()
-        assert (m1.id, m2.id) in joint_prefs
         try:
             return precedes(joint_prefs, (p1.id, p2.id), (m1.id, m2.id))
         except ValueError:
@@ -261,9 +263,6 @@ class Matching:
                 print(f"Matching {student} to {program}")
                 self.matches[student] = program
 
-    def is_matched_to(self, applicant: Applicant, program: ResidencyProgram) -> bool:
-        return all(applicant.map(lambda s: self.matches[s] == program if s else True))
-
     def current_match(
         self, applicant: Applicant
     ) -> Tuple[Optional[ResidencyProgram], Optional[ResidencyProgram]]:
@@ -293,14 +292,6 @@ class Matching:
         return "\n".join(
             [f"{student} -> {program}" for (student, program) in self.matches.items()]
         )
-
-
-def _isolate_singles(students, couples):
-    singles = []
-    for s in students:
-        if isinstance(s, Student) and all(s not in c.members for c in couples):
-            singles.append(s)
-    return singles
 
 
 class InstabilityChaining:
@@ -337,9 +328,7 @@ class InstabilityChaining:
         try:
             for applicant in self.applicants:
                 self.process_one(applicant)
-        except ValueError as e:
-            if "Found a cycle" not in str(e):
-                raise e
+        except ValueError:
             self.matching.valid = False
 
         return self.matching
@@ -492,13 +481,11 @@ class InstabilityChaining:
                 self.matching.reject(withdrawer)
 
             applicant = displaced_couples.pop()
-            if displaced_couples:
-                print(
-                    f"Adding displaced couples {displaced_couples} to the applicant stack"
-                )
+            print(
+                f"Adding displaced couples {displaced_couples} and singles {singles} "
+                f"to the applicant stack"
+            )
             self.applicant_stack.extend(displaced_couples)
-            if singles:
-                print(f"Adding singles {singles} to the applicant stack")
             self.applicant_stack.extend(singles)
 
 
