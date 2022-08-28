@@ -23,9 +23,9 @@ def build_partner_mapping(couples):
 @composite
 def market(
     draw,
-    num_students=integers(min_value=2, max_value=5),
-    num_programs=integers(min_value=1, max_value=5),
-    program_capacity=integers(min_value=1, max_value=5),
+    num_students=integers(min_value=2, max_value=50),
+    num_programs=integers(min_value=1, max_value=50),
+    program_capacity=integers(min_value=1, max_value=20),
     include_couples=True,
 ):
     """A hypothesis rule to generate a random matching market."""
@@ -115,10 +115,6 @@ def assert_stable(matching: Matching):
 TODO: test cases
 
  - Increase joint couple preferences to include any permutation of [n]x[n]
- - Test with a cycle
- - Test withdrawal causing a couple to become unstable
-
-TODO: Cycle detection & randomization
 
 TODO: re-read algorithm paper https://web.stanford.edu/~alroth/papers/rothperansonaer.PDF
 to make sure I'm not missing anything.
@@ -582,9 +578,12 @@ def test_withdrawal_creates_unstable_pair():
 
 
 @given(market(include_couples=True))
-@reproduce_failure('6.8.9', b'AXicY2ZmQALMTAyMKAIQwMjIyMAIAAIbABQ=')
 @settings(print_blob=True)
 def test_stability_with_couples(students_and_programs):
     applicants, programs = students_and_programs
     matching = stable_matching(applicants, programs)
-    assert_stable(matching)
+    if matching.valid:
+        # exited without encountering a cycle
+        assert_stable(matching)
+    else:
+        assert len(find_unstable_pairs(matching)) > 0

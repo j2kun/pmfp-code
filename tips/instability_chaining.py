@@ -3,6 +3,8 @@
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+from dataclasses import field
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Iterable
@@ -248,6 +250,7 @@ class Matching:
 
     applicants: List[Applicant]
     programs: List[ResidencyProgram]
+    valid: bool = True
 
     def set(
         self,
@@ -327,14 +330,26 @@ class InstabilityChaining:
             matches=dict(), applicants=self.applicants, programs=list(programs)
         )
 
+        # a log used to detect cycles
+        self.log: Set[Any] = set()
+
     def run(self) -> Matching:
-        for applicant in self.applicants:
-            self.process_one(applicant)
+        try:
+            for applicant in self.applicants:
+                self.process_one(applicant)
+        except ValueError as e:
+            if "Found a cycle" not in str(e):
+                raise e
+            self.matching.valid = False
+
         return self.matching
 
     def process_one(self, applicant: Applicant) -> None:
         self.applicant_stack = list([applicant])
         self.program_stack: Set[ResidencyProgram] = set()
+
+        # reset the log after processing each applicant
+        self.log = set()
 
         while self.applicant_stack or self.program_stack:
             while self.applicant_stack:
@@ -344,17 +359,47 @@ class InstabilityChaining:
 
             if self.program_stack:
                 program = self.program_stack.pop()
+                print(f"Processing {program} from the program stack.")
                 unstable_applicants = unstable_pairs(
                     program, self.matching, self.program_index
                 )
                 for applicant in unstable_applicants:
                     applicant.reset_best()
-                print(
-                    f"Adding unstable applicants "
-                    f"{','.join(str(x) for x in unstable_applicants)} "
-                    f"to the applicant stack"
-                )
+                    # By resetting their proposals back to the start of their
+                    # preference lists, they effectively withdraw from their
+                    # current program, and because they may end up matched with
+                    # a higher-ranked program, that can introduce a further
+                    # unstable pair with the newly vacant position.
+                    m1, m2 = self.matching.current_match(applicant)
+                    print(
+                        f"Adding potentially withdrawn programs {m1}, {m2} "
+                        "to the program stack."
+                    )
+                    assert m1 is not None
+                    self.program_stack.add(m1)
+                    if m2:
+                        self.program_stack.add(m2)
+
+                if unstable_applicants:
+                    print(
+                        f"Adding unstable applicants "
+                        f"{','.join(str(x) for x in unstable_applicants)} "
+                        f"to the applicant stack"
+                    )
                 self.applicant_stack.extend(unstable_applicants)
+
+            self.snapshot()
+
+    def snapshot(self) -> None:
+        hashable = (
+            tuple(hash(x) for x in self.applicant_stack),
+            tuple(hash(x) for x in self.program_stack),
+            tuple(sorted((s.id, p.id) for (s, p) in self.matching.matches.items())),
+        )
+        if hashable in self.log:
+            print(f"Found a cycle: log={self.log}\nNext entry would be {hashable}")
+            raise ValueError("Found a cycle")
+        self.log.add(hashable)
 
     def apply(self, applicant: Applicant) -> None:
         print(f"{applicant} starts applying")
@@ -491,6 +536,13 @@ def unstable_pairs(
     unstable_applicants: Set[Applicant] = set()
 
     for applicant in matching.applicants:
+        s1, s2 = applicant.proposal_pair()
+        if s1 not in matching.matches:
+            # It would be considered "unstable" by default, which can result in
+            # this applicant being incorrectly added to the applicant stack
+            # without an existing match.
+            continue
+
         program_prefs = applicant.map(lambda s: program.prefers(matching, s))
         program_has_pref = all(True if x is None else x for x in program_prefs)
         if program_has_pref:
