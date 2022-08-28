@@ -43,7 +43,7 @@ def elo_update(
       A pair (EloSkill, EloSkill) containing the updated skill ratings
     """
     if e1.variance != e2.variance:
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             f"Variances must agree, but were "
             f"p1={e1.variance}, p2={e2.variance}")
 
