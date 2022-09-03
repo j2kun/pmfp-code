@@ -144,7 +144,7 @@ def test_privatize_single_bin_histogram(name, mechanism):
     test_stat1 = dp_test_statistic(sample_hist1, sample_hist2, privacy_parameter)
     test_stat2 = dp_test_statistic(sample_hist2, sample_hist1, privacy_parameter)
 
-    tolerance = 0.0025
+    tolerance = 0.005
     assert test_stat1 < tolerance
     assert test_stat2 < tolerance
 
