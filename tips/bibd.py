@@ -36,17 +36,25 @@ bibd_9_4_3_str = """
 346678888787878786
 """
 
+bibd_7_3_3_str = """
+000000000111111222222
+111333555333444333444
+222444666555666666555
+"""
+
 
 def str_to_blocks(bibd_str) -> BIBD:
     """Convert from compact string format to a list of blocks."""
     return tuple(zip(*bibd_str.strip().split()))
 
 
+bibd_7_3_3 = str_to_blocks(bibd_7_3_3_str)
 bibd_9_4_3 = str_to_blocks(bibd_9_4_3_str)
 bibd_15_3_1 = str_to_blocks(bibd_15_3_1_str)
 bibd_19_9_4 = str_to_blocks(bibd_19_9_4_str)
 
 ALL_BIBDS = [
+    bibd_7_3_3,
     bibd_9_4_3,
     bibd_15_3_1,
     bibd_19_9_4,
@@ -173,6 +181,7 @@ def is_bibd(bibd: BIBD) -> bool:
     """Determine if a given list of blocks is a BIBD."""
     block_sizes = set(len(block) for block in bibd)
     if len(block_sizes) != 1:
+        print(f"Block sizes = {block_sizes}")
         return False
 
     element_memberships: DefaultDict[str, int] = defaultdict(int)
@@ -186,13 +195,21 @@ def is_bibd(bibd: BIBD) -> bool:
             pairwise_memberships[sorted_members] += 1
 
     if len(set(element_memberships.values())) != 1:
+        print(f"Element memberships = {element_memberships}")
         return False
 
     if len(set(pairwise_memberships.values())) != 1:
+        min_entry = min(pairwise_memberships.items(), key=lambda x: x[1])
+        max_entry = max(pairwise_memberships.items(), key=lambda x: x[1])
+        print(f"Pairwise memberships not all equal = {min_entry, max_entry}")
         return False
 
     n = len(element_memberships.keys())
     if len(pairwise_memberships.keys()) != n * (n - 1) / 2:
+        print(
+            "Not all pairs represented. Only found "
+            f"{len(pairwise_memberships.keys())} when expecting {n * (n-1) / 2}"
+        )
         return False
 
     return True
