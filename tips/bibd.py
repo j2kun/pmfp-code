@@ -36,25 +36,17 @@ bibd_9_4_3_str = """
 346678888787878786
 """
 
-bibd_7_3_3_str = """
-000000000111111222222
-111333555333444333444
-222444666555666666555
-"""
-
 
 def str_to_blocks(bibd_str) -> BIBD:
     """Convert from compact string format to a list of blocks."""
     return tuple(zip(*bibd_str.strip().split()))
 
 
-bibd_7_3_3 = str_to_blocks(bibd_7_3_3_str)
 bibd_9_4_3 = str_to_blocks(bibd_9_4_3_str)
 bibd_15_3_1 = str_to_blocks(bibd_15_3_1_str)
 bibd_19_9_4 = str_to_blocks(bibd_19_9_4_str)
 
 ALL_BIBDS = [
-    bibd_7_3_3,
     bibd_9_4_3,
     bibd_15_3_1,
     bibd_19_9_4,
@@ -114,21 +106,21 @@ class BIBDParams:
     """
     The number of replications of each treatment. In HCD, r.
     """
-    treatment_replication: int
+    subjects_per_treatment: int
 
     @property
     def r(self):
-        return self.treatment_replication
+        return self.subjects_per_treatment
 
     """
     The number of times each pair of treatments occurs in a block. In HCD,
     the parameter lambda.
     """
-    pairwise_treatment_replication: int
+    subjects_per_treatment_pair: int
 
     @property
     def lambda_(self):
-        return self.pairwise_treatment_replication
+        return self.subjects_per_treatment_pair
 
     def satisfies_necessary_conditions(self) -> bool:
         """Determine if the parameters satisfy the necessary conditions for
@@ -172,8 +164,8 @@ class BIBDParams:
             subjects=b,
             treatments=v,
             treatments_per_subject=k,
-            treatment_replication=r,
-            pairwise_treatment_replication=lambda_,
+            subjects_per_treatment=r,
+            subjects_per_treatment_pair=lambda_,
         )
 
 
@@ -223,3 +215,9 @@ def distance_from_balanced(bibd: BIBD) -> bool:
 def try_find_bibd(bibd: BIBD) -> bool:
     """Search for an approximately balanced BIBD."""
     pass
+
+
+if __name__ == "__main__":
+    for bibd in ALL_BIBDS:
+        print(f"Params = {BIBDParams.from_bibd(bibd)}")
+        print(f"Blocks = {bibd}")

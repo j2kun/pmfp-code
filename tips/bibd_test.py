@@ -28,8 +28,8 @@ def test_from_bibd():
         subjects=35,
         treatments=15,
         treatments_per_subject=3,
-        treatment_replication=7,
-        pairwise_treatment_replication=1,
+        subjects_per_treatment=7,
+        subjects_per_treatment_pair=1,
     )
     actual = BIBDParams.from_bibd(bibd_15_3_1)
     assert expected == actual
@@ -50,15 +50,15 @@ def test_bibd_params_tweaked_fail_conditions(bibd):
         replace(params, treatments=params.treatments - 1),
         replace(params, treatments_per_subject=params.treatments_per_subject + 1),
         replace(params, treatments_per_subject=params.treatments_per_subject - 1),
-        replace(params, treatment_replication=params.treatment_replication + 1),
-        replace(params, treatment_replication=params.treatment_replication - 1),
+        replace(params, subjects_per_treatment=params.subjects_per_treatment + 1),
+        replace(params, subjects_per_treatment=params.subjects_per_treatment - 1),
         replace(
             params,
-            pairwise_treatment_replication=params.pairwise_treatment_replication + 1,
+            subjects_per_treatment_pair=params.subjects_per_treatment_pair + 1,
         ),
         replace(
             params,
-            pairwise_treatment_replication=params.pairwise_treatment_replication - 1,
+            subjects_per_treatment_pair=params.subjects_per_treatment_pair - 1,
         ),
     ]
 
