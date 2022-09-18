@@ -143,6 +143,22 @@ class BIBDParams:
             satisfies_divisibility and is_balanceable and satisfies_fishers_inequality
         )
 
+    def efficiency_factor(self) -> float:
+        """Return the efficiecny factor of the design.
+
+        The efficiency factor E measures the relative precision of a
+        statistical experiment using a BIBD when compared to a complete block
+        design, i.e., a block design in which every treatment is applied to
+        every subject (RCBD, see
+        https://en.wikipedia.org/wiki/Generalized_randomized_block_design).
+
+        The quantity 100 * (1-E) is a bound on the percent reduction in
+        precision. This can also be interpreted as the amount of inter-block
+        variance that must be reduced to allow a BIBD study to maintain
+        the same precision as an equivalent complete block design.
+        """
+        return self.lambda_ * self.v / (self.r * self.k)
+
     @staticmethod
     def from_bibd(bibd: BIBD) -> "BIBDParams":
         """Return the parameters for a BIBD.
