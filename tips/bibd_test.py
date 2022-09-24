@@ -120,6 +120,15 @@ def test_specific_efficiency_factor():
 
 
 @pytest.mark.parametrize("bibd", ALL_BIBDS)
-def test_efficiency_factot_less_than_1(bibd):
+def test_efficiency_factor_agrees_with_book(bibd):
+    # In the book I use a different formula for efficiency factor to avoid
+    # introducing more variables at that part of the prose.
+    params = BIBDParams.from_bibd(bibd)
+    book_claim = (params.r * (params.k - 1) + params.lambda_) / (params.r * params.k)
+    assert (params.efficiency_factor() - book_claim) < 1e-05
+
+
+@pytest.mark.parametrize("bibd", ALL_BIBDS)
+def test_efficiency_factor_less_than_1(bibd):
     params = BIBDParams.from_bibd(bibd)
     assert 0 < params.efficiency_factor() < 1
