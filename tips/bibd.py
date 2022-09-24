@@ -134,8 +134,7 @@ class BIBDParams:
         satisfies_divisibility = v * r == b * k and v % k == 0
         is_balanceable = r * (k - 1) == lambda_ * (v - 1)
 
-        # Cf. HCB II.1.10 and II.7.3 Theorem 7.28
-        satisfies_fishers_inequality = b >= v + r - 1
+        satisfies_fishers_inequality = b >= v if (v > k >= 2) else True
 
         return (
             satisfies_divisibility and is_balanceable and satisfies_fishers_inequality
