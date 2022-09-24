@@ -36,17 +36,26 @@ bibd_9_4_3_str = """
 346678888787878786
 """
 
+bibd_8_4_3_str = """
+00000001111223
+11122342235344
+23436553446556
+57647676757767
+"""
+
 
 def str_to_blocks(bibd_str) -> BIBD:
     """Convert from compact string format to a list of blocks."""
     return tuple(zip(*bibd_str.strip().split()))
 
 
+bibd_8_4_3 = str_to_blocks(bibd_8_4_3_str)
 bibd_9_4_3 = str_to_blocks(bibd_9_4_3_str)
 bibd_15_3_1 = str_to_blocks(bibd_15_3_1_str)
 bibd_19_9_4 = str_to_blocks(bibd_19_9_4_str)
 
 ALL_BIBDS = [
+    bibd_8_4_3,
     bibd_9_4_3,
     bibd_15_3_1,
     bibd_19_9_4,
@@ -59,21 +68,9 @@ class BIBDParams:
 
     The members of this class will be described in both clinical trials
     language (subjects & treatments) and in the notation of Dinitz-Colbourn's
-    Handbook of Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD)
+    Handbook of Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD),
+    which are the parameters (v, b, r, k, lambda).
     """
-
-    """
-    The number of test subjects. In HCD, the number of blocks b.
-    """
-    subjects: int
-
-    @property
-    def blocks(self):
-        return self.subjects
-
-    @property
-    def b(self):
-        return self.subjects
 
     """
     The number of treatments to be tested. In HCD, the size v of the ground set
@@ -82,26 +79,17 @@ class BIBDParams:
     treatments: int
 
     @property
-    def elements(self):
-        return self.treatments
-
-    @property
     def v(self):
         return self.treatments
 
     """
-    The number of treatments to apply to each test subject. In HCD, the size k
-    of a block.
+    The number of test subjects. In HCD, the number of blocks b.
     """
-    treatments_per_subject: int
+    subjects: int
 
     @property
-    def block_size(self):
-        return self.treatments_per_subject
-
-    @property
-    def k(self):
-        return self.treatments_per_subject
+    def b(self):
+        return self.subjects
 
     """
     The number of replications of each treatment. In HCD, r.
@@ -111,6 +99,16 @@ class BIBDParams:
     @property
     def r(self):
         return self.subjects_per_treatment
+
+    """
+    The number of treatments to apply to each test subject. In HCD, the size k
+    of a block.
+    """
+    treatments_per_subject: int
+
+    @property
+    def k(self):
+        return self.treatments_per_subject
 
     """
     The number of times each pair of treatments occurs in a block. In HCD,
@@ -144,7 +142,7 @@ class BIBDParams:
         )
 
     def efficiency_factor(self) -> float:
-        """Return the efficiecny factor of the design.
+        """Return the efficiency factor of the design.
 
         The efficiency factor E measures the relative precision of a
         statistical experiment using a BIBD when compared to a complete block
@@ -153,9 +151,9 @@ class BIBDParams:
         https://en.wikipedia.org/wiki/Generalized_randomized_block_design).
 
         The quantity 100 * (1-E) is a bound on the percent reduction in
-        precision. This can also be interpreted as the amount of inter-block
-        variance that must be reduced to allow a BIBD study to maintain
-        the same precision as an equivalent complete block design.
+        precision. This can also be interpreted as the amount of variance that
+        must be reduced to allow a BIBD study to maintain the same precision as
+        an equivalent complete block design.
         """
         return self.lambda_ * self.v / (self.r * self.k)
 
@@ -221,16 +219,6 @@ def is_bibd(bibd: BIBD) -> bool:
         return False
 
     return True
-
-
-def distance_from_balanced(bibd: BIBD) -> bool:
-    """Determine how far an attempted BIBD is from being balanced."""
-    pass
-
-
-def try_find_bibd(bibd: BIBD) -> bool:
-    """Search for an approximately balanced BIBD."""
-    pass
 
 
 if __name__ == "__main__":
