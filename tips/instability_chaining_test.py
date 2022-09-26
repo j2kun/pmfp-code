@@ -5,6 +5,7 @@ from hypothesis import settings
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import permutations
+import pytest
 
 from instability_chaining import Couple
 from instability_chaining import Matching
@@ -432,6 +433,7 @@ def test_stable_matching_capacity_2():
     assert_stable(matching)
 
 
+@pytest.mark.order(index=-1)
 @given(market(include_couples=False))
 @settings(print_blob=True, derandomize=True)
 def test_stability_with_no_couples(students_and_programs):
@@ -689,6 +691,7 @@ def test_withdrawal_creates_unstable_pair():
     assert_stable(matching)
 
 
+@pytest.mark.order(index=-2)
 @given(market(include_couples=True))
 @settings(print_blob=True, derandomize=True)
 def test_stability_with_couples(students_and_programs):
