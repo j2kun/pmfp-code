@@ -106,6 +106,7 @@ def test_large_granularity():
     assert output[0] == 12
 
 
+@pytest.mark.order(index=-1)
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
 def test_privatize_single_number(name, mechanism):
     number, privacy_parameter = 17, 0.5
@@ -122,6 +123,7 @@ def test_privatize_single_number(name, mechanism):
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
 
+@pytest.mark.order(index=-2)
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
 def test_privatize_single_bin_histogram(name, mechanism):
     neighboring_hists, privacy_parameter = ((17,), (18,)), math.log(3)
@@ -149,6 +151,7 @@ def test_privatize_single_bin_histogram(name, mechanism):
     assert test_stat2 < tolerance
 
 
+@pytest.mark.order(index=-3)
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
 @pytest.mark.parametrize("neighboring_hists", [
     ((1, 2, 1, 2), (1, 2, 2, 2)),
