@@ -82,7 +82,7 @@ def partition_by(
 def optimal_schedule(
     weeks: int,
     matchups: Iterable[tuple[Team, Team]],
-    rules: list[PreferenceRule],
+    rules: list[PreferenceRule] = None,
 ) -> Schedule:
     # all_teams = list(itertools.chain(*matchups))
     all_games = [
@@ -120,6 +120,7 @@ def optimal_schedule(
     objective = solver.Objective()
     objective.SetMinimization()
     penalty_vars = []
+    rules = rules or []
     for rule in rules:
         print(f"Building models for {rule.__class__.__name__}")
         var_count = 0
@@ -134,7 +135,7 @@ def optimal_schedule(
     status = solver.Solve()
 
     if status not in [solver.OPTIMAL, solver.FEASIBLE]:
-        raise Exception("Unable to find feasible solution")
+        raise ValueError("Unable to find feasible solution")
 
     for var in penalty_vars:
         if var.solution_value() > 0:
@@ -143,7 +144,7 @@ def optimal_schedule(
     return [g for (g, g_var) in game_vars.items() if g_var.solution_value() == 1]
 
 
-class ThreeAwayGamesRule(PreferenceRule):
+class MinimizeThreeAwayGames(PreferenceRule):
     """A rule that incentivizes against a team having three away games on
     consecutive weeks."""
 
@@ -240,7 +241,7 @@ class NoFarTravel(PreferenceRule):
                     ),
                 )
                 violation_vars.append(violation_var)
-                # Similar modeling trick to ThreeAwayGamesRule:
+                # Similar modeling trick to MinimizeThreeAwayGames:
                 # violation_var is 1 if and only if both RHS vars are 1.
                 solver.Add(game_vars[g1] + game_vars[g2] <= violation_var + 1)
 
@@ -248,26 +249,3 @@ class NoFarTravel(PreferenceRule):
 
     def objective_penalty(self) -> int:
         return 1
-
-
-if __name__ == "__main__":
-    solution = optimal_schedule(
-        5,
-        itertools.combinations(["DAL", "NYG", "PHI", "A", "B"], 2),
-        [
-            ThreeAwayGamesRule(),
-            NoFarTravel(
-                # A and B are close, as are DAL/NYG/PHI
-                far_pairs=[
-                    ("A", "DAL"),
-                    ("A", "PHI"),
-                    ("A", "NYG"),
-                    ("B", "DAL"),
-                    ("B", "PHI"),
-                    ("B", "NYG"),
-                ]
-            ),
-        ],
-    )
-    for game in sorted(solution, key=lambda g: (g.week, g.away_team)):
-        print(game)
