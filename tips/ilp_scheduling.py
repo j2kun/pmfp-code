@@ -44,7 +44,7 @@ class PreferenceRule(ABC):
 
     @abstractmethod
     def build_model(
-        self, solver, game_vars: Iterable[dict[Game, pywraplp.Variable]]
+        self, solver, game_vars: dict[Game, pywraplp.Variable]
     ) -> pywraplp.Variable:
         """Make necessary model changes for one subset of games, and output a
         single variable to be included in the objective. This variable is
@@ -69,9 +69,10 @@ def partition_by(
     """Partitions the given Game dict into sub dictionaries using the given keys.
 
     Values from multiple keys are merged in the final output dict."""
-    partitions = defaultdict(dict)
+    partitions: defaultdict[K, dict[Game, V]] = defaultdict(dict)
+    keys = list(keys) if keys else []
     if key:
-        keys = (list(keys) if keys else []) + [key]
+        keys += [key]
     for g, v in d.items():
         for key in keys:
             partitions[key(g)][g] = v
@@ -80,7 +81,7 @@ def partition_by(
 
 def optimal_schedule(
     weeks: int,
-    matchups: list[tuple[Team, Team]],
+    matchups: Iterable[tuple[Team, Team]],
     rules: list[PreferenceRule],
 ) -> Schedule:
     # all_teams = list(itertools.chain(*matchups))
@@ -150,7 +151,9 @@ class ThreeAwayGamesRule(PreferenceRule):
         """For each week and team, yield the list of away games for that week
         and the subsequent two weeks."""
         # index by away team and week
-        index = defaultdict(lambda: defaultdict(list))
+        index: defaultdict[int, defaultdict[Team, list[Game]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
         for game in all_games:
             index[game.week][game.away_team].append(game)
 
@@ -195,8 +198,10 @@ class NoFarTravel(PreferenceRule):
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
         """For each week and team, yield the list of games for that week
         and the subsequent week."""
-        # index by team and week
-        index = defaultdict(lambda: defaultdict(list))
+        # index by week and team
+        index: defaultdict[int, defaultdict[Team, list[Game]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
         for game in all_games:
             index[game.week][game.away_team].append(game)
             index[game.week][game.home_team].append(game)
