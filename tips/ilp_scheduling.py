@@ -148,6 +148,9 @@ class MinimizeThreeAwayGames(PreferenceRule):
     """A rule that incentivizes against a team having three away games on
     consecutive weeks."""
 
+    def __init__(self, penalty: int = 10):
+        self.penalty = penalty
+
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
         """For each week and team, yield the list of away games for that week
         and the subsequent two weeks."""
@@ -186,15 +189,16 @@ class MinimizeThreeAwayGames(PreferenceRule):
         return [violation_var]
 
     def objective_penalty(self) -> int:
-        return 10
+        return self.penalty
 
 
 class NoFarTravel(PreferenceRule):
     """A rule that incentivizes against a team having to travel far in two
     consecutive weeks."""
 
-    def __init__(self, far_pairs):
+    def __init__(self, far_pairs: Iterable[tuple[Team, Team]], penalty: int = 1):
         self.far_pairs = set(tuple(sorted(x)) for x in far_pairs)
+        self.penalty = penalty
 
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
         """For each week and team, yield the list of games for that week
@@ -214,8 +218,8 @@ class NoFarTravel(PreferenceRule):
                     yield games + index[week + 1][team]
 
     def build_model(self, solver, game_vars) -> Iterable[list[pywraplp.Variable]]:
-        """Create new variables constrained to be 1 if a subsequent pair of
-        weeks involves far travel for a team."""
+        """Create new variables constrained to be 1 if a two games in subsequent
+        weeks involve traveling far."""
         which_weeks = list(sorted(list(set(g.week for g in game_vars))))
         assert len(which_weeks) == 2  # or else subset generator is broken
         week1, week2 = which_weeks
@@ -248,4 +252,4 @@ class NoFarTravel(PreferenceRule):
         return violation_vars
 
     def objective_penalty(self) -> int:
-        return 1
+        return self.penalty
