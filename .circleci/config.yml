@@ -4,22 +4,27 @@ orbs:
   python: circleci/python@1.4.0
 
 jobs:
-  build-and-test:
+  build_and_test:
     docker:
       - image: cimg/python:3.10.6
+    # https://circleci.com/docs/2.0/configuration-reference/#resourceclass
+    resource_class: large
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Test
+          name: Test and upload coverage
           command: |
-              python -m pytest --mypy --cov-report html:cov_html --cov-report annotate:cov_annotate --cov --junitxml=test-results/pytest/results.xml
+              cp -f .circleci/resources/circleci_setup.cfg setup.cfg
+              python -m pytest
               python -m coveralls
       - store_test_results:
+          path: test-results
+      - store_artifacts:
           path: test-results
 
 workflows:
   main:
     jobs:
-      - build-and-test
+      - build_and_test
