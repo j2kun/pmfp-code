@@ -1,5 +1,4 @@
 """An implementation of the student-proposing instability chaining algorithm."""
-
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -14,6 +13,7 @@ from typing import Tuple
 from typing import TypeVar
 from typing import cast
 import heapq
+import logging
 
 
 T = TypeVar("T")
@@ -259,7 +259,7 @@ class Matching:
     ) -> None:
         for (student, program) in matches:
             if student and program:
-                print(f"Matching {student} to {program}")
+                logging.debug(f"Matching {student} to {program}")
                 self.matches[student] = program
 
     def current_match(
@@ -347,7 +347,7 @@ class InstabilityChaining:
 
             if self.program_stack:
                 program = self.program_stack.pop()
-                print(f"Processing {program} from the program stack.")
+                logging.debug(f"Processing {program} from the program stack.")
                 unstable_applicants = unstable_pairs(
                     program, self.matching, self.program_index
                 )
@@ -359,7 +359,7 @@ class InstabilityChaining:
                     # a higher-ranked program, that can introduce a further
                     # unstable pair with the newly vacant position.
                     m1, m2 = self.matching.current_match(applicant)
-                    print(
+                    logging.debug(
                         f"Adding potentially withdrawn programs {m1}, {m2} "
                         "to the program stack."
                     )
@@ -369,7 +369,7 @@ class InstabilityChaining:
                         self.program_stack.add(m2)
 
                 if unstable_applicants:
-                    print(
+                    logging.debug(
                         f"Adding unstable applicants "
                         f"{','.join(str(x) for x in unstable_applicants)} "
                         f"to the applicant stack"
@@ -385,12 +385,14 @@ class InstabilityChaining:
             tuple(sorted((s.id, p.id) for (s, p) in self.matching.matches.items())),
         )
         if hashable in self.log:
-            print(f"Found a cycle: log={self.log}\nNext entry would be {hashable}")
+            logging.debug(
+                f"Found a cycle: log={self.log}\nNext entry would be {hashable}"
+            )
             raise ValueError("Found a cycle")
         self.log.add(hashable)
 
     def apply(self, applicant: Applicant) -> None:
-        print(f"{applicant} starts applying")
+        logging.debug(f"{applicant} starts applying")
         while applicant.may_still_apply():
             proposer, partner = applicant.proposal_pair()
             program, partner_program = self.program_index.next_to_apply(applicant)
@@ -401,7 +403,7 @@ class InstabilityChaining:
             if partner and program == partner_program:
                 applicants.add(partner)
 
-            print(f"{applicant} proposing to {program}, {partner_program}")
+            logging.debug(f"{applicant} proposing to {program}, {partner_program}")
             displ = program.select(applicants)
             if partner and program != partner_program:
                 assert partner_program is not None
@@ -410,7 +412,7 @@ class InstabilityChaining:
                 )
 
             if not displ:
-                print("Application accepted with no bumps")
+                logging.debug("Application accepted with no bumps")
                 # The program(s) applied to had available positions and didn't
                 # need to reject anyone.
                 self.matching.set((proposer, program), (partner, partner_program))
@@ -421,13 +423,15 @@ class InstabilityChaining:
             if rejected:
                 rejectee = f"{proposer if proposer in displ else partner}"
                 rejecter = f"{program if proposer in displ else partner_program}"
-                print(f"Application rejected ({rejectee} rejected by {rejecter})")
+                logging.debug(
+                    f"Application rejected ({rejectee} rejected by {rejecter})"
+                )
                 proposer.best_unrejected += 1
                 if partner:
                     partner.best_unrejected += 1
                 continue
             else:
-                print("Application accepted with bumps")
+                logging.debug("Application accepted with bumps")
 
             self.matching.set((proposer, program), (partner, partner_program))
 
@@ -443,7 +447,7 @@ class InstabilityChaining:
             #    preference lists, and put the remaining couples on the applicant stack.
             couples, singles = split_by(displ, lambda s: s in self.partner_mapping)
             for bumped in singles:
-                print(
+                logging.debug(
                     f"{bumped} (matched to {self.matching.matches[bumped]}) "
                     f"displaced by {applicant}"
                 )
@@ -460,27 +464,22 @@ class InstabilityChaining:
                 couple = Couple(members=(bumped, withdrawer))
                 if couple in displaced_couples:
                     continue
-                print(
+                logging.debug(
                     f"{couple} displaced (was matched to "
                     f"{self.matching.matches[bumped]}, "
                     f"{self.matching.matches[withdrawer]}) "
-                    f"by {applicant}"
-                )
-
-                print(
-                    f"{withdrawer} withdrawing from {self.matching.matches[withdrawer]}"
-                )
-                displaced_couples.add(couple)
-                print(
+                    f"by {applicant}\n"
+                    f"{withdrawer} withdrawing from {self.matching.matches[withdrawer]}\n"
                     f"Adding withdrawn program {self.matching.matches[withdrawer]} to "
                     "the program stack"
                 )
+                displaced_couples.add(couple)
                 self.program_stack.add(self.matching.matches[withdrawer])
                 self.matching.reject(bumped)
                 self.matching.reject(withdrawer)
 
             applicant = displaced_couples.pop()
-            print(
+            logging.debug(
                 f"Adding displaced couples {displaced_couples} and singles {singles} "
                 f"to the applicant stack"
             )

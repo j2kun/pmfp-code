@@ -2,8 +2,10 @@ from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
+import hypothesis
 import numpy as np
 import pytest
+
 from sobel import convolve
 from sobel import detect_edges
 from sobel import np_convolve2d
@@ -161,6 +163,7 @@ def random_matrix(draw, min_dim=1, max_dim=10):
     return matrix
 
 
+@hypothesis.settings(deadline=5000)
 @given(random_matrix(min_dim=4, max_dim=20))
 def test_consistency_between_impls(matrix):
     result1 = detect_edges(matrix)

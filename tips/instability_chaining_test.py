@@ -693,7 +693,7 @@ def test_withdrawal_creates_unstable_pair():
 
 @pytest.mark.order(index=-2)
 @given(market(include_couples=True))
-@settings(print_blob=True, derandomize=True)
+@settings(print_blob=True, derandomize=True, deadline=10000)
 def test_stability_with_couples(students_and_programs):
     applicants, programs = students_and_programs
     matching = stable_matching(applicants, programs)
