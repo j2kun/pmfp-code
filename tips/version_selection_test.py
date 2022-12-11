@@ -52,161 +52,144 @@ def build_indices(packages):
 def test_no_deps():
     package = PackageVersion(
         package_id=1,
-        name='foo',
+        name="foo",
         version=1,
         dependencies=tuple(),
     )
-    chosen = select_dependent_versions(
-        package,
-        *build_indices([package])
-    )
+    chosen = select_dependent_versions(package, *build_indices([package]))
 
-    assert chosen == {'foo': 1}
+    assert chosen == {"foo": 1}
 
 
 def test_single_dep():
     package = PackageVersion(
         package_id=1,
-        name='foo',
+        name="foo",
         version=1,
-        dependencies=(
-            ('bar', (1,)),
-        ),
+        dependencies=(("bar", (1,)),),
     )
     dep = PackageVersion(
         package_id=2,
-        name='bar',
+        name="bar",
         version=1,
         dependencies=tuple(),
     )
-    chosen = select_dependent_versions(
-        package,
-        *build_indices([package, dep])
-    )
+    chosen = select_dependent_versions(package, *build_indices([package, dep]))
 
-    assert chosen == {'foo': 1, 'bar': 1}
+    assert chosen == {"foo": 1, "bar": 1}
 
 
 def test_branch_deps():
     p1 = PackageVersion(
         package_id=1,
-        name='foo',
+        name="foo",
         version=1,
         dependencies=(
-            ('bar', (1,)),
-            ('baz', (1,)),
+            ("bar", (1,)),
+            ("baz", (1,)),
         ),
     )
     p2 = PackageVersion(
         package_id=2,
-        name='bar',
+        name="bar",
         version=1,
         dependencies=tuple(),
     )
     p3 = PackageVersion(
         package_id=3,
-        name='baz',
+        name="baz",
         version=1,
         dependencies=tuple(),
     )
-    chosen = select_dependent_versions(
-        p1,
-        *build_indices([p1, p2, p3])
-    )
+    chosen = select_dependent_versions(p1, *build_indices([p1, p2, p3]))
 
-    assert chosen == {'foo': 1, 'bar': 1, 'baz': 1}
+    assert chosen == {"foo": 1, "bar": 1, "baz": 1}
 
 
 def test_diamond_deps_feasible():
     p1 = PackageVersion(
         package_id=1,
-        name='foo',
+        name="foo",
         version=1,
         dependencies=(
-            ('bar', (1,)),
-            ('baz', (1,)),
+            ("bar", (1,)),
+            ("baz", (1,)),
         ),
     )
     p2 = PackageVersion(
         package_id=2,
-        name='bar',
+        name="bar",
         version=1,
         dependencies=(
-            ('quux', (1, 2,)),
+            (
+                "quux",
+                (
+                    1,
+                    2,
+                ),
+            ),
         ),
     )
     p3 = PackageVersion(
         package_id=3,
-        name='baz',
+        name="baz",
         version=1,
-        dependencies=(
-            ('quux', (1,)),
-        ),
+        dependencies=(("quux", (1,)),),
     )
     p4 = PackageVersion(
         package_id=4,
-        name='quux',
+        name="quux",
         version=1,
         dependencies=tuple(),
     )
     p5 = PackageVersion(
         package_id=5,
-        name='quux',
+        name="quux",
         version=2,
         dependencies=tuple(),
     )
-    chosen = select_dependent_versions(
-        p1,
-        *build_indices([p1, p2, p3, p4, p5])
-    )
+    chosen = select_dependent_versions(p1, *build_indices([p1, p2, p3, p4, p5]))
 
-    assert chosen == {'foo': 1, 'bar': 1, 'baz': 1, 'quux': 1}
+    assert chosen == {"foo": 1, "bar": 1, "baz": 1, "quux": 1}
 
 
 def test_diamond_deps_infeasible():
     p1 = PackageVersion(
         package_id=1,
-        name='foo',
+        name="foo",
         version=1,
         dependencies=(
-            ('bar', (1,)),
-            ('baz', (1,)),
+            ("bar", (1,)),
+            ("baz", (1,)),
         ),
     )
     p2 = PackageVersion(
         package_id=2,
-        name='bar',
+        name="bar",
         version=1,
-        dependencies=(
-            ('quux', (1,)),
-        ),
+        dependencies=(("quux", (1,)),),
     )
     p3 = PackageVersion(
         package_id=3,
-        name='baz',
+        name="baz",
         version=1,
-        dependencies=(
-            ('quux', (2,)),
-        ),
+        dependencies=(("quux", (2,)),),
     )
     p4 = PackageVersion(
         package_id=4,
-        name='quux',
+        name="quux",
         version=1,
         dependencies=tuple(),
     )
     p5 = PackageVersion(
         package_id=5,
-        name='quux',
+        name="quux",
         version=2,
         dependencies=tuple(),
     )
 
     with pytest.raises(ValueError):
-        select_dependent_versions(
-            p1,
-            *build_indices([p1, p2, p3, p4, p5])
-        )
+        select_dependent_versions(p1, *build_indices([p1, p2, p3, p4, p5]))
 
 
 @composite
@@ -214,9 +197,9 @@ def dependency_graph(
     draw,
     dependency_decider=booleans(),
     num_packages=integers(min_value=1, max_value=10),
-    num_versions=integers(min_value=1, max_value=10)
+    num_versions=integers(min_value=1, max_value=10),
 ):
-    names = [f'package_{i}' for i in range(draw(num_packages))]
+    names = [f"package_{i}" for i in range(draw(num_packages))]
     packages = []
     i = 1
     for name in names:
@@ -233,12 +216,14 @@ def dependency_graph(
                     if legal_dep_versions:
                         dependencies.append((dep_name, tuple(legal_dep_versions)))
 
-            packages.append(PackageVersion(
-                package_id=i,
-                name=name,
-                version=version,
-                dependencies=tuple(dependencies),
-            ))
+            packages.append(
+                PackageVersion(
+                    package_id=i,
+                    name=name,
+                    version=version,
+                    dependencies=tuple(dependencies),
+                )
+            )
             i += 1
 
     return packages
@@ -247,9 +232,7 @@ def dependency_graph(
 @given(dependency_graph())
 def test_arbitrary_dep_graph_feasible(graph):
     try:
-        chosen = select_dependent_versions(
-            graph[-1], *build_indices(graph)
-        )
+        chosen = select_dependent_versions(graph[-1], *build_indices(graph))
     except Exception:
         chosen = dict()
 
@@ -267,9 +250,7 @@ def test_arbitrary_dep_graph_feasible(graph):
 @given(dependency_graph())
 def test_arbitrary_dep_graph_infeasible(graph):
     try:
-        chosen = select_dependent_versions(
-            graph[-1], *build_indices(graph)
-        )
+        select_dependent_versions(graph[-1], *build_indices(graph))
         assume(False)
     except Exception:
         pass
