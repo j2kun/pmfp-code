@@ -197,7 +197,7 @@ def random_matchups(draw, min_teams=4, max_teams=10, max_matchups=30):
 
 
 @pytest.mark.order(index=1)
-@settings(deadline=10000)
+@settings(deadline=100000)
 @given(random_matchups())
 def test_smoke_feasibility(matchups_and_pairs):
     matchups, far_pairs = matchups_and_pairs
