@@ -23,7 +23,7 @@ def test_estimate_is_accurate(n, sample_frac):
         success = low <= n <= high
         if not success:
             failures += 1
-            counterexamples.append([n, 'confidence_interval', low, high])
+            counterexamples.append([n, "confidence_interval", low, high])
 
         actual = estimate_size(sample)
         # the variance is n^2 / k^2, so the stddev is n/k, and we should expect to
@@ -34,7 +34,7 @@ def test_estimate_is_accurate(n, sample_frac):
 
         if not success:
             failures += 1
-            counterexamples.append([n, 'point_estimate', actual, threshold])
+            counterexamples.append([n, "point_estimate", actual, threshold])
 
     if counterexamples:
         print(counterexamples)

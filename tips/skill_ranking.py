@@ -1,4 +1,4 @@
-'''Various implementations of skill ranking.'''
+"""Various implementations of skill ranking."""
 
 from dataclasses import dataclass
 from math import erf
@@ -13,13 +13,14 @@ class EloSkill:
 
 
 def standard_normal_cumulative_density(x):
-    '''Cumulative density function for a normal distribution with zero mean and variance 1.'''
+    """Cumulative density function for a normal distribution with zero mean and variance 1."""
     return (1.0 + erf(x / sqrt(2.0))) / 2.0
 
 
 def elo_player1_win_prob(e1: EloSkill, e2: EloSkill):
     return standard_normal_cumulative_density(
-        (e1.mean - e2.mean) / sqrt(e1.variance + e2.variance))
+        (e1.mean - e2.mean) / sqrt(e1.variance + e2.variance)
+    )
 
 
 def truncate(x, xmin: int = 0, xmax: int = 3000):
@@ -44,8 +45,8 @@ def elo_update(
     """
     if e1.variance != e2.variance:
         raise ValueError(  # pragma: no cover
-            f"Variances must agree, but were "
-            f"p1={e1.variance}, p2={e2.variance}")
+            f"Variances must agree, but were " f"p1={e1.variance}, p2={e2.variance}"
+        )
 
     std_dev = sqrt(e1.variance)
     scale = alpha * std_dev  # also called the K-factor

@@ -16,7 +16,7 @@ from differential_privacy import sample_geometric
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):
-    '''
+    """
      Decides whether two sets of random samples were likely drawn from similar
      discrete distributions.
 
@@ -40,21 +40,25 @@ def distributions_are_close(hist1, hist2, L2_tolerance):
           given two samples from the same distribution).
 
     Returns True if the underlying distributions are within the given L2 distance.
-    '''
+    """
     n = sum(hist1.values())
-    assert(n) == sum(hist2.values())
+    assert (n) == sum(hist2.values())
 
     self_collision_1 = sum(count * (count - 1) / 2 for count in hist1.values())
     self_collision_2 = sum(count * (count - 1) / 2 for count in hist2.values())
-    cross_collision_count = sum(hist1[sample] * hist2.get(sample, 0) for sample in hist1.keys())
+    cross_collision_count = sum(
+        hist1[sample] * hist2.get(sample, 0) for sample in hist1.keys()
+    )
 
-    test_value = (self_collision_1 + self_collision_2 - ((n - 1) / n) * cross_collision_count)
+    test_value = (
+        self_collision_1 + self_collision_2 - ((n - 1) / n) * cross_collision_count
+    )
     threshold = (L2_tolerance * (n - 1)) * (L2_tolerance * n) / 4.0
     return test_value < threshold
 
 
 def dp_test_statistic(s1, s2, privacy_parameter):
-    '''Compute the epsilon-delta differential privacy test statistic.
+    """Compute the epsilon-delta differential privacy test statistic.
 
     This checks whether the differential privacy mechanism, which outputs
     samples s1 and s2 from two neighboring databases, approximately satisfies
@@ -69,7 +73,7 @@ def dp_test_statistic(s1, s2, privacy_parameter):
 
     Also see a reference implementation at
     https://github.com/google/differential-privacy/blob/c2376f0daaf406e1524b462accaa9cbb548fd6d1/java/main/com/google/privacy/differentialprivacy/testing/StatisticalTestsUtil.java#L88-L137
-    '''
+    """
     n = sum(s1.values())
     assert n == sum(s2.values())
     return sum(
@@ -83,9 +87,15 @@ def make_mechanisms():
     return [(x.__class__.__name__, x) for x in mechs]
 
 
-@given(st.floats(
-    min_value=0.0, max_value=2**1023, allow_infinity=False, allow_nan=False, exclude_min=True
-))
+@given(
+    st.floats(
+        min_value=0.0,
+        max_value=2**1023,
+        allow_infinity=False,
+        allow_nan=False,
+        exclude_min=True,
+    )
+)
 @example(float(2**-1023))
 @example(float(2**1023))
 def test_next_power_of_two(x):
@@ -114,12 +124,21 @@ def test_privatize_single_number(name, mechanism):
 
     def sample(num):
         return Counter(
-            [privatize_histogram([num], privacy_parameter, mechanism)[0]
-             for _ in range(sample_size)])
+            [
+                privatize_histogram([num], privacy_parameter, mechanism)[0]
+                for _ in range(sample_size)
+            ]
+        )
 
     sample_outputs = sample(number)
-    baseline = Counter([max(0, round(x)) for x in np.random.default_rng(1).laplace(
-        number, 1.0 / privacy_parameter, sample_size)])
+    baseline = Counter(
+        [
+            max(0, round(x))
+            for x in np.random.default_rng(1).laplace(
+                number, 1.0 / privacy_parameter, sample_size
+            )
+        ]
+    )
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
 
@@ -132,16 +151,19 @@ def test_privatize_single_bin_histogram(name, mechanism):
 
     def sample(hist):
         return Counter(
-            [tuple(privatize_histogram(hist, privacy_parameter, mechanism))
-             for _ in range(sample_size)])
+            [
+                tuple(privatize_histogram(hist, privacy_parameter, mechanism))
+                for _ in range(sample_size)
+            ]
+        )
 
     sample_hist1 = sample(hist1)
     sample_hist2 = sample(hist2)
 
     plot1 = [sample_hist1.get((i,), 0) for i in range(40)]
     plot2 = [sample_hist2.get((i,), 0) for i in range(40)]
-    print(f'{plot1}')
-    print(f'{plot2}')
+    print(f"{plot1}")
+    print(f"{plot2}")
 
     test_stat1 = dp_test_statistic(sample_hist1, sample_hist2, privacy_parameter)
     test_stat2 = dp_test_statistic(sample_hist2, sample_hist1, privacy_parameter)
@@ -153,10 +175,13 @@ def test_privatize_single_bin_histogram(name, mechanism):
 
 @pytest.mark.order(index=-3)
 @pytest.mark.parametrize("name,mechanism", make_mechanisms())
-@pytest.mark.parametrize("neighboring_hists", [
-    ((1, 2, 1, 2), (1, 2, 2, 2)),
-    ((10, 15, 9, 14), (9, 15, 9, 14)),
-])
+@pytest.mark.parametrize(
+    "neighboring_hists",
+    [
+        ((1, 2, 1, 2), (1, 2, 2, 2)),
+        ((10, 15, 9, 14), (9, 15, 9, 14)),
+    ],
+)
 def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
     privacy_parameter = math.log(3)
     mechanism = InsecureLaplaceMechanism()
@@ -165,8 +190,11 @@ def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
 
     def sample(hist):
         return Counter(
-            [tuple(privatize_histogram(hist, privacy_parameter, mechanism))
-             for _ in range(sample_size)])
+            [
+                tuple(privatize_histogram(hist, privacy_parameter, mechanism))
+                for _ in range(sample_size)
+            ]
+        )
 
     sample_hist1 = sample(hist1)
     sample_hist2 = sample(hist2)

@@ -2,10 +2,12 @@ from typing import List
 from typing import Optional
 
 
-def score(ratings: List[int],
-          rating_prior: List[int],
-          rating_utility: Optional[List[float]] = None) -> float:
-    '''Compute the expected utility of a listing with discrete ratings.
+def score(
+    ratings: List[int],
+    rating_prior: List[int],
+    rating_utility: Optional[List[float]] = None,
+) -> float:
+    """Compute the expected utility of a listing with discrete ratings.
 
     This score can be used as a sorting key to rank listings by the order they
     should be displayed to a user. Higher scores should be displayed first.
@@ -28,7 +30,7 @@ def score(ratings: List[int],
     Returns:
       A float score representing the expected utility of a listing with the
       given ratings.
-    '''
+    """
     if not rating_utility:
         rating_utility = list(range(len(ratings)))
 

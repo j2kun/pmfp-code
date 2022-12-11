@@ -11,9 +11,7 @@ def test_no_ratings_uses_prior():
     prior = [2, 3]
 
     expected_score = 3.0 / 5
-    actual_score = five_star_ranking.score(
-        ratings=ratings,
-        rating_prior=prior)
+    actual_score = five_star_ranking.score(ratings=ratings, rating_prior=prior)
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)
 
@@ -23,9 +21,7 @@ def test_thumbs_up_thumbs_down_no_prior():
     prior = [0, 0]
 
     expected_score = 3.0 / 5
-    actual_score = five_star_ranking.score(
-        ratings=ratings,
-        rating_prior=prior)
+    actual_score = five_star_ranking.score(ratings=ratings, rating_prior=prior)
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)
 
@@ -35,9 +31,7 @@ def test_thumbs_up_thumbs_down_with_prior():
     prior = [4, 3]
 
     expected_score = 6.0 / 12
-    actual_score = five_star_ranking.score(
-        ratings=ratings,
-        rating_prior=prior)
+    actual_score = five_star_ranking.score(ratings=ratings, rating_prior=prior)
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)
 
@@ -47,11 +41,10 @@ def test_thumbs_up_thumbs_down_with_prior_and_utility():
     prior = [10, 10]
     utility = [-4, 3]  # weight downvotes slightly higher than upvotes
 
-    expected_score = (-4. * 20 + 3 * 20) / 40
+    expected_score = (-4.0 * 20 + 3 * 20) / 40
     actual_score = five_star_ranking.score(
-        ratings=ratings,
-        rating_prior=prior,
-        rating_utility=utility)
+        ratings=ratings, rating_prior=prior, rating_utility=utility
+    )
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)
 
@@ -62,10 +55,9 @@ def test_five_star_rating():
     utility = [-4, -3, 0, 2, 5]
 
     total = 41
-    expected_score = (-44. + -15 + 16 + 50) / total
+    expected_score = (-44.0 + -15 + 16 + 50) / total
     actual_score = five_star_ranking.score(
-        ratings=ratings,
-        rating_prior=prior,
-        rating_utility=utility)
+        ratings=ratings, rating_prior=prior, rating_utility=utility
+    )
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)

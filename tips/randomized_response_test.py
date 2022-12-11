@@ -8,8 +8,7 @@ from randomized_response import respond_privately
 from randomized_response import aggregate_responses
 
 
-@given(integers(min_value=25, max_value=1000),
-       integers(min_value=25, max_value=1000))
+@given(integers(min_value=25, max_value=1000), integers(min_value=25, max_value=1000))
 @example(200, 0)
 @example(0, 200)
 @example(200, 200)

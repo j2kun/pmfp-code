@@ -13,7 +13,7 @@ LARGE_RANDOM_PRIME = 175927138426321871
 
 
 def random_hash(modulus):
-    '''Return a random instance of a family of 2-universal hashes.'''
+    """Return a random instance of a family of 2-universal hashes."""
     a, b = random.randint(0, modulus - 1), random.randint(0, modulus - 1)
 
     def f(x):
@@ -24,14 +24,14 @@ def random_hash(modulus):
 
 class CountMinSketch:
     def __init__(self, accuracy: float = 0.001, confidence: float = 1e-05):
-        '''Create an empty sketch with the given accuracy parameters.
+        """Create an empty sketch with the given accuracy parameters.
 
         Arguments:
         - accuracy: the desired additive error of count estimates as a
           fraction of the total number of values processed
         - confidence: 1-confidence is the desired probability that the accuracy
           is achieved.
-        '''
+        """
         self.accuracy = accuracy
         self.width = math.ceil(math.e / accuracy)
         self.hash_count = math.ceil(math.log(1 / confidence))
@@ -43,13 +43,15 @@ class CountMinSketch:
             self.sketch[i][self.hashes[i](hash(value)) % self.width] += 1
 
     def count(self, value: Hashable) -> int:
-        return min([
-            self.sketch[i][self.hashes[i](hash(value)) % self.width]
-            for i, h in enumerate(self.hashes)
-        ])
+        return min(
+            [
+                self.sketch[i][self.hashes[i](hash(value)) % self.width]
+                for i, h in enumerate(self.hashes)
+            ]
+        )
 
     def __len__(self):
-        '''Return the total number of increments applied.'''
+        """Return the total number of increments applied."""
         return sum(self.sketch[0])
 
     def additive_error_guarantee(self):
@@ -60,7 +62,7 @@ T = TypeVar("T")
 
 
 def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
-    '''Find the data entries that occur at least len(values) / k times.
+    """Find the data entries that occur at least len(values) / k times.
 
     This computes an approximate "heavy hitters" function, whereby it
     guarantees to return all data entries that occur at least len(values) / k
@@ -70,7 +72,7 @@ def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
 
     In exchange for this approximation, this method uses only O(k) space,
     and O(log(k)) time per data entry.
-    '''
+    """
     heap: List[Tuple[int, T]] = []
     candidates: Set[T] = set()
     count_processed = 0
@@ -107,6 +109,7 @@ def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
 
 if __name__ == "__main__":
     from collections import Counter
+
     random.seed(1)
 
     n = 1000

@@ -16,11 +16,9 @@ class SloMetric:
 
 
 def error_budget_remaining(
-        requests: TimeSeries,
-        errors: TimeSeries,
-        budget: float,
-        window_minutes: int) -> SloMetric:
-    '''Return a guess of the estimated time until an error budget is exhausted.
+    requests: TimeSeries, errors: TimeSeries, budget: float, window_minutes: int
+) -> SloMetric:
+    """Return a guess of the estimated time until an error budget is exhausted.
 
     Assumes time series samples are minute-aligned, and that the requests and
     errors time series are aligned with each other.
@@ -30,7 +28,8 @@ def error_budget_remaining(
       - errors: cumulative errors since the start of the measurement period
       - budget: the error budget, as a fraction of errors / requests
       - window: how far to look backwards to estimate error and request rates
-    '''
+    """
+
     def budget_at(index):
         return int(budget * requests[index]) - errors[index]
 
@@ -39,7 +38,8 @@ def error_budget_remaining(
     # Estimate the first derivative of "remaining budget" curve
     prev_index = max(0, len(requests) - 1 - window_minutes)
     estimated_budget_growth_rate = (
-        (budget_at(-1) - budget_at(prev_index)) / window_minutes)
+        budget_at(-1) - budget_at(prev_index)
+    ) / window_minutes
 
     if abs(estimated_budget_growth_rate) < 1e-06:
         return SloMetric(violated=violated, budget_growth_rate=0.0)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     errors = list(accumulate([random.randint(0, 2 * i) for i in range(samples)]))
 
     budget = 0.35
-    print('measurement_index, violated, budget_growth_rate, est_time_remaining')
+    print("measurement_index, violated, budget_growth_rate, est_time_remaining")
     for index in range(5, 1000, 20):
         result = error_budget_remaining(
             requests[:index],
@@ -73,11 +73,11 @@ if __name__ == "__main__":
             budget,
             window_minutes=10,
         )
-        s = f'{index}, {result.violated}, {result.budget_growth_rate:.2f},'
+        s = f"{index}, {result.violated}, {result.budget_growth_rate:.2f},"
         if result.budget_growth_rate > 0 or result.violated:
             print(s)
         else:
-            print(f'{s} {result.time_until_exhausted}')
+            print(f"{s} {result.time_until_exhausted}")
 
     # draw the estimated budget curve starting from index 600
     index = 600
@@ -90,7 +90,9 @@ if __name__ == "__main__":
 
     d = [datetime.now() + timedelta(minutes=i) for i in range(samples)]
     values = [budget * requests[i] - errors[i] for i in range(samples)]
-    violation_time = d[index - 1] + (result.time_until_exhausted or timedelta(minutes=0))
+    violation_time = d[index - 1] + (
+        result.time_until_exhausted or timedelta(minutes=0)
+    )
 
     plt.plot(d[:index], values[:index], linewidth=3, label=r"error budget")
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     ax = plt.gca()
-    ax.xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    ax.xaxis.set_major_formatter(dates.DateFormatter("%Y-%m-%d %H:%M:%S"))
     ax.set_ylim(bottom=0)
 
     plt.gcf().autofmt_xdate()

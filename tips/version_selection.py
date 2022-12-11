@@ -33,7 +33,7 @@ def select_dependent_versions(
     package_index: NameIndex,
     id_index: IdIndex,
 ) -> Dict[Name, Version]:
-    '''Select versions of dependent packages to install, or report impossible.'''
+    """Select versions of dependent packages to install, or report impossible."""
     solver = Glucose4()
 
     clauses = []
@@ -44,7 +44,7 @@ def select_dependent_versions(
         next_package = to_process.pop()
         processed.add(next_package)
 
-        '''
+        """
         At most one version of any package may be installed.  While SAT 
         solvers admit many ways to model "cardinality constraints", we
         choose a simple "pairwise" model that adds the constraint
@@ -55,15 +55,12 @@ def select_dependent_versions(
         This is equivalent to
 
             (NOT v1) OR (NOT v2)
-        '''
-        versions = [
-            p.package_id
-            for p in package_index(next_package.name).values()
-        ]
+        """
+        versions = [p.package_id for p in package_index(next_package.name).values()]
         for (v1, v2) in combinations(versions, 2):
             clauses.append([-v1, -v2])
 
-        '''
+        """
         For each dependency DEP, we need a clause that says 
         "if next_package is chosen, one of DEP's allowed versions 
         must be installed."
@@ -73,7 +70,7 @@ def select_dependent_versions(
         This is equivalent to
 
             (!next_package OR DEP_v1 OR DEP_v2 OR ...)
-        '''
+        """
         for name, allowed_versions in next_package.dependencies:
             clause = [-next_package.package_id]
             for version in allowed_versions:
@@ -92,7 +89,4 @@ def select_dependent_versions(
         # return solver.get_core()
         raise ValueError("Infeasible!")
 
-    return dict(
-        id_index(v).as_tuple()
-        for v in solver.get_model() if v > 0
-    )
+    return dict(id_index(v).as_tuple() for v in solver.get_model() if v > 0)

@@ -14,7 +14,7 @@ from hypothesis.strategies import text
 @settings(deadline=2000)
 @given(
     lists(integers(), min_size=5),
-    floats(min_value=1e-04, max_value=0.5, allow_nan=False, allow_infinity=False)
+    floats(min_value=1e-04, max_value=0.5, allow_nan=False, allow_infinity=False),
 )
 def test_sketch_error_guarantee_achieved(values, accuracy):
     sketch = CountMinSketch(accuracy=accuracy, confidence=1e-10)

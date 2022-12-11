@@ -18,22 +18,27 @@ def test_no_errors_no_requests():
 
 @given(
     floats(min_value=0.01, max_value=0.99, allow_nan=False, allow_infinity=False),
-    integers(min_value=1, max_value=999))
+    integers(min_value=1, max_value=999),
+)
 def test_error_rate_exactly_budget(budget, measurement_index):
     requests = [1000 + x for x in range(1000)]
     errors = [int(x * budget) for x in requests]
     expected = SloMetric(violated=True)
-    assert error_budget_remaining(
-        requests[:measurement_index],
-        errors[:measurement_index],
-        budget,
-        window_minutes=10
-    ) == expected
+    assert (
+        error_budget_remaining(
+            requests[:measurement_index],
+            errors[:measurement_index],
+            budget,
+            window_minutes=10,
+        )
+        == expected
+    )
 
 
 @given(
     floats(min_value=0.01, max_value=0.99, allow_nan=False, allow_infinity=False),
-    integers(min_value=1, max_value=999))
+    integers(min_value=1, max_value=999),
+)
 def test_error_rate_just_below_budget(budget, measurement_index):
     requests = [1000 + x for x in range(1000)]
     errors = [int(x * budget) - 1 for x in requests]
@@ -41,7 +46,7 @@ def test_error_rate_just_below_budget(budget, measurement_index):
         requests[:measurement_index],
         errors[:measurement_index],
         budget,
-        window_minutes=10
+        window_minutes=10,
     )
 
     assert actual.violated == False
@@ -62,7 +67,7 @@ def test_negative_budget_growth_rate(budget, error_rate, measurement_index):
         requests[:measurement_index],
         errors[:measurement_index],
         budget,
-        window_minutes=10
+        window_minutes=10,
     )
 
     assert actual.violated == False
@@ -72,12 +77,7 @@ def test_negative_budget_growth_rate(budget, error_rate, measurement_index):
 def test_positive_budget_growth_rate():
     requests = [1000 for _ in range(1000)]
     errors = list(range(1000))
-    actual = error_budget_remaining(
-        requests[:21],
-        errors[:21],
-        0.8,
-        window_minutes=10
-    )
+    actual = error_budget_remaining(requests[:21], errors[:21], 0.8, window_minutes=10)
 
     assert actual.violated == False
     assert actual.budget_growth_rate == -1

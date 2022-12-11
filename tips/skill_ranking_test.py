@@ -34,10 +34,7 @@ def test_two_player_tournament(player1_skill_mean, player2_skill_mean):
     p2_elo = EloSkill(mean=1500, variance=standard_deviation**2)
 
     num_games = 1000
-    outcomes = list(zip(
-        p1.samples(num_games, seed=1),
-        p2.samples(num_games, seed=2)
-    ))
+    outcomes = list(zip(p1.samples(num_games, seed=1), p2.samples(num_games, seed=2)))
     print([int(x > y) for (x, y) in outcomes])
     print(Counter([int(x > y) for (x, y) in outcomes]))
 
@@ -73,8 +70,9 @@ def test_n_player_tournament():
     standard_deviation = 50
     alpha = 0.4
 
-    perf_dists = [NormalDist(mu=skill, sigma=standard_deviation)
-                  for skill in player_skills]
+    perf_dists = [
+        NormalDist(mu=skill, sigma=standard_deviation) for skill in player_skills
+    ]
     elos = [EloSkill(mean=1500, variance=standard_deviation**2) for _ in players]
 
     num_games = 30000
@@ -82,10 +80,12 @@ def test_n_player_tournament():
         i = random.choice(players)
         j = random.choice(players)
 
-        outcomes = list(zip(
-            perf_dists[i].samples(3),
-            perf_dists[j].samples(3),
-        ))
+        outcomes = list(
+            zip(
+                perf_dists[i].samples(3),
+                perf_dists[j].samples(3),
+            )
+        )
         for (p1_perf, p2_perf) in outcomes:
             outcome = 1 if p1_perf > p2_perf else -1
             if abs(p1_perf - p2_perf) < 1e-03:
@@ -93,6 +93,6 @@ def test_n_player_tournament():
             elos[i], elos[j] = elo_update(elos[i], elos[j], outcome, alpha)
 
     skills_vs_elo = [(s, elo.mean) for (s, elo) in zip(player_skills, elos)]
-    inaccuracies = [s-elo for (s, elo) in skills_vs_elo]
+    inaccuracies = [s - elo for (s, elo) in skills_vs_elo]
     assert mean(inaccuracies) < 200
     assert max(inaccuracies) < 500

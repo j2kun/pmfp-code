@@ -21,35 +21,22 @@ def assert_satisfies_dependency_order(dag, sorted_nodes):
 
 
 @pytest.mark.parametrize(
-    "dag,expected", [
+    "dag,expected",
+    [
         (dict(), []),
-        ({
-            1: []
-        }, [1]),
-        ({
-            1: [2],
-            2: []
-        }, [1, 2]),
-        ({
-            2: [1, 3],
-            1: [],
-            3: [1]
-        }, [2, 3, 1]),
-        ({
-            0: [1],
-            1: [2],
-            2: [3],
-            3: [4],
-            4: []
-        }, [0, 1, 2, 3, 4]),
-    ]
+        ({1: []}, [1]),
+        ({1: [2], 2: []}, [1, 2]),
+        ({2: [1, 3], 1: [], 3: [1]}, [2, 3, 1]),
+        ({0: [1], 1: [2], 2: [3], 3: [4], 4: []}, [0, 1, 2, 3, 4]),
+    ],
 )
 def test_unique_toposort(dag, expected):
     assert expected == topological_sort(dag)
 
 
 @pytest.mark.parametrize(
-    "dag", [
+    "dag",
+    [
         {
             1: [2, 3],
             2: [],
@@ -69,29 +56,33 @@ def test_unique_toposort(dag, expected):
             5: [],
             6: [],
         },
-    ]
+    ],
 )
 def test_non_unique_toposort(dag):
     assert_satisfies_dependency_order(dag, topological_sort(dag))
 
 
-@pytest.mark.parametrize("dag", [
-    {
-        1: [2],
-    },
-    {
-        1: [2],
-        2: [3],
-        3: [4],
-    },
-])
+@pytest.mark.parametrize(
+    "dag",
+    [
+        {
+            1: [2],
+        },
+        {
+            1: [2],
+            2: [3],
+            3: [4],
+        },
+    ],
+)
 def test_missing_keys(dag):
     with pytest.raises(KeyError):
         topological_sort(dag)
 
 
 @pytest.mark.parametrize(
-    "dag", [
+    "dag",
+    [
         {
             1: [2],
             2: [1],
@@ -101,7 +92,7 @@ def test_missing_keys(dag):
             2: [3],
             3: [1],
         },
-    ]
+    ],
 )
 def test_loop_detection(dag):
     with pytest.raises(ValueError):

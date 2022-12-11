@@ -72,17 +72,8 @@ def random_polygon(draw, min_value=0.0, max_value=0.0):
         allow_nan=False,
         allow_infinity=False,
     )
-    xs = draw(
-        lists(
-            float_strategy,
-            min_size=1,
-            max_size=50,
-            unique=True))
-    ys = draw(
-        lists(
-            float_strategy,
-            min_size=1,
-            max_size=50))
+    xs = draw(lists(float_strategy, min_size=1, max_size=50, unique=True))
+    ys = draw(lists(float_strategy, min_size=1, max_size=50))
     pts = [Point(x=x, y=y) for (x, y) in zip(xs, ys)]
     # duplicate last point so the polygon is closed.
     return pts + [pts[0]]
@@ -90,7 +81,7 @@ def random_polygon(draw, min_value=0.0, max_value=0.0):
 
 @given(
     random_polygon(min_value=0.0, max_value=1.0),
-    floats(allow_nan=False, allow_infinity=False)
+    floats(allow_nan=False, allow_infinity=False),
 )
 def test_point_outside_polygon_bounding_box(polygon, value):
     assert not point_in_polygon(Point(x=value, y=1.1), polygon)

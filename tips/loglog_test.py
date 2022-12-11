@@ -23,23 +23,25 @@ def test_small_error_in_good_cardinality_range(estimator_name):
 
     n = 100000
     for i in range(5):
-      result = cardinality(random_data(n=n), estimator=estimator_name) / n
+        result = cardinality(random_data(n=n), estimator=estimator_name) / n
 
-      assert abs(1 - result) < 0.04
+        assert abs(1 - result) < 0.04
 
 
 def test_improved_estimator_works_on_all_cardinalities():
     random.seed(1)
 
     for n in [1, 10, 100, 1000, 10000, 100000, 1000000]:
-      result = cardinality(random_data(n=n), estimator='improved') / n
-      assert abs(1 - result) < 0.04
+        result = cardinality(random_data(n=n), estimator="improved") / n
+        assert abs(1 - result) < 0.04
 
 
-@pytest.mark.parametrize("estimator_name", [x for x in estimator_names if x != 'improved'])
+@pytest.mark.parametrize(
+    "estimator_name", [x for x in estimator_names if x != "improved"]
+)
 def test_normal_estimators_are_poor_on_small_cardinalities(estimator_name):
     random.seed(1)
 
     for n in [1, 10, 100, 1000, 10000]:
-      result = cardinality(random_data(n=n), estimator=estimator_name) / n
-      assert abs(1 - result) > 0.04
+        result = cardinality(random_data(n=n), estimator=estimator_name) / n
+        assert abs(1 - result) > 0.04

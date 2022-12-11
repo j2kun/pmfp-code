@@ -31,8 +31,8 @@ def test_can_recover_from_single_bit_error(data_index):
 
 
 def test_encode_single_block():
-    bits = BitStream(bin='0b1011')
-    expected = BitStream(bin='0b1011010')
+    bits = BitStream(bin="0b1011")
+    expected = BitStream(bin="0b1011010")
     assert_that(encode(bits)).is_equal_to(expected)
 
 
@@ -44,7 +44,7 @@ def assert_decodes_with_error_in_bit(bits, encoded, index):
 
 
 def test_decode_single_block_with_message_bit_error():
-    bits = BitStream(bin='0b1011')
+    bits = BitStream(bin="0b1011")
     encoded = encode(bits)
     assert_decodes_with_error_in_bit(bits, encoded, 0)
     assert_decodes_with_error_in_bit(bits, encoded, 1)
@@ -53,7 +53,7 @@ def test_decode_single_block_with_message_bit_error():
 
 
 def test_decode_single_block_with_check_bit_error():
-    bits = BitStream(bin='0b1011')
+    bits = BitStream(bin="0b1011")
     encoded = encode(bits)
     assert_decodes_with_error_in_bit(bits, encoded, 4)
     assert_decodes_with_error_in_bit(bits, encoded, 5)

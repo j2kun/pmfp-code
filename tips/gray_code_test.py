@@ -8,18 +8,17 @@ from gray_code import to_gray_code
 
 
 def test_convert_to_gray_code():
-    assert int('00101', 2) == to_gray_code(int('00110', 2))
+    assert int("00101", 2) == to_gray_code(int("00110", 2))
 
 
-@given(integers(min_value = 0))
+@given(integers(min_value=0))
 def test_convert_and_back(x):
     assert x == from_gray_code(to_gray_code(x))
 
 
 def test_iter():
     n = 4
-    settings = lambda n, s, f: SettingsChange(
-            num_settings=n, settings=s, flipped_bit=f)
+    settings = lambda n, s, f: SettingsChange(num_settings=n, settings=s, flipped_bit=f)
 
     expected = [
         settings(n, 0, None),

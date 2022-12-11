@@ -47,8 +47,7 @@ def run_round(
 ) -> Set[Student]:
     """Run one round of deferred acceptance, returning a list of rejections."""
     applications: Dict[int, List[int]] = {
-        id: school.held[:]
-        for (id, school) in schools.items()
+        id: school.held[:] for (id, school) in schools.items()
     }
 
     for student in to_apply:
@@ -104,7 +103,8 @@ def deferred_acceptance(
     return Matching(
         matches={
             student_index[student_id]: school
-            for school in schools for student_id in school.held
+            for school in schools
+            for student_id in school.held
         },
         unassigned=unassigned,
     )
@@ -134,8 +134,7 @@ def find_unstable_pair(
         # Returns true if a school prefers the input student over at least one
         # of their assigned students.
         assigned_students = [
-            student for (student, sch) in matching.matches.items()
-            if sch == school
+            student for (student, sch) in matching.matches.items() if sch == school
         ]
         student_cmps = [
             precedes(school.preferences, student.id, assigned_student.id)
@@ -145,9 +144,11 @@ def find_unstable_pair(
 
     for (student, school) in itertools.product(students, schools):
         if student not in matching.unassigned:
-            if (school != matching.matches[student]
-                    and student_prefers(student, school)
-                    and school_prefers(school, student)):
+            if (
+                school != matching.matches[student]
+                and student_prefers(student, school)
+                and school_prefers(school, student)
+            ):
                 return (student, school)
 
     return None

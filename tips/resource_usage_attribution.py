@@ -9,9 +9,9 @@ import numpy
 EPSILON = 1e-10
 
 # just for type clarity
-Resource = TypeVar('Resource')
-Service = TypeVar('Service')
-Customer = TypeVar('Customer')
+Resource = TypeVar("Resource")
+Service = TypeVar("Service")
+Customer = TypeVar("Customer")
 
 # A service can be a provider for other services
 Provider = Union[Resource, Service]
@@ -22,10 +22,12 @@ Attribution = Dict[Resource, Dict[Consumer, float]]
 
 
 def attribute_resource_usage(
-    resources: List[Resource], services: List[Service],
-    customers: List[Customer], usageFn: UsageFn
+    resources: List[Resource],
+    services: List[Service],
+    customers: List[Customer],
+    usageFn: UsageFn,
 ) -> Attribution:
-    '''Attribute the resource usage among the terminal customers of services.
+    """Attribute the resource usage among the terminal customers of services.
 
     In this context a Resource is something that is provided out of thin air,
     consumes nothing, and can be consumed by either Services or Customers.
@@ -55,21 +57,17 @@ def attribute_resource_usage(
 
     Returns:
       A dict describing the attribution of each resource among the Customers.
-    '''
+    """
     # construct transitions among transient states Q
     providers = cast(List[Provider], resources) + cast(List[Provider], services)
     consumers = cast(List[Consumer], services) + cast(List[Consumer], customers)
     verify_proper_normalization(providers, consumers, usageFn)
 
     # transition matrix for services and resources
-    Q = numpy.array(
-        [[usageFn(a, b) for b in providers] for a in providers]
-    )
+    Q = numpy.array([[usageFn(a, b) for b in providers] for a in providers])
 
     # compute transition matrix to absorbing states
-    R = numpy.array(
-        [[usageFn(a, b) for b in customers] for a in providers]
-    )
+    R = numpy.array([[usageFn(a, b) for b in customers] for a in providers])
 
     if not Q.any() or not R.any():
         return dict()
@@ -93,10 +91,10 @@ def attribute_resource_usage(
 def verify_proper_normalization(
     providers: List[Provider], consumers: List[Consumer], usageFn: UsageFn
 ) -> None:
-    '''Confirm that the usageFn is properly normalized.'''
+    """Confirm that the usageFn is properly normalized."""
     for provider in providers:
-        if abs(sum(usageFn(provider, consumer)
-                   for consumer in consumers) - 1) > EPSILON:
-            raise ValueError(
-                "Input usages are not normalized for %s" % provider
-            )
+        if (
+            abs(sum(usageFn(provider, consumer) for consumer in consumers) - 1)
+            > EPSILON
+        ):
+            raise ValueError("Input usages are not normalized for %s" % provider)

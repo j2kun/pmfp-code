@@ -6,13 +6,12 @@ import math
 
 
 # just for type clarity
-Action = TypeVar('Action')
+Action = TypeVar("Action")
 RewardFn = Callable[[Action], float]
 
 
-def ucb1(actions: List[Action],
-         reward: RewardFn) -> Generator[Action, None, None]:
-    '''The Upper Confidence Bound 1 (UCB1) algorithm.
+def ucb1(actions: List[Action], reward: RewardFn) -> Generator[Action, None, None]:
+    """The Upper Confidence Bound 1 (UCB1) algorithm.
 
     This function is an infinite generator that chooses an action to take
     in each step, the rewards for which are produced by the `reward` callable.
@@ -33,7 +32,7 @@ def ucb1(actions: List[Action],
 
     Returns:
       A generator yielding an infinite stream of actions.
-    '''
+    """
     num_actions: int = len(actions)
     payoff_sums: List[float] = [0] * num_actions
 
@@ -46,13 +45,13 @@ def ucb1(actions: List[Action],
     t: int = num_actions
 
     def upperBound(step: int, num_plays: int) -> float:
-        '''Return the margin of the confidence bound from its mean.
+        """Return the margin of the confidence bound from its mean.
 
         This method does not need to know the expected value of the action
         being attempted. The confidence bound depends only on the number of
         total actions attempted and the number of times one particular action
         has been tried.
-        '''
+        """
         return math.sqrt(2 * math.log(step) / num_plays)
 
     while True:
@@ -61,8 +60,7 @@ def ucb1(actions: List[Action],
             for i in range(num_actions)
         ]
         chosen_action_index: int = max(
-            range(num_actions),
-            key=lambda i: upper_confidence_bounds[i]
+            range(num_actions), key=lambda i: upper_confidence_bounds[i]
         )
         chosen_action: Action = actions[chosen_action_index]
         yield chosen_action

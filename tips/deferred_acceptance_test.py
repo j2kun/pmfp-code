@@ -65,56 +65,34 @@ def test_stability(students_and_schools):
 
 
 def test_find_unstable_pair_stable():
-    students = [
-        Student(id=0, preferences=[0, 1]),
-        Student(id=1, preferences=[1, 0])
-    ]
+    students = [Student(id=0, preferences=[0, 1]), Student(id=1, preferences=[1, 0])]
     schools = [
         School(id=0, capacity=1, preferences=[0, 1]),
-        School(id=1, capacity=1, preferences=[1, 0])
+        School(id=1, capacity=1, preferences=[1, 0]),
     ]
-    matching = Matching(
-        matches={
-            students[0]: schools[0],
-            students[1]: schools[1]
-        }
-    )
+    matching = Matching(matches={students[0]: schools[0], students[1]: schools[1]})
     assert find_unstable_pair(students, schools, matching) is None
 
 
 def test_find_unstable_pair_unstable():
-    students = [
-        Student(id=0, preferences=[1, 0]),
-        Student(id=1, preferences=[1, 0])
-    ]
+    students = [Student(id=0, preferences=[1, 0]), Student(id=1, preferences=[1, 0])]
     schools = [
         School(id=0, capacity=1, preferences=[0, 1]),
-        School(id=1, capacity=1, preferences=[0, 1])
+        School(id=1, capacity=1, preferences=[0, 1]),
     ]
-    matching = Matching(
-        matches={
-            students[0]: schools[0],
-            students[1]: schools[1]
-        }
-    )
+    matching = Matching(matches={students[0]: schools[0], students[1]: schools[1]})
     result = find_unstable_pair(students, schools, matching)
     assert result == (students[0], schools[1])
 
 
 def test_deferred_acceptance_two():
-    students = [
-        Student(id=0, preferences=[0, 1]),
-        Student(id=1, preferences=[1, 0])
-    ]
+    students = [Student(id=0, preferences=[0, 1]), Student(id=1, preferences=[1, 0])]
     schools = [
         School(id=0, capacity=1, preferences=[0, 1]),
-        School(id=1, capacity=1, preferences=[1, 0])
+        School(id=1, capacity=1, preferences=[1, 0]),
     ]
     matching = deferred_acceptance(students, schools)
-    assert matching.matches == {
-        students[0]: schools[0],
-        students[1]: schools[1]
-    }
+    assert matching.matches == {students[0]: schools[0], students[1]: schools[1]}
     assert find_unstable_pair(students, schools, matching) is None
 
 
