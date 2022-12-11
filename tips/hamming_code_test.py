@@ -34,7 +34,7 @@ def test_encode_single_block():
     bits = BitStream(bin='0b1011')
     expected = BitStream(bin='0b1011010')
     assert_that(encode(bits)).is_equal_to(expected)
-    
+
 
 def assert_decodes_with_error_in_bit(bits, encoded, index):
     encoded.pos = 0
