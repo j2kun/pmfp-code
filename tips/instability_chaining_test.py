@@ -76,9 +76,8 @@ def market(
 
 def err_msg(matching, unstable_pair):
     applicant, program = unstable_pair
-    if isinstance(applicant, Student):
-        (student, partner) = (applicant, None)
-    elif isinstance(applicant, Couple):
+    student, partner = applicant, None
+    if isinstance(applicant, Couple):
         (student, partner) = applicant.members
 
     assigned_to_program = [

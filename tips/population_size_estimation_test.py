@@ -2,7 +2,6 @@ from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
-import math
 import random
 
 from population_size_estimation import estimate_size

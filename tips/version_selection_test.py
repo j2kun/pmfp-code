@@ -1,4 +1,3 @@
-from collections import defaultdict
 from hypothesis import assume
 from hypothesis import given
 from hypothesis.strategies import booleans
@@ -251,7 +250,7 @@ def test_arbitrary_dep_graph_feasible(graph):
         chosen = select_dependent_versions(
             graph[-1], *build_indices(graph)
         )
-    except:
+    except Exception:
         chosen = dict()
 
     # either infeasible or no deps on the last package
@@ -272,5 +271,5 @@ def test_arbitrary_dep_graph_infeasible(graph):
             graph[-1], *build_indices(graph)
         )
         assume(False)
-    except:
-        chosen = dict()
+    except Exception:
+        pass

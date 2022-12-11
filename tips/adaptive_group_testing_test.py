@@ -3,7 +3,6 @@ from hypothesis import given
 from hypothesis.strategies import lists
 from hypothesis.strategies import integers
 import math
-import pytest
 
 import adaptive_group_testing
 
@@ -86,7 +85,7 @@ def test_optimality(positive_subjects):
     n = len(subjects)
 
     test = intersecting_test(positive_subjects)
-    actual = adaptive_group_testing.generalized_binary_split(
+    _ = adaptive_group_testing.generalized_binary_split(
         subjects, test, len(positive_subjects)
     )
 

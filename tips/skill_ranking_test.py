@@ -7,7 +7,6 @@ from hypothesis import assume
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import integers
-from hypothesis.strategies import lists
 from skill_ranking import EloSkill
 from skill_ranking import elo_player1_win_prob
 from skill_ranking import elo_update

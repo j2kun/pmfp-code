@@ -1,4 +1,3 @@
-import hypothesis
 from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
