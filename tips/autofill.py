@@ -5,8 +5,10 @@ Based on https://github.com/inkstitch/inkstitch/blob/main/lib/stitches/auto_fill
 
 from collections import deque
 from itertools import groupby
-from itertools import pairwise
+from itertools import pairwise  # type: ignore
 from typing import Any
+from typing import Deque
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Tuple
@@ -26,7 +28,7 @@ def outlines(shape: geo.Polygon) -> List[geo.LineString]:
     return [outlines]  # only other option is a single LineString
 
 
-def sorted_grouped_by_outline(graph: networkx.MultiGraph) -> List[Any]:
+def sorted_grouped_by_outline(graph: networkx.MultiGraph) -> Dict[int, List[Any]]:
     nodes = list(graph.nodes(data=True))
 
     def sort_key(node_and_data):
@@ -112,7 +114,7 @@ def find_stitch_path(
             if i % 2 == 0:
                 graph.add_edge(node1, node2, key="extra")
 
-    path = deque([])
+    path: Deque[Edge] = deque([])
     vertex_stack = [starting_point]
     last_vertex = None
 
