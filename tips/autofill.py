@@ -117,9 +117,10 @@ def find_stitch_path(
     path: Deque[Edge] = deque([])
     vertex_stack = [starting_point]
     last_vertex = None
+    import ipdb; ipdb.set_trace()
 
     while vertex_stack:
-        # print(vertex_stack)
+        print(vertex_stack)
         current_vertex = vertex_stack[-1]
         if graph.degree(current_vertex) == 0:
             if last_vertex:
