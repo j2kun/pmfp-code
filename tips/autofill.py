@@ -64,9 +64,7 @@ def pick_edge(edges, segment_edges):
         )
 
     values = {e: 0 if e[2] == "segment" else dist_to_closest_segment(e) for e in edges}
-    print(f"Edge choices = {values}")
     output = min(values, key=values.get)
-    print(f"Choosing {output}")
     return output
 
 
@@ -117,10 +115,9 @@ def find_stitch_path(
     path: Deque[Edge] = deque([])
     vertex_stack = [starting_point]
     last_vertex = None
-    import ipdb; ipdb.set_trace()
 
     while vertex_stack:
-        print(vertex_stack)
+        # print(vertex_stack)
         current_vertex = vertex_stack[-1]
         if graph.degree(current_vertex) == 0:
             if last_vertex:
