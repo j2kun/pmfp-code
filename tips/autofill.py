@@ -57,8 +57,8 @@ def pick_edge(edges, segment_edges):
     # segment, where closest is geometrically. Closest could be defined by
     # traversing graph edges instead, but this is good enough.
     def dist_to_closest_segment(edge):
-        source, target, key = edge
-        edge_line = geo.LineString([edge[0], edge[1]])
+        source, target, _ = edge
+        edge_line = geo.LineString([source, target])
         return min(
             edge_line.distance(geo.LineString([e[0], e[1]])) for e in segment_edges
         )
