@@ -117,7 +117,6 @@ def find_stitch_path(
     last_vertex = None
 
     while vertex_stack:
-        # print(vertex_stack)
         current_vertex = vertex_stack[-1]
         if graph.degree(current_vertex) == 0:
             if last_vertex:
