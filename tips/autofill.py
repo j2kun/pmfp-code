@@ -100,12 +100,7 @@ def find_stitch_path(
         graph.add_node(node, outline=index, order=outline.project(pt))
 
     for nodes in sorted_grouped_by_outline(graph).values():
-        # add an edge between each successive node, unless there is already a
-        # grating segment edge.
         for i, (node1, node2) in enumerate(pairwise_cyclic(nodes)):
-            key = graph.get_edge_data(node1, node2, default={}).get("key", "")
-            if key == "segment":
-                continue
             graph.add_edge(node1, node2, key="outline")
             # This extra edge ensures every node in the graph has degree 4, and
             # hence that an Eulerian path exists.
