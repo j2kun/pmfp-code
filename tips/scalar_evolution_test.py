@@ -41,6 +41,11 @@ def test_chain_recurrence_evaluate():
     "rec1, rec2, expected",
     [
         (
+            0,
+            Recurrence(7, operator.add, 3),
+            Recurrence(7, operator.add, 3),
+        ),
+        (
             12,
             Recurrence(7, operator.add, 3),
             Recurrence(19, operator.add, 3),
@@ -59,6 +64,16 @@ def test_add(rec1, rec2, expected):
 @pytest.mark.parametrize(
     "rec1, rec2, expected",
     [
+        (
+            0,
+            Recurrence(7, operator.add, 3),
+            0,
+        ),
+        (
+            1,
+            Recurrence(7, operator.add, 3),
+            Recurrence(7, operator.add, 3),
+        ),
         (
             12,
             Recurrence(7, operator.add, 3),
@@ -136,12 +151,29 @@ def test_rewrite_terms(expression, induction_vars, expected):
     assert expected == actual
 
 
+def test_from_ast_error():
+    with pytest.raises(ValueError):
+        Recurrence.from_ast(ast.Name(id="z"), induction_vars=dict())
+
+
 @pytest.mark.parametrize(
     "input, expected",
     [
         (
             Recurrence(0, operator.add, Recurrence(4, operator.add, 0)),
             Recurrence(0, operator.add, 4),
+        ),
+        (
+            Recurrence(0, operator.mul, 3),
+            0,
+        ),
+        (
+            Recurrence(7, operator.add, 0),
+            7,
+        ),
+        (
+            Recurrence(5, operator.mul, 1),
+            5,
         ),
     ],
 )
@@ -210,3 +242,15 @@ def test_reduce_strength():
         context={},
     )
     assert expected == reduce_strength(loop)
+
+
+def test_reduce_strength_unsupported_assign():
+    loop = Loop(
+        header=[],
+        body=[Assign(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7"))],
+        context={
+            "x": Recurrence(0, operator.add, 1),
+        },
+    )
+    with pytest.raises(ValueError):
+        reduce_strength(loop)

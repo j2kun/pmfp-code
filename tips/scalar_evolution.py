@@ -9,84 +9,13 @@ Operator = Callable[[int, int], int]
 allowed_ops = [operator.add, operator.mul]
 
 
-class ExprMeta(type):
-    def __instancecheck__(self, instance):
-        is_int = isinstance(instance, int)
-        is_recurrence = isinstance(instance, Recurrence)
-        return is_int or (
-            not is_recurrence
-            and hasattr(instance, "__add__")
-            and hasattr(instance, "__mul__")
-        )
-
-
-class Expr(metaclass=ExprMeta):
-    def __str__(self):
-        return repr(self)
-
-    def __add__(self, other):
-        return Add(self, other).normalize()
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __mul__(self, other):
-        return Mul(self, other).normalize()
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
-
-class Ref(Expr):
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return self.name
-
-
-@dataclass
-class Add(Expr):
-    left: Union[int, Expr]
-    right: Union[int, Expr]
-
-    def __repr__(self):
-        return f"{repr(self.left)} + {repr(self.right)}"
-
-    def normalize(self):
-        if self.right == 0:
-            return self.left
-        if self.left == 0:
-            return self.right
-        return self
-
-
-@dataclass
-class Mul(Expr):
-    left: Union[int, Expr]
-    right: Union[int, Expr]
-
-    def __repr__(self):
-        return f"{repr(self.left)} * {repr(self.right)}"
-
-    def normalize(self):
-        if self.right == 1:
-            return self.left
-        if self.left == 1:
-            return self.right
-        return self
-
-
 @dataclass
 class Assign:
     lhs: ast.Name
     rhs: ast.AST
 
-    def __str__(self):
-        return f"{self.lhs.id} = {ast.dump(self.rhs)}"
-
     def __repr__(self):
-        return str(self)
+        return f"{self.lhs.id} = {ast.dump(self.rhs)}"
 
     def __eq__(self, other):
         return (
@@ -98,7 +27,7 @@ class Assign:
 
 @dataclass
 class Increment(Assign):
-    def __str__(self):
+    def __repr__(self):
         return f"{self.lhs.id} += {ast.dump(self.rhs)}"
 
     def __eq__(self, other):
@@ -112,19 +41,15 @@ class Increment(Assign):
 class Recurrence:
     def __init__(
         self,
-        base: Union[int, Expr],
+        base: int,
         op: Operator,
-        increment: Union["Recurrence", int, Expr],
+        increment: Union["Recurrence", int],
     ):
         assert op in allowed_ops
-        assert isinstance(base, int) or isinstance(base, Expr)
+        assert isinstance(base, int)
         self.base = base
         self.op = op
         self.increment = increment
-
-    @staticmethod
-    def constant(x: Union[int, Expr]):
-        return Recurrence(base=x, op=operator.add, increment=0)
 
     def visit(self, fn):
         fn(self)
@@ -169,12 +94,8 @@ class Recurrence:
         return self.__add__(other)
 
     def __add__(self, other):
-        if self.op == operator.add and other == 0:
+        if other == 0:
             return self
-        elif self.op == operator.mul and other == 1:
-            return self
-        elif self.op == operator.mul and other == 0:
-            return 0
         match (self, other):
             case (
                 Recurrence(base=e, op=operator.add, increment=f),
@@ -186,13 +107,15 @@ class Recurrence:
                 Recurrence(base=g, op=operator.add, increment=h),
             ):
                 return Recurrence(base=e + g, op=operator.add, increment=f + h)
-            case _:
-                raise ValueError(f"Unsupported add {self} + {other}")
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
     def __mul__(self, other):
+        if other == 1:
+            return self
+        elif other == 0:
+            return 0
         match (self, other):
             case (
                 Recurrence(base=e, op=operator.add, increment=f),
@@ -215,8 +138,6 @@ class Recurrence:
                     op=operator.add,
                     increment=inc1 * h + inc2 * f + f * h,
                 )
-            case _:
-                raise ValueError(f"Unsupported mul {self} * {other}")
 
     def normalize(self):
         match self:
@@ -243,13 +164,10 @@ class Recurrence:
                     op=operator.add,
                     increment=Recurrence.from_ast(rhs, induction_vars),
                 )
-            case Assign(lhs=_, rhs=rhs):
-                return Recurrence.from_ast(rhs, induction_vars)
-            case _:
-                raise ValueError(
-                    "Input must be a subclass of Assign, but was: "
-                    f"{type(assign)}; value={assign}"
-                )
+            case Assign(lhs=_, rhs=_):
+                # It's a cop out: I'm not supporting arbitrary assignments in
+                # the loop body. Sorry, friendo.
+                raise ValueError("Unsupported assign in loop body")
 
     @staticmethod
     def from_ast(tree: ast.AST, induction_vars: dict[str, "Recurrence"]):
@@ -265,12 +183,9 @@ class Recurrence:
                 if name in induction_vars:
                     return induction_vars[name]
                 else:
-                    return Recurrence.constant(Ref(name=name))
+                    raise ValueError(f"Missing SCEV for {name}")
             case ast.BinOp(left=left, op=op, right=right):
-                # print("")
-                # print(f"Parsing {op} left={ast.dump(left, annotate_fields=False)}")
                 parsed_left = Recurrence.from_ast(left, induction_vars=induction_vars)
-                # print(f"Parsing {op} right={ast.dump(right, annotate_fields=False)}")
                 parsed_right = Recurrence.from_ast(right, induction_vars=induction_vars)
                 sub = False
                 match op:
@@ -281,8 +196,6 @@ class Recurrence:
                         sub = True
                     case ast.Mult():
                         parsed_op = operator.mul
-                    case _:
-                        raise ValueError(f"Unsupported op {op}")
                 if sub:
                     parsed_right = -1 * parsed_right
                 return parsed_op(parsed_left, parsed_right).normalize()
