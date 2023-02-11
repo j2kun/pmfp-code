@@ -3,7 +3,11 @@ import operator
 
 import pytest
 
+from scalar_evolution import Assign
+from scalar_evolution import Increment
+from scalar_evolution import Loop
 from scalar_evolution import Recurrence
+from scalar_evolution import reduce_strength
 
 
 def test_basic_recurrence_repr():
@@ -92,16 +96,21 @@ def test_mul(rec1, rec2, expected):
 
 
 @pytest.mark.parametrize(
-    "expression, induction_var, expected",
+    "expression, induction_vars, expected",
     [
         (
             "x*x",
-            Recurrence(0, operator.add, 1),
+            {"x": Recurrence(0, operator.add, 1)},
             Recurrence(0, operator.add, Recurrence(1, operator.add, 2)),
         ),
         (
+            "3*x + 7",
+            {"x": Recurrence(0, operator.add, 1)},
+            Recurrence(7, operator.add, 3),
+        ),
+        (
             "x*x*x + 2*x*x + 3*x + 7",
-            Recurrence(0, operator.add, 1),
+            {"x": Recurrence(0, operator.add, 1)},
             Recurrence(
                 7,
                 operator.add,
@@ -116,14 +125,14 @@ def test_mul(rec1, rec2, expected):
         # ),
         (
             "(x*x + x) - (x*x - x)",
-            Recurrence(0, operator.add, 2),  # x += 2
+            {"x": Recurrence(0, operator.add, 2)},  # x += 2
             Recurrence(0, operator.add, 4),  # equivalent to 2x
         ),
     ],
 )
-def test_rewrite_terms(expression, induction_var, expected):
+def test_rewrite_terms(expression, induction_vars, expected):
     parsed_ast = ast.parse(expression)
-    actual = Recurrence.from_ast(parsed_ast, induction_vars={"x": induction_var})
+    actual = Recurrence.from_ast(parsed_ast, induction_vars)
     assert expected == actual
 
 
@@ -139,3 +148,65 @@ def test_rewrite_terms(expression, induction_var, expected):
 def test_normalize(input, expected):
     actual = input.normalize()
     assert expected == actual
+
+
+def parse_to_binop(expr: str):
+    # Can ignore type checker because input is assumed to be a BinOp, which has
+    # the attribute
+    return ast.parse(expr).body[0].value  # type:ignore
+
+
+def test_reduce_strength():
+    # first, demonstrate the rewriting is correct
+    # original
+    y = 0
+    for x in range(10):
+        y = y + x * x * x + 2 * x * x + 3 * x + 7
+    original_y = y
+
+    # rewritten
+    t0 = 0
+    t1 = 7
+    t2 = 6
+    t3 = 10
+    t4 = 6
+    for x in range(10):
+        t0 = t0 + t1
+        t1 = t1 + t2
+        t2 = t2 + t3
+        t3 = t3 + t4
+        y = t0
+    rewritten_y = y
+
+    assert original_y == rewritten_y
+
+    # Then run the test with inputs in the proper AST form
+    loop = Loop(
+        header=[],
+        body=[
+            Increment(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7"))
+        ],
+        context={
+            "x": Recurrence(0, operator.add, 1),
+        },
+    )
+    # The SCEV for x is {7, +, 6, +, 10, + 6}
+    # The SCEV for y is {0, +, 7, +, 6, +, 10, + 6}
+    expected = Loop(
+        header=[
+            Assign(lhs=ast.Name(id="t0"), rhs=ast.Constant(value=0)),
+            Assign(lhs=ast.Name(id="t1"), rhs=ast.Constant(value=7)),
+            Assign(lhs=ast.Name(id="t2"), rhs=ast.Constant(value=6)),
+            Assign(lhs=ast.Name(id="t3"), rhs=ast.Constant(value=10)),
+            Assign(lhs=ast.Name(id="t4"), rhs=ast.Constant(value=6)),
+        ],
+        body=[
+            Increment(lhs=ast.Name(id="t0"), rhs=ast.Name(id="t1")),
+            Increment(lhs=ast.Name(id="t1"), rhs=ast.Name(id="t2")),
+            Increment(lhs=ast.Name(id="t2"), rhs=ast.Name(id="t3")),
+            Increment(lhs=ast.Name(id="t3"), rhs=ast.Name(id="t4")),
+            Assign(lhs=ast.Name(id="y"), rhs=ast.Name(id="t0")),
+        ],
+        context={},
+    )
+    assert expected == reduce_strength(loop)

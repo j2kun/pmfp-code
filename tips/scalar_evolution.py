@@ -25,13 +25,13 @@ class Expr(metaclass=ExprMeta):
         return repr(self)
 
     def __add__(self, other):
-        return Add(self, other)
+        return Add(self, other).normalize()
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __mul__(self, other):
-        return Mul(self, other)
+        return Mul(self, other).normalize()
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -53,6 +53,13 @@ class Add(Expr):
     def __repr__(self):
         return f"{repr(self.left)} + {repr(self.right)}"
 
+    def normalize(self):
+        if self.right == 0:
+            return self.left
+        if self.left == 0:
+            return self.right
+        return self
+
 
 @dataclass
 class Mul(Expr):
@@ -62,9 +69,47 @@ class Mul(Expr):
     def __repr__(self):
         return f"{repr(self.left)} * {repr(self.right)}"
 
+    def normalize(self):
+        if self.right == 1:
+            return self.left
+        if self.left == 1:
+            return self.right
+        return self
+
+
+@dataclass
+class Assign:
+    lhs: ast.Name
+    rhs: ast.AST
+
+    def __str__(self):
+        return f"{self.lhs.id} = {ast.dump(self.rhs)}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, Assign)
+            and self.lhs.id == other.lhs.id
+            and ast.dump(self.rhs) == ast.dump(other.rhs)
+        )
+
+
+@dataclass
+class Increment(Assign):
+    def __str__(self):
+        return f"{self.lhs.id} += {ast.dump(self.rhs)}"
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, Increment)
+            and self.lhs.id == other.lhs.id
+            and ast.dump(self.rhs) == ast.dump(other.rhs)
+        )
+
 
 class Recurrence:
-    # TODO: really, base should be a value or a reference
     def __init__(
         self,
         base: Union[int, Expr],
@@ -80,6 +125,13 @@ class Recurrence:
     @staticmethod
     def constant(x: Union[int, Expr]):
         return Recurrence(base=x, op=operator.add, increment=0)
+
+    def visit(self, fn):
+        fn(self)
+        if isinstance(self.increment, int):
+            fn(self.increment)
+        else:
+            self.increment.visit(fn)
 
     def evaluate(self, i):
         if i == 0:
@@ -109,6 +161,9 @@ class Recurrence:
 
     def __eq__(self, other):
         return isinstance(other, Recurrence) and repr(self) == repr(other)
+
+    def __hash__(self):
+        return hash((self.base, self.op, self.increment))
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -180,6 +235,23 @@ class Recurrence:
                 return self
 
     @staticmethod
+    def from_assign(assign: Assign, induction_vars: dict[str, "Recurrence"]):
+        match assign:
+            case Increment(lhs=_, rhs=rhs):
+                return Recurrence(
+                    base=0,
+                    op=operator.add,
+                    increment=Recurrence.from_ast(rhs, induction_vars),
+                )
+            case Assign(lhs=_, rhs=rhs):
+                return Recurrence.from_ast(rhs, induction_vars)
+            case _:
+                raise ValueError(
+                    "Input must be a subclass of Assign, but was: "
+                    f"{type(assign)}; value={assign}"
+                )
+
+    @staticmethod
     def from_ast(tree: ast.AST, induction_vars: dict[str, "Recurrence"]):
         match tree:
             case ast.Module(body=[ast.Expr(value=value)]):
@@ -195,10 +267,10 @@ class Recurrence:
                 else:
                     return Recurrence.constant(Ref(name=name))
             case ast.BinOp(left=left, op=op, right=right):
-                print("")
-                print(f"Parsing {op} left={ast.dump(left, annotate_fields=False)}")
+                # print("")
+                # print(f"Parsing {op} left={ast.dump(left, annotate_fields=False)}")
                 parsed_left = Recurrence.from_ast(left, induction_vars=induction_vars)
-                print(f"Parsing {op} right={ast.dump(right, annotate_fields=False)}")
+                # print(f"Parsing {op} right={ast.dump(right, annotate_fields=False)}")
                 parsed_right = Recurrence.from_ast(right, induction_vars=induction_vars)
                 sub = False
                 match op:
@@ -214,3 +286,66 @@ class Recurrence:
                 if sub:
                     parsed_right = -1 * parsed_right
                 return parsed_op(parsed_left, parsed_right).normalize()
+
+
+@dataclass
+class Loop:
+    header: list[Assign]
+    body: list[Assign]
+    context: dict[str, Recurrence]
+
+
+class UniqueId:
+    def __init__(self):
+        self.i = 0
+
+    def get(self):
+        output = self.i
+        self.i += 1
+        return output
+
+
+def reduce_strength(loop: Loop) -> Loop:
+    """A simple strength reduction for a loop."""
+    body_scevs = {
+        stmt.lhs: Recurrence.from_assign(stmt, induction_vars=loop.context)
+        for stmt in loop.body
+    }
+
+    header: list[Assign] = []
+    body: list[Assign] = []
+    # assign variable names to each sub-recurrence
+    vars: dict[str, Recurrence] = dict()
+    ids: dict[Recurrence, str] = dict()
+    var_id = UniqueId()
+
+    def assign_var_names(recurrence):
+        var_name = f"t{var_id.get()}"
+        vars[var_name] = recurrence
+        ids[recurrence] = var_name
+
+    def make_header(rec):
+        header.append(
+            Assign(
+                lhs=ast.Name(id=ids[rec]),
+                rhs=ast.Constant(value=rec if isinstance(rec, int) else rec.base),
+            )
+        )
+
+    def make_body(recurrence):
+        if isinstance(recurrence, int):
+            return
+        body.append(
+            Increment(
+                lhs=ast.Name(id=ids[recurrence]),
+                rhs=ast.Name(id=ids[recurrence.increment]),
+            )
+        )
+
+    for lhs, scev in body_scevs.items():
+        scev.visit(assign_var_names)
+        scev.visit(make_header)
+        scev.visit(make_body)
+        body.append(Assign(lhs=lhs, rhs=ast.Name(id=ids[scev])))
+
+    return Loop(header=header, body=body, context=dict())
