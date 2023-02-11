@@ -70,12 +70,7 @@ class Recurrence:
         return self.op(self.evaluate(i - 1), increment)
 
     def br_notation(self, flatten=True):
-        match self.op:
-            case operator.add:
-                op_str = "+"
-            case operator.mul:
-                op_str = "*"
-
+        op_str = "+" if self.op == operator.add else "*"
         nested = repr(self.increment)
         if flatten:
             nested = nested.strip("{").strip("}")
@@ -141,13 +136,13 @@ class Recurrence:
 
     def normalize(self):
         match self:
+            case Recurrence(base=0, op=operator.mul, increment=_):
+                return 0
             case (
                 Recurrence(base=b, op=operator.add, increment=0)
                 | Recurrence(base=b, op=operator.mul, increment=1)
             ):
                 return b
-            case Recurrence(base=0, op=operator.mul, increment=_):
-                return 0
             case Recurrence(increment=Recurrence()) as r:
                 return Recurrence(
                     base=r.base, op=r.op, increment=r.increment.normalize()
