@@ -125,13 +125,11 @@ class Recurrence:
             case (
                 Recurrence(base=e, op=operator.add, increment=f),
                 Recurrence(base=g, op=operator.add, increment=h),
-            ):
-                inc1 = Recurrence(base=e, op=operator.add, increment=f)
-                inc2 = Recurrence(base=g, op=operator.add, increment=h)
+            ) as incs:
                 return Recurrence(
                     base=e * g,
                     op=operator.add,
-                    increment=inc1 * h + inc2 * f + f * h,
+                    increment=incs[0] * h + incs[1] * f + f * h,
                 )
 
     def normalize(self):
