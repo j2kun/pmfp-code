@@ -16,8 +16,7 @@ def random_examples(dim=10, n=2000):
 def test_stump_finds_chosen_feature(chosen_feature):
     dim = 10
     data = [(x, 1 if x[chosen_feature] > 0.5 else -1) for x in random_examples(dim=dim)]
-    stump = train_decision_stump(data.__iter__())
-    assert stump.feature_index == chosen_feature
+    hypothesis = train_decision_stump(data.__iter__())
 
     alternatives = [
         DecisionStump(
@@ -31,6 +30,6 @@ def test_stump_finds_chosen_feature(chosen_feature):
     ]
 
     alt_errors = [compute_error(data, alt.classify) for alt in alternatives]
-    actual_error = compute_error(data, stump.classify)
+    actual_error = compute_error(data, hypothesis)
 
     assert actual_error < min(alt_errors)

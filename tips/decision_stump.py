@@ -29,6 +29,8 @@ class DecisionStump:
 
 def most_common_label(data: Dataset) -> int:
     """Compute the label that occurs most commonly in the set of labeled examples."""
+    if not data:
+        return -1
     return Counter([label for (_, label) in data]).most_common(1)[0][0]
 
 
@@ -65,8 +67,10 @@ def best_threshold_for_feature(
     )
 
 
-def train_decision_stump(draw_example: DrawIter, debug: bool = True):
-    data = [next(draw_example) for _ in range(500)]
+def train_decision_stump(
+    draw_example: DrawIter, sample_size: int = 200, debug: bool = False
+):
+    data = [next(draw_example) for _ in range(sample_size)]
     num_features = len(data[0][0])
 
     best_thresholds = [
@@ -84,6 +88,6 @@ def train_decision_stump(draw_example: DrawIter, debug: bool = True):
     )
 
     if debug:
-        print(f"Feature: {feature}, threshold: {thresh}, {stump.gt_label}\n")
+        print(f"Feature: {feature}, threshold: {thresh}, {stump.gt_label}")
 
-    return stump
+    return stump.classify
