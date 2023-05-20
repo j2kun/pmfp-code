@@ -30,7 +30,7 @@ def draw(weights: Iterable[float]) -> int:
             return index
         index += 1
 
-    raise ValueError("unreachable")
+    raise ValueError("unreachable")  # pragma: no cover
 
 
 def normalize(weights: list[float]) -> tuple[float, ...]:
@@ -49,9 +49,6 @@ class DrawExample:
     def __init__(self, distr, examples):
         self.distr = distr
         self.examples = examples
-
-    def __iter__(self):
-        return self
 
     def __next__(self):
         return self.examples[draw(self.distr)]
