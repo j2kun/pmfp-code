@@ -7,12 +7,12 @@ from hypothesis.strategies import integers
 from hypothesis.strategies import permutations
 import pytest
 
-from instability_chaining import Couple
-from instability_chaining import Matching
-from instability_chaining import ResidencyProgram
-from instability_chaining import Student
-from instability_chaining import find_unstable_pairs
-from instability_chaining import stable_matching
+from tips.instability_chaining import Couple
+from tips.instability_chaining import Matching
+from tips.instability_chaining import ResidencyProgram
+from tips.instability_chaining import Student
+from tips.instability_chaining import find_unstable_pairs
+from tips.instability_chaining import stable_matching
 
 
 def build_partner_mapping(couples):

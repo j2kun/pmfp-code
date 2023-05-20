@@ -1,8 +1,8 @@
 import numpy as np
 
-from boosting import boost
-from boosting import compute_error
-from decision_stump import train_decision_stump
+from tips.boosting import boost
+from tips.boosting import compute_error
+from tips.decision_stump import train_decision_stump
 
 import data.adult as adult
 

@@ -7,7 +7,7 @@ from hypothesis.strategies import composite
 from hypothesis.strategies import decimals
 import numpy
 
-from resource_usage_attribution import attribute_resource_usage
+from tips.resource_usage_attribution import attribute_resource_usage
 
 RESOURCES = ["flour", "leather"]
 SERVICES = ["miller", "leathersmith"]

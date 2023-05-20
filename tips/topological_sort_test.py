@@ -7,7 +7,7 @@ from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 import pytest
 
-from topological_sort import topological_sort
+from tips.topological_sort import topological_sort
 
 
 def assert_satisfies_dependency_order(dag, sorted_nodes):

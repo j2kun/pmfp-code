@@ -3,9 +3,9 @@ import pytest
 
 import numpy as np
 
-from decision_stump import DecisionStump
-from decision_stump import compute_error
-from decision_stump import train_decision_stump
+from tips.decision_stump import DecisionStump
+from tips.decision_stump import compute_error
+from tips.decision_stump import train_decision_stump
 
 
 def random_examples(dim=10, n=2000):

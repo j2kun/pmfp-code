@@ -3,9 +3,9 @@ from hypothesis.strategies import composite
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
 
-from winding_number import Point
-from winding_number import is_left
-from winding_number import point_in_polygon
+from tips.winding_number import Point
+from tips.winding_number import is_left
+from tips.winding_number import point_in_polygon
 
 
 def test_is_left_upward_left():

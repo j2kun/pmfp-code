@@ -7,8 +7,8 @@ from itertools import groupby
 from itertools import takewhile
 import pytest
 
-from version_selection import PackageVersion
-from version_selection import select_dependent_versions
+from tips.version_selection import PackageVersion
+from tips.version_selection import select_dependent_versions
 
 
 class IdIndex:

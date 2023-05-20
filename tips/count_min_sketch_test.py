@@ -1,14 +1,15 @@
 from collections import Counter
 import random
 
-from count_min_sketch import CountMinSketch
-from count_min_sketch import heavy_hitters
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
 from hypothesis.strategies import text
+
+from tips.count_min_sketch import CountMinSketch
+from tips.count_min_sketch import heavy_hitters
 
 
 @settings(deadline=2000)

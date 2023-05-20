@@ -3,11 +3,11 @@ import operator
 
 import pytest
 
-from scalar_evolution import Assign
-from scalar_evolution import Increment
-from scalar_evolution import Loop
-from scalar_evolution import Recurrence
-from scalar_evolution import reduce_strength
+from tips.scalar_evolution import Assign
+from tips.scalar_evolution import Increment
+from tips.scalar_evolution import Loop
+from tips.scalar_evolution import Recurrence
+from tips.scalar_evolution import reduce_strength
 
 
 def test_basic_recurrence_repr():

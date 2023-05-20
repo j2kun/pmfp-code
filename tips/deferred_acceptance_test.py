@@ -3,11 +3,11 @@ from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import permutations
 
-from deferred_acceptance import Matching
-from deferred_acceptance import School
-from deferred_acceptance import Student
-from deferred_acceptance import deferred_acceptance
-from deferred_acceptance import find_unstable_pair
+from tips.deferred_acceptance import Matching
+from tips.deferred_acceptance import School
+from tips.deferred_acceptance import Student
+from tips.deferred_acceptance import deferred_acceptance
+from tips.deferred_acceptance import find_unstable_pair
 
 
 @composite

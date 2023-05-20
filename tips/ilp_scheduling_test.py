@@ -10,9 +10,9 @@ from hypothesis.strategies import permutations
 from hypothesis.strategies import text
 import pytest
 
-from ilp_scheduling import optimal_schedule
-from ilp_scheduling import MinimizeThreeAwayGames
-from ilp_scheduling import NoFarTravel
+from tips.ilp_scheduling import optimal_schedule
+from tips.ilp_scheduling import MinimizeThreeAwayGames
+from tips.ilp_scheduling import NoFarTravel
 
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
