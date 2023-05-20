@@ -37,7 +37,7 @@ def test_too_few_weeks_infeasible():
     matchups = list(itertools.combinations(["DAL", "NYG", "PHI", "A", "B"], 2))
     for i in range(1, 5):
         with pytest.raises(ValueError):
-            optimal_schedule(i, matchups, [])
+            optimal_schedule(i, matchups, rules=[])
 
 
 def test_each_team_plays_at_most_once_per_week():

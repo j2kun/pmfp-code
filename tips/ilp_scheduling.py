@@ -6,6 +6,7 @@ from collections.abc import Callable
 from collections.abc import Iterable
 from dataclasses import dataclass
 from dataclasses import replace
+from typing import Optional
 from typing import TypeVar
 import itertools
 
@@ -63,8 +64,8 @@ class PreferenceRule(ABC):
 
 def partition_by(
     d: dict[Game, V],
-    key: Callable[[Game], K] = None,
-    keys: Iterable[Callable[[Game], K]] = None,
+    key: Optional[Callable[[Game], K]] = None,
+    keys: Optional[Iterable[Callable[[Game], K]]] = None,
 ) -> dict[K, dict[Game, V]]:
     """Partitions the given Game dict into sub dictionaries using the given keys.
 
@@ -82,7 +83,7 @@ def partition_by(
 def optimal_schedule(
     weeks: int,
     matchups: Iterable[tuple[Team, Team]],
-    rules: list[PreferenceRule] = None,
+    rules: Optional[list[PreferenceRule]] = None,
 ) -> Schedule:
     # all_teams = list(itertools.chain(*matchups))
     all_games = [
