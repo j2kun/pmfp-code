@@ -125,7 +125,7 @@ def test_random_dag(dag):
 @composite
 def random_dag_with_loop(
     draw,
-    dag_builder=random_dag(),
+    dag_builder=random_dag(num_nodes=integers(min_value=1, max_value=50)),
     loop_member_picker=booleans(),
 ):
     """Generate a random DAG, then pick a random subset of nodes and form a

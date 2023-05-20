@@ -87,7 +87,4 @@ def train_decision_stump(
         feature_index=feature, threshold=thresh, gt_label=gt_label, lt_label=lt_label
     )
 
-    if debug:
-        print(f"Feature: {feature}, threshold: {thresh}, {stump.gt_label}")
-
     return stump.classify

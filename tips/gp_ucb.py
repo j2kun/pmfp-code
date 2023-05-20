@@ -39,7 +39,7 @@ class GaussianProcessRegressor:
 
         try:
             self.L_ = cholesky(K, lower=True)
-        except np.linalg.LinAlgError as exc:
+        except np.linalg.LinAlgError as exc:  # pragma: no cover
             exc.args = (
                 "Cholseky factorization failed, kernel might "
                 "not be positive semidefinite"
@@ -108,10 +108,6 @@ class GpUcb:
         gp.train(self.obs_inputs, self.obs_outputs)
         self.mean, cov = gp.predict(self.input_space)
         self.stdev = cov.diagonal()**0.5
-
-    def get_mean(self, input):
-        # inefficient but simple
-        return self.mean[self.input_space.index(input)]
 
     def unwind_estimates(self):
         output = dict()

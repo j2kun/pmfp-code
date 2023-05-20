@@ -50,6 +50,9 @@ class DrawExample:
         self.distr = distr
         self.examples = examples
 
+    def __iter__(self):
+        return self  # pragma: no cover
+
     def __next__(self):
         return self.examples[draw(self.distr)]
 
