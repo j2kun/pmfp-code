@@ -140,31 +140,7 @@ def process_line(line):
     return tuple(point), label
 
 
-def column(A, j):
-    return [row[j] for row in A]
-
-
-def transpose(A):
-    return [column(A, j) for j in range(len(A[0]))]
-
-
-def normalize(L):
-    theMin = min(L)
-    theMax = max(L)
-
-    if theMax == 1 and theMin == 0 or theMax == theMin:
-        return L
-
-    return [(x - theMin) / (theMax - theMin) for x in L]
-
-
-def normalize_examples(data):
-    points, labels = zip(*data)
-    points = transpose([normalize(row) for row in transpose(points)])
-    return list(zip(points, labels))
-
-
-def load(normalize=False):
+def load():
     train_path, test_path = dataset_paths("adult")
 
     with open(train_path, "r") as infile:
@@ -172,8 +148,5 @@ def load(normalize=False):
 
     with open(test_path, "r") as infile:
         testData = [process_line(line) for line in infile]
-
-    if normalize:
-        return normalize_examples(trainingData), normalize_examples(testData)
 
     return trainingData, testData
