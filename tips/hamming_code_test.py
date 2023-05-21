@@ -5,8 +5,8 @@ from hypothesis.strategies import binary
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 
-from hamming_code import decode
-from hamming_code import encode
+from tips.hamming_code import decode
+from tips.hamming_code import encode
 
 
 @composite

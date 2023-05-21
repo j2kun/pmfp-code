@@ -6,11 +6,11 @@ import hypothesis
 import numpy as np
 import pytest
 
-from sobel import convolve
-from sobel import detect_edges
-from sobel import np_convolve2d
-from sobel import np_detect_edges
-from sobel import sobel_optimized
+from tips.sobel import convolve
+from tips.sobel import detect_edges
+from tips.sobel import np_convolve2d
+from tips.sobel import np_detect_edges
+from tips.sobel import sobel_optimized
 
 
 def test_convolve_4by4_with_2by2():

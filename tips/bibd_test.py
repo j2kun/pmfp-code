@@ -1,11 +1,11 @@
 from dataclasses import replace
 import pytest
 
-from bibd import ALL_BIBDS
-from bibd import BIBDParams
-from bibd import bibd_15_3_1
-from bibd import bibd_8_4_3
-from bibd import is_bibd
+from tips.bibd import ALL_BIBDS
+from tips.bibd import BIBDParams
+from tips.bibd import bibd_15_3_1
+from tips.bibd import bibd_8_4_3
+from tips.bibd import is_bibd
 
 
 @pytest.mark.parametrize("bibd", ALL_BIBDS)

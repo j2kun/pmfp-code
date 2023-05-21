@@ -5,8 +5,8 @@ from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 
-from error_budget import error_budget_remaining
-from error_budget import SloMetric
+from tips.error_budget import error_budget_remaining
+from tips.error_budget import SloMetric
 
 
 def test_no_errors_no_requests():

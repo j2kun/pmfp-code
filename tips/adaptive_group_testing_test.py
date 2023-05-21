@@ -4,7 +4,7 @@ from hypothesis.strategies import lists
 from hypothesis.strategies import integers
 import math
 
-import adaptive_group_testing
+import tips.adaptive_group_testing as adaptive_group_testing
 
 
 class TrackTestCounts:

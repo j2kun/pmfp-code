@@ -5,9 +5,9 @@ import random
 
 import pytest
 
-from reservoir_sample import algorithm_L
-from reservoir_sample import sample_without_replacement
-from reservoir_sample import weighted_sample_with_replacement
+from tips.reservoir_sample import algorithm_L
+from tips.reservoir_sample import sample_without_replacement
+from tips.reservoir_sample import weighted_sample_with_replacement
 
 
 # used to assert the expected probability of each outcome

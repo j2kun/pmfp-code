@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import shapely
 import shapely.affinity as affine
 
-from autofill import find_stitch_path
+from tips.autofill import find_stitch_path
 
 
 def test_fill_box():

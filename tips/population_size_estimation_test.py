@@ -4,8 +4,8 @@ from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 import random
 
-from population_size_estimation import estimate_size
-from population_size_estimation import size_confidence_interval
+from tips.population_size_estimation import estimate_size
+from tips.population_size_estimation import size_confidence_interval
 
 
 @given(integers(min_value=100, max_value=10000), floats(min_value=0.2, max_value=0.9))

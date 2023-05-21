@@ -3,7 +3,7 @@ import random
 from assertpy import assert_that
 from dataclasses import dataclass
 
-from ucb1 import ucb1
+from tips.ucb1 import ucb1
 
 
 def test_find_best_action():

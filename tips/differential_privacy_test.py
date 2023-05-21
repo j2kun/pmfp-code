@@ -8,11 +8,11 @@ from hypothesis import example
 import numpy as np
 import pytest
 
-from differential_privacy import InsecureLaplaceMechanism
-from differential_privacy import SecureLaplaceMechanism
-from differential_privacy import next_power_of_two
-from differential_privacy import privatize_histogram
-from differential_privacy import sample_geometric
+from tips.differential_privacy import InsecureLaplaceMechanism
+from tips.differential_privacy import SecureLaplaceMechanism
+from tips.differential_privacy import next_power_of_two
+from tips.differential_privacy import privatize_histogram
+from tips.differential_privacy import sample_geometric
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):

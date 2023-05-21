@@ -1,7 +1,7 @@
-from skill_ranking_teams import Player
-from skill_ranking_teams import Rating
-from skill_ranking_teams import Team
-from skill_ranking_teams import update_ratings
+from tips.skill_ranking_teams import Player
+from tips.skill_ranking_teams import Rating
+from tips.skill_ranking_teams import Team
+from tips.skill_ranking_teams import update_ratings
 
 p1 = Player(1)
 p2 = Player(2)
