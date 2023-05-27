@@ -226,8 +226,9 @@ def find_culprits(
                     key=lambda c: 0 if c == sentinel else dist.probs[c],
                 )
             else:
-                print("No more changes to test.")
-                break
+                # If it exceeded the exit_threshold, the loop would have
+                # exited.
+                raise ValueError("unreachable")  # pragma: no cover
 
         if test_fn(next_change):
             print(f"Test at {next_change.id} passed.")

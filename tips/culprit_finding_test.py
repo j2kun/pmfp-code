@@ -57,6 +57,19 @@ def test_no_culprit():
     assert actual is None
 
 
+def test_prior_is_no_culprit_but_there_is_one():
+    random.seed(1)
+    changes = [Change(id=i) for i in range(3)]
+    prior = [0.1, 0.1, 0.1, 0.7]
+    flake = Change(id=2)
+    true_flake_rate = 0.01
+
+    test_fn = make_test_fn(flake, true_flake_rate)
+    actual = find_culprits(test_fn, changes, prior, true_flake_rate)
+    assert flake == actual
+
+
+
 @composite
 def hidden_culprit(
     draw,
