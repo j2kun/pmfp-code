@@ -11,4 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4.7.0
+        with:
+          # required by black which sets language_version in the precommit config
+          python-version: '3.11'
       - uses: pre-commit/action@v3.0.0
