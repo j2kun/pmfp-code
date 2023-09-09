@@ -56,3 +56,22 @@ module = [
   "shapely.affinity",
 ]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [
+  "*_test.py",
+  "*site-packages*",
+  "__pycache__/*",
+  "venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "@abc.abstractmethod",
+  "@abstractmethod",
+  "def __repr__",
+  "if __name__ == .__main__.:",
+  "pass",
+  "pragma: no cover",
+  "raise NotImplementedError",
+]
