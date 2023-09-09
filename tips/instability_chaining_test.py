@@ -83,11 +83,15 @@ def err_msg(matching, unstable_pair):
         str(x) for (x, y) in matching.matches.items() if y == program
     ]
     student_assigned = matching.matches[student]
-    msg = (
-        f"\n({applicant}, {program}) form an unstable pair in matching \n\n{matching} "
-        f"\n\nbecause {student} prefers {program} to their assignment {student_assigned}"
-        f"\nand {program} prefers {student} over at least one of {assigned_to_program}.\n"
-    )
+    msg = f"""
+        ({applicant}, {program}) form an unstable pair in matching
+
+        {matching}
+
+        because {student} prefers {program} to their assignment
+        {student_assigned} and {program} prefers {student} over at least one of
+        {assigned_to_program}.
+        """
 
     if partner:
         partner_assigned = matching.matches[partner]
@@ -95,11 +99,10 @@ def err_msg(matching, unstable_pair):
         assigned_to_program = [
             str(x) for (x, y) in matching.matches.items() if y.id == partner_program
         ]
-        msg += (
-            f"And {student}'s partner {partner} simultaneously prefers Program({partner_program}) "
-            f"over their assignment {partner_assigned}\nand Program({partner_program}) prefers "
-            f"{partner} over at least one of {assigned_to_program}.\n"
-        )
+        msg += f"""And {student}'s partner {partner} simultaneously prefers
+            Program({partner_program}) over their assignment
+            {partner_assigned}\nand Program({partner_program}) prefers
+            {partner} over at least one of {assigned_to_program}."""
 
     return msg
 

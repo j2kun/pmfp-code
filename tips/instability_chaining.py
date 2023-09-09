@@ -443,16 +443,18 @@ class InstabilityChaining:
 
             self.matching.set((proposer, program), (partner, partner_program))
 
-            # Not being rejected means that we have to handle all the displaced applicants.
-            # This can come in two cases:
+            # Not being rejected means that we have to handle all the displaced
+            # applicants. This can come in two cases:
             #
-            #  - If all displaced applicants are single, continue with one such person as
-            #    the new applicant, put the remaining applicants on the applicant stack.
+            #  - If all displaced applicants are single, continue with one such
+            #  person as the new applicant, put the remaining applicants on the
+            #  applicant stack.
             #
-            #  - Each displaced member of a couple has their partner withdraw from their
-            #    matched program (if any) and the program is added to the program stack.
-            #    Pick one such couple and continue with them applying jointly down their
-            #    preference lists, and put the remaining couples on the applicant stack.
+            #  - Each displaced member of a couple has their partner withdraw
+            #  from their matched program (if any) and the program is added to
+            #  the program stack. Pick one such couple and continue with them
+            #  applying jointly down their preference lists, and put the
+            #  remaining couples on the applicant stack.
             couples, singles = split_by(displ, lambda s: s in self.partner_mapping)
             for bumped in singles:
                 logging.debug(
@@ -473,13 +475,13 @@ class InstabilityChaining:
                 if couple in displaced_couples:
                     continue
                 logging.debug(
-                    f"{couple} displaced (was matched to "
-                    f"{self.matching.matches[bumped]}, "
-                    f"{self.matching.matches[withdrawer]}) "
-                    f"by {applicant}\n"
-                    f"{withdrawer} withdrawing from {self.matching.matches[withdrawer]}\n"
-                    f"Adding withdrawn program {self.matching.matches[withdrawer]} to "
-                    "the program stack",
+                    f"""{couple} displaced (was matched to
+                                            {self.matching.matches[bumped]},
+                                            {self.matching.matches[withdrawer]})
+                    by {applicant}\n {withdrawer} withdrawing from
+                    {self.matching.matches[withdrawer]} Adding withdrawn
+                    program {self.matching.matches[withdrawer]} to the program
+                    stack""",
                 )
                 displaced_couples.add(couple)
                 self.program_stack.add(self.matching.matches[withdrawer])

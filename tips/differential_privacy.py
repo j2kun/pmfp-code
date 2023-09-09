@@ -51,10 +51,11 @@ def sample_geometric(rng, exponent):
     if rng.random() > -1.0 * math.expm1(-1.0 * exponent * max_value):
         return max_value
 
-    # Perform a binary search for the sample in the interval from 1 to max long. Each iteration
-    # splits the interval in two and randomly keeps either the left or the right subinterval
-    # depending on the respective probability of the sample being contained in them. The search
-    # ends once the interval only contains a single sample.
+    # Perform a binary search for the sample in the interval from 1 to max
+    # long. Each iteration splits the interval in two and randomly keeps either
+    # the left or the right subinterval depending on the respective probability
+    # of the sample being contained in them. The search ends once the interval
+    # only contains a single sample.
     left = 0  # exclusive
     right = max_value  # inclusive
 
@@ -237,5 +238,6 @@ if __name__ == "__main__":
 
     cProfile.run(
         "for i in range(100000): "
-        "privatize_histogram((17,), math.log(3), SecureLaplaceMechanism(random.SystemRandom()))",
+        + "privatize_histogram((17,), math.log(3), "
+        + "SecureLaplaceMechanism(random.SystemRandom()))",
     )
