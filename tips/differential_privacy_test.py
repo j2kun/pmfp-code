@@ -1,18 +1,19 @@
-from collections import Counter
 import math
 import random
+from collections import Counter
 
-from hypothesis import example
-from hypothesis import given
-from hypothesis import strategies as st
 import numpy as np
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 
-from tips.differential_privacy import InsecureLaplaceMechanism
-from tips.differential_privacy import SecureLaplaceMechanism
-from tips.differential_privacy import next_power_of_two
-from tips.differential_privacy import privatize_histogram
-from tips.differential_privacy import sample_geometric
+from tips.differential_privacy import (
+    InsecureLaplaceMechanism,
+    SecureLaplaceMechanism,
+    next_power_of_two,
+    privatize_histogram,
+    sample_geometric,
+)
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):

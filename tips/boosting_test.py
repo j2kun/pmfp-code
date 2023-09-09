@@ -1,8 +1,7 @@
 import numpy as np
 
 import data.adult as adult
-from tips.boosting import boost
-from tips.boosting import compute_error
+from tips.boosting import boost, compute_error
 from tips.decision_stump import train_decision_stump
 
 

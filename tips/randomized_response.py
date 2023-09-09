@@ -1,8 +1,7 @@
 """An implementation of a randomized response protocol."""
 
 import random
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 
 
 def respond_privately(true_answer: bool) -> bool:

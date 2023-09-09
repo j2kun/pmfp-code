@@ -7,9 +7,7 @@ https://github.com/scikit-learn/scikit-learn/blob/8c9c1f27b7e21201cfffb118934999
 import itertools
 
 import numpy as np
-from scipy.linalg import cho_solve
-from scipy.linalg import cholesky
-from scipy.linalg import solve_triangular
+from scipy.linalg import cho_solve, cholesky, solve_triangular
 from scipy.spatial.distance import cdist
 
 

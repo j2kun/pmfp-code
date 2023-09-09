@@ -1,9 +1,5 @@
-from math import floor
-from math import log2
-from typing import Callable
-from typing import List
-from typing import Tuple
-from typing import TypeVar
+from math import floor, log2
+from typing import Callable, List, Tuple, TypeVar
 
 TestSubject = TypeVar("TestSubject")
 Test = Callable[[List[TestSubject]], bool]

@@ -1,11 +1,9 @@
-from itertools import combinations
 import random
+from itertools import combinations
 
-from hypothesis import given
-from hypothesis.strategies import booleans
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
 import pytest
+from hypothesis import given
+from hypothesis.strategies import booleans, composite, integers
 
 from tips.topological_sort import topological_sort
 

@@ -1,9 +1,7 @@
 """An implementation of flake-aware culprit finding."""
 
-from dataclasses import dataclass
-from dataclasses import replace
-from typing import Callable
-from typing import Optional
+from dataclasses import dataclass, replace
+from typing import Callable, Optional
 
 
 @dataclass(eq=True, frozen=True)

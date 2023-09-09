@@ -4,14 +4,9 @@ Based on https://github.com/inkstitch/inkstitch/blob/main/lib/stitches/auto_fill
 """
 
 from collections import deque
-from itertools import groupby
 from itertools import pairwise  # type: ignore
-from typing import Any
-from typing import Deque
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Tuple
+from itertools import groupby
+from typing import Any, Deque, Dict, Iterable, List, Tuple
 
 import networkx
 from shapely import geometry as geo

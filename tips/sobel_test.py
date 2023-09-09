@@ -1,16 +1,16 @@
 import hypothesis
-from hypothesis import given
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
 import numpy as np
 import pytest
+from hypothesis import given
+from hypothesis.strategies import composite, integers, lists
 
-from tips.sobel import convolve
-from tips.sobel import detect_edges
-from tips.sobel import np_convolve2d
-from tips.sobel import np_detect_edges
-from tips.sobel import sobel_optimized
+from tips.sobel import (
+    convolve,
+    detect_edges,
+    np_convolve2d,
+    np_detect_edges,
+    sobel_optimized,
+)
 
 
 def test_convolve_4by4_with_2by2():

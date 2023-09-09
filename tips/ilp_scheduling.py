@@ -1,14 +1,10 @@
 """An integer linear program that schedules a sports season."""
-from abc import ABC
-from abc import abstractmethod
-from collections.abc import Callable
-from collections.abc import Iterable
-from collections import defaultdict
-from dataclasses import dataclass
-from dataclasses import replace
 import itertools
-from typing import Optional
-from typing import TypeVar
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, replace
+from typing import Optional, TypeVar
 
 from ortools.linear_solver import pywraplp
 

@@ -2,8 +2,7 @@
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import Callable
-from typing import Iterator
+from typing import Callable, Iterator
 
 LabeledExample = tuple[list[float], int]
 Dataset = list[LabeledExample]

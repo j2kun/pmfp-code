@@ -1,8 +1,7 @@
 import ast
-from dataclasses import dataclass
 import operator
-from typing import Callable
-from typing import Union
+from dataclasses import dataclass
+from typing import Callable, Union
 
 # only operator.add and operator.mul are supported
 Operator = Callable[[int, int], int]

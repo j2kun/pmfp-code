@@ -1,7 +1,6 @@
 import numpy as np
 
-from tips.gp_ucb import GaussianProcessRegressor
-from tips.gp_ucb import GpUcb
+from tips.gp_ucb import GaussianProcessRegressor, GpUcb
 
 TRAIN_X = np.array(
     [

@@ -1,13 +1,15 @@
-from collections import defaultdict
 import itertools
 import math
 import random
+from collections import defaultdict
 
 import pytest
 
-from tips.reservoir_sample import algorithm_L
-from tips.reservoir_sample import sample_without_replacement
-from tips.reservoir_sample import weighted_sample_with_replacement
+from tips.reservoir_sample import (
+    algorithm_L,
+    sample_without_replacement,
+    weighted_sample_with_replacement,
+)
 
 
 # used to assert the expected probability of each outcome

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterator
-from typing import Optional
+from typing import Iterator, Optional
 
 
 def to_gray_code(x: int) -> int:

@@ -1,14 +1,11 @@
 """An implementation of the Laplacian mechanism for privately releasing a histogram
 where each underlying user contributes to a single bin."""
 
-from abc import ABC
-from abc import abstractmethod
 import math
-from struct import pack
-from struct import unpack
 import sys
-from typing import List
-from typing import Tuple
+from abc import ABC, abstractmethod
+from struct import pack, unpack
+from typing import List, Tuple
 
 import numpy as np
 

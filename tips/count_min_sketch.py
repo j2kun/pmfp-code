@@ -1,12 +1,7 @@
 import heapq
 import math
 import random
-from typing import Hashable
-from typing import Iterable
-from typing import List
-from typing import Set
-from typing import Tuple
-from typing import TypeVar
+from typing import Hashable, Iterable, List, Set, Tuple, TypeVar
 
 LARGE_RANDOM_PRIME = 175927138426321871
 

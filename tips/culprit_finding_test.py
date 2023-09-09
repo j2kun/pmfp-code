@@ -1,14 +1,9 @@
 import random
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import floats
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
+from hypothesis import given, settings
+from hypothesis.strategies import composite, floats, integers, lists
 
-from tips.culprit_finding import Change
-from tips.culprit_finding import find_culprits
+from tips.culprit_finding import Change, find_culprits
 
 
 def make_test_fn(culprit: Change, true_flake_rate: float):

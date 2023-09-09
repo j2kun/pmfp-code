@@ -1,10 +1,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from tips.gray_code import SettingsChange
-from tips.gray_code import from_gray_code
-from tips.gray_code import gray_code_iter
-from tips.gray_code import to_gray_code
+from tips.gray_code import SettingsChange, from_gray_code, gray_code_iter, to_gray_code
 
 
 def test_convert_to_gray_code():

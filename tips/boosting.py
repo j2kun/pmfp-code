@@ -2,9 +2,7 @@
 
 import math
 import random
-from typing import Callable
-from typing import Iterable
-from typing import Iterator
+from typing import Callable, Iterable, Iterator
 
 LabeledExample = tuple[list[float], int]
 Dataset = list[LabeledExample]

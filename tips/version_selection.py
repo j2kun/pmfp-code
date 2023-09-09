@@ -1,10 +1,7 @@
 from collections import deque
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Callable
-from typing import Dict
-from typing import Iterable
-from typing import Tuple
+from typing import Callable, Dict, Iterable, Tuple
 
 from pysat.solvers import Glucose4
 

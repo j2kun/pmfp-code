@@ -1,7 +1,6 @@
-from collections import Counter
 import random
-from typing import Hashable
-from typing import Iterable
+from collections import Counter
+from typing import Hashable, Iterable
 
 LARGE_RANDOM_PRIME = 50075507486621659027
 

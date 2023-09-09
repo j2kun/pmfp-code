@@ -1,18 +1,17 @@
 import math
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import permutations
 import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import composite, integers, permutations
 
-from tips.instability_chaining import Couple
-from tips.instability_chaining import Matching
-from tips.instability_chaining import ResidencyProgram
-from tips.instability_chaining import Student
-from tips.instability_chaining import find_unstable_pairs
-from tips.instability_chaining import stable_matching
+from tips.instability_chaining import (
+    Couple,
+    Matching,
+    ResidencyProgram,
+    Student,
+    find_unstable_pairs,
+    stable_matching,
+)
 
 
 def build_partner_mapping(couples):

@@ -3,9 +3,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Collection
-from typing import DefaultDict
-from typing import Tuple
+from typing import Collection, DefaultDict, Tuple
 
 BIBD = Collection[Collection[str]]
 

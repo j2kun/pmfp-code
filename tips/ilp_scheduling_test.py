@@ -1,18 +1,11 @@
-from collections import defaultdict
 import itertools
+from collections import defaultdict
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
-from hypothesis.strategies import permutations
-from hypothesis.strategies import text
 import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import composite, integers, lists, permutations, text
 
-from tips.ilp_scheduling import MinimizeThreeAwayGames
-from tips.ilp_scheduling import NoFarTravel
-from tips.ilp_scheduling import optimal_schedule
+from tips.ilp_scheduling import MinimizeThreeAwayGames, NoFarTravel, optimal_schedule
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

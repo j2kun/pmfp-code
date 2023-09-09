@@ -2,14 +2,12 @@ import math
 import random
 
 import hypothesis
-from hypothesis import given
-from hypothesis.strategies import composite
-from hypothesis.strategies import floats
-from hypothesis.strategies import integers
-from matplotlib.patches import FancyArrowPatch
 import matplotlib.pyplot as plt
 import shapely
 import shapely.affinity as affine
+from hypothesis import given
+from hypothesis.strategies import composite, floats, integers
+from matplotlib.patches import FancyArrowPatch
 from shapely import geometry as geo
 
 from tips.autofill import find_stitch_path

@@ -1,13 +1,13 @@
 from hypothesis import given
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import permutations
+from hypothesis.strategies import composite, integers, permutations
 
-from tips.deferred_acceptance import Matching
-from tips.deferred_acceptance import School
-from tips.deferred_acceptance import Student
-from tips.deferred_acceptance import deferred_acceptance
-from tips.deferred_acceptance import find_unstable_pair
+from tips.deferred_acceptance import (
+    Matching,
+    School,
+    Student,
+    deferred_acceptance,
+    find_unstable_pair,
+)
 
 
 @composite

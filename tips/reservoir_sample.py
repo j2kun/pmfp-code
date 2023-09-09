@@ -1,9 +1,6 @@
 import math
 import random
-from typing import Iterable
-from typing import List
-from typing import Tuple
-from typing import TypeVar
+from typing import Iterable, List, Tuple, TypeVar
 
 T = TypeVar("T")
 

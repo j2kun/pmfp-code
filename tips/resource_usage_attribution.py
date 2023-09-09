@@ -1,9 +1,4 @@
-from typing import Callable
-from typing import Dict
-from typing import List
-from typing import TypeVar
-from typing import Union
-from typing import cast
+from typing import Callable, Dict, List, TypeVar, Union, cast
 
 import numpy
 

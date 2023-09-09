@@ -1,8 +1,5 @@
 import math
-from typing import Callable
-from typing import Generator
-from typing import List
-from typing import TypeVar
+from typing import Callable, Generator, List, TypeVar
 
 # just for type clarity
 Action = TypeVar("Action")

@@ -1,8 +1,7 @@
 """Various implementations of skill ranking."""
 
 from dataclasses import dataclass
-from math import erf
-from math import sqrt
+from math import erf, sqrt
 from typing import Tuple
 
 

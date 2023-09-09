@@ -1,15 +1,10 @@
-from itertools import groupby
-from itertools import takewhile
+from itertools import groupby, takewhile
 
-from hypothesis import assume
-from hypothesis import given
-from hypothesis.strategies import booleans
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
 import pytest
+from hypothesis import assume, given
+from hypothesis.strategies import booleans, composite, integers
 
-from tips.version_selection import PackageVersion
-from tips.version_selection import select_dependent_versions
+from tips.version_selection import PackageVersion, select_dependent_versions
 
 
 class IdIndex:

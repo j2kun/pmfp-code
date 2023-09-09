@@ -2,9 +2,7 @@ import random
 
 import pytest
 
-from tips.loglog import LogLog
-from tips.loglog import cardinality
-from tips.loglog import trailing_zeros
+from tips.loglog import LogLog, cardinality, trailing_zeros
 
 estimator_names = LogLog(log_bucket_count=1).estimator_names
 

@@ -1,16 +1,11 @@
-from collections import Counter
 import random
-from statistics import NormalDist
-from statistics import mean
+from collections import Counter
+from statistics import NormalDist, mean
 
-from hypothesis import assume
-from hypothesis import given
-from hypothesis import settings
+from hypothesis import assume, given, settings
 from hypothesis.strategies import integers
 
-from tips.skill_ranking import EloSkill
-from tips.skill_ranking import elo_player1_win_prob
-from tips.skill_ranking import elo_update
+from tips.skill_ranking import EloSkill, elo_player1_win_prob, elo_update
 
 
 @settings(deadline=2000)

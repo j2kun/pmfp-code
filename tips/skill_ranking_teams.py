@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 from math import sqrt
 from statistics import NormalDist
-from typing import Dict
-from typing import NewType
+from typing import Dict, NewType
 
 STANDARD_NORMAL = NormalDist(0, 1)
 DEFAULT_MEAN = 25
