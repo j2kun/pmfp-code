@@ -227,7 +227,7 @@ class InkstitchPoint:
         elif isinstance(other, (int, float)):
             return self.__class__(self.x * other, self.y * other)
         else:
-            raise ValueError("cannot multiply %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot multiply {} by {}".format(type(self), type(other)))
 
     def __neg__(self):
         return self * -1
@@ -236,13 +236,13 @@ class InkstitchPoint:
         if isinstance(other, (int, float)):
             return self.__mul__(other)
         else:
-            raise ValueError("cannot multiply %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot multiply {} by {}".format(type(self), type(other)))
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return self * (1.0 / other)
         else:
-            raise ValueError("cannot divide %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot divide {} by {}".format(type(self), type(other)))
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y

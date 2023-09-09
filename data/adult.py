@@ -143,10 +143,10 @@ def process_line(line):
 def load():
     train_path, test_path = dataset_paths("adult")
 
-    with open(train_path, "r") as infile:
+    with open(train_path) as infile:
         trainingData = [process_line(line) for line in infile]
 
-    with open(test_path, "r") as infile:
+    with open(test_path) as infile:
         testData = [process_line(line) for line in infile]
 
     return trainingData, testData

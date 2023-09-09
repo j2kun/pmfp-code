@@ -281,11 +281,11 @@ class Matching:
 
     def students_matched_to(self, program: ResidencyProgram) -> Set[Student]:
         # Inefficient, but let's keep it simple.
-        return set(s for (s, prog) in self.matches.items() if prog.id == program.id)
+        return {s for (s, prog) in self.matches.items() if prog.id == program.id}
 
     def make_pool(self, program_index: ProgramIndex, student: Student) -> Set[Student]:
         program, _ = program_index.next_to_apply(student)
-        return set([student]) | self.students_matched_to(program)
+        return {student} | self.students_matched_to(program)
 
     def __str__(self):
         return "\n".join(
@@ -301,11 +301,11 @@ class InstabilityChaining:
     ):
         self.program_index = ProgramIndex(programs)
 
-        couples = set(x for x in applicants if isinstance(x, Couple))
+        couples = {x for x in applicants if isinstance(x, Couple)}
         partner_mapping = dict(c.members for c in couples)
-        self.partner_mapping = partner_mapping | dict(
-            (v, k) for k, v in partner_mapping.items()
-        )
+        self.partner_mapping = partner_mapping | {
+            v: k for k, v in partner_mapping.items()
+        }
 
         # Clean up dupes if a couple and its members are in applicants.
         singles: List[Applicant] = [

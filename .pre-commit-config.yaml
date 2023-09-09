@@ -21,10 +21,10 @@ repos:
   rev: v0.0.287
   hooks:
   - id: ruff
-  # - repo: https://github.com/asottile/pyupgrade
-  #   rev: v3.10.1
-  #   hooks:
-  #   - id: pyupgrade
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.10.1
+  hooks:
+  - id: pyupgrade
   # - repo: https://github.com/pycqa/isort
   #   rev: 5.11.2
   #   hooks:

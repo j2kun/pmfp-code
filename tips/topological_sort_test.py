@@ -107,7 +107,7 @@ def random_dag(
 ):
     """Generate a random DAG."""
     nodes = list(range(draw(num_nodes)))
-    dag = dict((i, []) for i in nodes)
+    dag = {i: [] for i in nodes}
     random.shuffle(nodes)
 
     for (i, j) in combinations(nodes, 2):
@@ -135,7 +135,7 @@ def random_dag_with_loop(
 
     # the cycle must have at least one node, and the picker may always return
     # false.
-    chosen_nodes = set([random.choice(list(dag.keys()))])
+    chosen_nodes = {random.choice(list(dag.keys()))}
 
     for node in dag.keys():
         if draw(loop_member_picker):

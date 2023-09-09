@@ -13,7 +13,7 @@ from tips.version_selection import select_dependent_versions
 
 class IdIndex:
     def __init__(self, packages):
-        self.id_index = dict((p.package_id, p) for p in packages)
+        self.id_index = {p.package_id: p for p in packages}
 
     def __str__(self):
         return str(self.id_index)
@@ -27,10 +27,10 @@ class IdIndex:
 
 class NameVerIndex:
     def __init__(self, packages):
-        self.name_ver_index = dict(
-            (key, dict((p.version, p) for p in group))
+        self.name_ver_index = {
+            key: {p.version: p for p in group}
             for (key, group) in groupby(packages, lambda p: p.name)
-        )
+        }
 
     def __str__(self):
         return str(self.name_ver_index)

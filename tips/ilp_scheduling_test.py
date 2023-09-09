@@ -92,9 +92,9 @@ def teams_violating_three_away_game(solution):
         away_games_by_team[game.away_team].add(game.week)
         num_weeks = max(num_weeks, game.week)
 
-    possible_failing_week_triples = set(
-        [(i, i + 1, i + 2) for i in range(num_weeks - 2)],
-    )
+    possible_failing_week_triples = {
+        (i, i + 1, i + 2) for i in range(num_weeks - 2)
+    }
     violations = dict()
     for team, away_game_weeks in away_games_by_team.items():
         triples_of_away_game_weeks = itertools.combinations(sorted(away_game_weeks), 3)

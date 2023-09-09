@@ -223,7 +223,7 @@ def test_unequal_split_at_both_service_and_customer():
     for resource in RESOURCES:
         for customer in CUSTOMERS:
             assert_that(actual_attribution[resource][customer]).described_as(
-                "attribution[%s][%s]" % (resource, customer),
+                "attribution[{}][{}]".format(resource, customer),
             ).is_close_to(expected_attribution[resource][customer], 1e-10)
 
 
@@ -253,7 +253,7 @@ def test_many_cycles_slight_bias():
 
     for resource in resources:
         for customer in customers:
-            descr = "attribution[%s][%s]" % (resource, customer)
+            descr = "attribution[{}][{}]".format(resource, customer)
             if customer == customers[-1]:
                 assert_that(actual_attribution[resource][customer]).described_as(
                     descr,
@@ -355,5 +355,5 @@ def test_exact_solution_matches_simulated_approximation(
         for (j, customer) in enumerate(customers):
             expected_attribution = state[2 * DIM + j]
             assert_that(actual_attribution[resource][customer]).described_as(
-                "attribution[%s][%s]" % (resource, customer),
+                "attribution[{}][{}]".format(resource, customer),
             ).is_close_to(expected_attribution, 1e-02)

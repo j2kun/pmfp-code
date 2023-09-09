@@ -161,7 +161,7 @@ class BIBDParams:
         """Return the parameters for a BIBD.
 
         Assumes the input is a valid BIBD."""
-        elements = set(x for block in bibd for x in block)
+        elements = {x for block in bibd for x in block}
         k = len(next(iter(bibd)))
         b = len(bibd)
         v = len(elements)
@@ -184,7 +184,7 @@ class BIBDParams:
 
 def is_bibd(bibd: BIBD) -> bool:
     """Determine if a given list of blocks is a BIBD."""
-    block_sizes = set(len(block) for block in bibd)
+    block_sizes = {len(block) for block in bibd}
     if len(block_sizes) != 1:
         print(f"Block sizes = {block_sizes}")
         return False

@@ -104,7 +104,7 @@ def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
             candidates.add(value)
             heapq.heappush(heap, (est_count, value))
 
-    return set([x for (c, x) in heap])
+    return {x for (c, x) in heap}
 
 
 if __name__ == "__main__":

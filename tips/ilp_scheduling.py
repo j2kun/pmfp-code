@@ -173,7 +173,7 @@ class MinimizeThreeAwayGames(PreferenceRule):
         away games in the given variables. Note a separate constraint enforces
         that only one game is played per (team, week). This indicates an
         instance of a violation of the "no three away games in a row" rule."""
-        which_weeks = list(sorted(list(set(str(g.week) for g in game_vars))))
+        which_weeks = list(sorted(list({str(g.week) for g in game_vars})))
         team = next(iter(game_vars.keys())).away_team
         assert len(which_weeks) == 3  # or else subset generator is broken
         violation_var = solver.IntVar(
@@ -198,7 +198,7 @@ class NoFarTravel(PreferenceRule):
     consecutive weeks."""
 
     def __init__(self, far_pairs: Iterable[tuple[Team, Team]], penalty: int = 1):
-        self.far_pairs = set(tuple(sorted(x)) for x in far_pairs)
+        self.far_pairs = {tuple(sorted(x)) for x in far_pairs}
         self.penalty = penalty
 
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
@@ -221,7 +221,7 @@ class NoFarTravel(PreferenceRule):
     def build_model(self, solver, game_vars) -> Iterable[list[pywraplp.Variable]]:
         """Create new variables constrained to be 1 if a two games in subsequent
         weeks involve traveling far."""
-        which_weeks = list(sorted(list(set(g.week for g in game_vars))))
+        which_weeks = list(sorted(list({g.week for g in game_vars})))
         assert len(which_weeks) == 2  # or else subset generator is broken
         week1, week2 = which_weeks
 

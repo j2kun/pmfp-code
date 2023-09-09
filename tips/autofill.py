@@ -121,7 +121,7 @@ def find_stitch_path(
         else:
             # This could be made more efficient by keeping track of the
             # remaining segment edges as you go.
-            segment_edges = set(e for e in graph.edges(keys=True) if e[2] == "segment")
+            segment_edges = {e for e in graph.edges(keys=True) if e[2] == "segment"}
             if not segment_edges:
                 graph.clear_edges()
                 continue

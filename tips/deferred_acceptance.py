@@ -66,7 +66,7 @@ def run_round(
         school.held = new_held_students[id]
         rejections |= set(applications[id]) - set(new_held_students[id])
 
-    return set(students[student_id] for student_id in rejections)
+    return {students[student_id] for student_id in rejections}
 
 
 def deferred_acceptance(

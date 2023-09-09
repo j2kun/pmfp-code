@@ -17,7 +17,7 @@ from tips.instability_chaining import stable_matching
 
 def build_partner_mapping(couples):
     partner_mapping = dict(couple.members for couple in couples)
-    return partner_mapping | dict((v, k) for k, v in partner_mapping.items())
+    return partner_mapping | {v: k for k, v in partner_mapping.items()}
 
 
 @composite
@@ -315,12 +315,10 @@ def test_unstable_pairs_unstable_with_couple():
     # represent the "program" side of an unstable pairs as a pair of programs.
     # Oh well.
     assert len(result) == 2
-    assert set(result) == set(
-        [
+    assert set(result) == {
             (couples[0], programs[0]),
             (couples[0], programs[1]),
-        ],
-    )
+    }
 
 
 # ------ End to end tests that involve no couples
