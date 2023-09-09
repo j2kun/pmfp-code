@@ -117,7 +117,7 @@ def np_convolve2d(matrix: np.ndarray, kernel: np.ndarray):
     view_shape = tuple(np.subtract(matrix.shape, sub_shape) + 1) + sub_shape
     strides = 2 * matrix.strides
     sub_matrix = np.lib.stride_tricks.as_strided(
-        matrix, shape=view_shape, strides=strides
+        matrix, shape=view_shape, strides=strides,
     )
     return np.einsum("kl,ijkl->ij", kernel, sub_matrix)
 

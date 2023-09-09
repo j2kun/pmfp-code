@@ -213,7 +213,7 @@ def is_bibd(bibd: BIBD) -> bool:
     if len(pairwise_memberships.keys()) != n * (n - 1) / 2:
         print(
             "Not all pairs represented. Only found "
-            f"{len(pairwise_memberships.keys())} when expecting {n * (n-1) / 2}"
+            f"{len(pairwise_memberships.keys())} when expecting {n * (n-1) / 2}",
         )
         return False
 

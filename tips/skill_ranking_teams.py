@@ -104,7 +104,7 @@ def truncated_twosided_gaussian_w(perf_diff, draw_margin):
     """
     abs_diff = abs(perf_diff)
     normalization = STANDARD_NORMAL.cdf(draw_margin - abs_diff) - STANDARD_NORMAL.cdf(
-        -draw_margin - abs_diff
+        -draw_margin - abs_diff,
     )
     if normalization < TOLERANCE:
         return 1
@@ -139,7 +139,7 @@ def update_one_team(team1: Team, team2: Team, outcome: int) -> Dict[Player, Rati
     # performance values was close to zero.
     if outcome == 0:
         v = truncated_twosided_gaussian_v(
-            perf_diff / c, -draw_margin / c, draw_margin / c
+            perf_diff / c, -draw_margin / c, draw_margin / c,
         )
         w = truncated_twosided_gaussian_w(perf_diff / c, draw_margin / c)
         mean_adjustment_direction = 1
@@ -170,5 +170,5 @@ def update_ratings(team1: Team, team2: Team, outcome: int = 1) -> Dict[Player, R
     # Nb: in Python3.9 the bitwise-or operator is overloaded for dictionaries
     # to perform a union of the key-value pairs. See PEP584.
     return update_one_team(team1, team2, outcome) | update_one_team(
-        team2, team1, -outcome
+        team2, team1, -outcome,
     )

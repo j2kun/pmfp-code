@@ -85,7 +85,7 @@ def test_n_player_tournament():
             zip(
                 perf_dists[i].samples(3),
                 perf_dists[j].samples(3),
-            )
+            ),
         )
         for (p1_perf, p2_perf) in outcomes:
             outcome = 1 if p1_perf > p2_perf else -1

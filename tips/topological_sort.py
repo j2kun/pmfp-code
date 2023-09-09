@@ -37,7 +37,7 @@ def topological_sort(dag: Graph) -> list[int]:
         for dependent in dag[node]:
             if dependent in visited_single_dfs and dependent not in visited_overall:
                 raise ValueError(
-                    f"Input graph {dag} is not a DAG! Node {dependent} is part of a loop"
+                    f"Input graph {dag} is not a DAG! Node {dependent} is part of a loop",
                 )
             if dependent in visited_overall:
                 continue

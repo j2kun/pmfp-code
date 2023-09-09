@@ -23,7 +23,7 @@ def test_empty_inputs():
         return 1
 
     assert_that(
-        attribute_resource_usage(resources, services, customers, usageFn)
+        attribute_resource_usage(resources, services, customers, usageFn),
     ).is_equal_to(dict())
 
 
@@ -40,7 +40,7 @@ def test_single_path():
     expected_attribution = {"flour": {"cake": 1}}
 
     assert_that(
-        attribute_resource_usage(resources, services, customers, usageFn)
+        attribute_resource_usage(resources, services, customers, usageFn),
     ).is_equal_to(expected_attribution)
 
 
@@ -67,7 +67,7 @@ def test_parallel_disjoint_edges():
     }
 
     assert_that(
-        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn),
     ).is_equal_to(expected_attribution)
 
 
@@ -83,7 +83,7 @@ def test_err_on_unnormalized_inputs():
         return usages.get((x, y), 0)
 
     assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn
+        RESOURCES, SERVICES, CUSTOMERS, usageFn,
     )
 
 
@@ -99,7 +99,7 @@ def test_err_on_unnormalized_inputs_2():
         return usages.get((x, y), 0)
 
     assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn
+        RESOURCES, SERVICES, CUSTOMERS, usageFn,
     )
 
 
@@ -140,7 +140,7 @@ def test_equal_split_at_service():
     }
 
     assert_that(
-        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn),
     ).is_equal_to(expected_attribution)
 
 
@@ -181,7 +181,7 @@ def test_equal_split_at_customer():
     }
 
     assert_that(
-        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn)
+        attribute_resource_usage(RESOURCES, SERVICES, CUSTOMERS, usageFn),
     ).is_equal_to(expected_attribution)
 
 
@@ -217,13 +217,13 @@ def test_unequal_split_at_both_service_and_customer():
     }
 
     actual_attribution = attribute_resource_usage(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn
+        RESOURCES, SERVICES, CUSTOMERS, usageFn,
     )
 
     for resource in RESOURCES:
         for customer in CUSTOMERS:
             assert_that(actual_attribution[resource][customer]).described_as(
-                "attribution[%s][%s]" % (resource, customer)
+                "attribution[%s][%s]" % (resource, customer),
             ).is_close_to(expected_attribution[resource][customer], 1e-10)
 
 
@@ -248,7 +248,7 @@ def test_many_cycles_slight_bias():
         return no_bias
 
     actual_attribution = attribute_resource_usage(
-        resources, services, customers, usageFn
+        resources, services, customers, usageFn,
     )
 
     for resource in resources:
@@ -256,11 +256,11 @@ def test_many_cycles_slight_bias():
             descr = "attribution[%s][%s]" % (resource, customer)
             if customer == customers[-1]:
                 assert_that(actual_attribution[resource][customer]).described_as(
-                    descr
+                    descr,
                 ).is_greater_than(1.0 / 5)
             else:
                 assert_that(actual_attribution[resource][customer]).described_as(
-                    descr
+                    descr,
                 ).is_less_than(1.0 / 5)
 
 
@@ -276,7 +276,7 @@ def decimal_as_float(draw):
             allow_nan=False,
             allow_infinity=False,
             places=1,
-        )
+        ),
     )
     return float(x)
 
@@ -287,8 +287,8 @@ def decimal_as_float(draw):
 )
 @given(
     providers_to_customers_transition=arrays(
-        float, (2 * DIM, 2 * DIM), elements=decimal_as_float()
-    )
+        float, (2 * DIM, 2 * DIM), elements=decimal_as_float(),
+    ),
 )
 def test_exact_solution_matches_simulated_approximation(
     providers_to_customers_transition,
@@ -314,7 +314,7 @@ def test_exact_solution_matches_simulated_approximation(
         )
 
     providers_to_customers_transition = normalize_rows(
-        providers_to_customers_transition
+        providers_to_customers_transition,
     )
 
     resources = ["R_" + str(i) for i in range(DIM)]
@@ -336,7 +336,7 @@ def test_exact_solution_matches_simulated_approximation(
         return providers_to_customers_transition[x_id, y_id]
 
     actual_attribution = attribute_resource_usage(
-        resources, services, customers, usageFn
+        resources, services, customers, usageFn,
     )
 
     total_transition_matrix = numpy.zeros((3 * DIM, 3 * DIM), dtype=float)
@@ -355,5 +355,5 @@ def test_exact_solution_matches_simulated_approximation(
         for (j, customer) in enumerate(customers):
             expected_attribution = state[2 * DIM + j]
             assert_that(actual_attribution[resource][customer]).described_as(
-                "attribution[%s][%s]" % (resource, customer)
+                "attribution[%s][%s]" % (resource, customer),
             ).is_close_to(expected_attribution, 1e-02)

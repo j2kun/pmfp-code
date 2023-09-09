@@ -1,20 +1,22 @@
 import numpy
 
 # fmt: off
-P = numpy.array([
-    1, 1, 0,
-    1, 0, 1,
-    0, 1, 1,
-    1, 1, 1,
-], dtype=numpy.uint8).reshape((4, 3))
+P = numpy.array(
+    [
+        1, 1, 0,
+        1, 0, 1,
+        0, 1, 1,
+        1, 1, 1,
+    ], dtype=numpy.uint8,
+).reshape((4, 3))
 # fmt: on
 
 generator_matrix = numpy.concatenate(
-    (numpy.identity(n=4, dtype=numpy.uint8), P), axis=1
+    (numpy.identity(n=4, dtype=numpy.uint8), P), axis=1,
 )
 
 parity_check_matrix = numpy.concatenate(
-    (P.transpose(), numpy.identity(n=3, dtype=numpy.uint8)), axis=1
+    (P.transpose(), numpy.identity(n=3, dtype=numpy.uint8)), axis=1,
 )
 
 
@@ -54,7 +56,7 @@ if __name__ == "__main__":
         "syndrome = ("
         f"4 * parity(block & {decoder_bits[0]}) "
         f"+ 2 * parity(block & {decoder_bits[1]}) "
-        f"+ parity(block & {decoder_bits[2]}))"
+        f"+ parity(block & {decoder_bits[2]}))",
     )
 
     syndrome_lookup = [0] * 8

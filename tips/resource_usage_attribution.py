@@ -89,7 +89,7 @@ def attribute_resource_usage(
 
 
 def verify_proper_normalization(
-    providers: List[Provider], consumers: List[Consumer], usageFn: UsageFn
+    providers: List[Provider], consumers: List[Consumer], usageFn: UsageFn,
 ) -> None:
     """Confirm that the usageFn is properly normalized."""
     for provider in providers:

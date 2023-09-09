@@ -222,7 +222,7 @@ def dependency_graph(
                     name=name,
                     version=version,
                     dependencies=tuple(dependencies),
-                )
+                ),
             )
             i += 1
 

@@ -52,7 +52,7 @@ def algorithm_L(sample_size: int, stream: Iterable[T]) -> List[T]:
 
 
 def weighted_sample_with_replacement(
-    sample_size: int, stream: Iterable[Tuple[T, float]]
+    sample_size: int, stream: Iterable[Tuple[T, float]],
 ) -> List[T]:
     """Sample with replacement from a stream according to item weights.
 

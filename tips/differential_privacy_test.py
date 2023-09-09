@@ -94,7 +94,7 @@ def make_mechanisms():
         allow_infinity=False,
         allow_nan=False,
         exclude_min=True,
-    )
+    ),
 )
 @example(float(2**-1023))
 @example(float(2**1023))
@@ -127,7 +127,7 @@ def test_privatize_single_number(name, mechanism):
             [
                 privatize_histogram([num], privacy_parameter, mechanism)[0]
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_outputs = sample(number)
@@ -135,9 +135,9 @@ def test_privatize_single_number(name, mechanism):
         [
             max(0, round(x))
             for x in np.random.default_rng(1).laplace(
-                number, 1.0 / privacy_parameter, sample_size
+                number, 1.0 / privacy_parameter, sample_size,
             )
-        ]
+        ],
     )
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
@@ -154,7 +154,7 @@ def test_privatize_single_bin_histogram(name, mechanism):
             [
                 tuple(privatize_histogram(hist, privacy_parameter, mechanism))
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_hist1 = sample(hist1)
@@ -193,7 +193,7 @@ def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
             [
                 tuple(privatize_histogram(hist, privacy_parameter, mechanism))
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_hist1 = sample(hist1)

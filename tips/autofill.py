@@ -127,7 +127,7 @@ def find_stitch_path(
                 continue
 
             source, target, key = pick_edge(
-                graph.edges(current_vertex, keys=True), segment_edges
+                graph.edges(current_vertex, keys=True), segment_edges,
             )
             if target:
                 vertex_stack.append(target)

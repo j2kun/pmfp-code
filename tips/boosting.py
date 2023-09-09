@@ -72,7 +72,7 @@ def boost(examples: Dataset, weak_learner: Learner, rounds: int) -> Hypothesis:
         alpha = 0.5 * math.log((1 - weighted_error) / (0.0001 + weighted_error))
         alphas.append(alpha)
         distr = normalize(
-            [d * math.exp(-alpha * h) for (d, h) in zip(distr, prediction_results)]
+            [d * math.exp(-alpha * h) for (d, h) in zip(distr, prediction_results)],
         )
         print("Round %d, error %.3f" % (t, weighted_error))
 

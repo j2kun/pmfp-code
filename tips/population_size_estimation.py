@@ -19,7 +19,7 @@ def estimate_size(sample: List[int]) -> float:
 
 
 def size_confidence_interval(
-    sample: List[int], confidence: float
+    sample: List[int], confidence: float,
 ) -> Tuple[float, float]:
     """Return a confidence interval analogue of estimate_size.
 

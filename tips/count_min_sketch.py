@@ -47,7 +47,7 @@ class CountMinSketch:
             [
                 self.sketch[i][self.hashes[i](hash(value)) % self.width]
                 for i, h in enumerate(self.hashes)
-            ]
+            ],
         )
 
     def __len__(self):

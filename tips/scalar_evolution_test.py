@@ -32,7 +32,7 @@ def test_chain_recurrence_evaluate():
     # for x in range(n):
     #   value = x^3 + 2x^2 + 3x + 7
     rec = Recurrence(
-        7, operator.add, Recurrence(6, operator.add, Recurrence(10, operator.add, 6))
+        7, operator.add, Recurrence(6, operator.add, Recurrence(10, operator.add, 6)),
     )
     assert 61 == rec.evaluate(3)
 
@@ -216,7 +216,7 @@ def test_reduce_strength():
     loop = Loop(
         header=[],
         body=[
-            Increment(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7"))
+            Increment(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7")),
         ],
         context={
             "x": Recurrence(0, operator.add, 1),

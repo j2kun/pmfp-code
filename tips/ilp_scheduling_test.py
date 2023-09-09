@@ -93,7 +93,7 @@ def teams_violating_three_away_game(solution):
         num_weeks = max(num_weeks, game.week)
 
     possible_failing_week_triples = set(
-        [(i, i + 1, i + 2) for i in range(num_weeks - 2)]
+        [(i, i + 1, i + 2) for i in range(num_weeks - 2)],
     )
     violations = dict()
     for team, away_game_weeks in away_games_by_team.items():
@@ -185,7 +185,7 @@ def random_matchups(draw, min_teams=4, max_teams=10, max_matchups=30):
     team_pairs = list(itertools.combinations(teams, 2))
     matchups = draw(permutations(team_pairs))
     truncate_pt = draw(
-        integers(min_value=4, max_value=min(max_matchups, len(matchups)))
+        integers(min_value=4, max_value=min(max_matchups, len(matchups))),
     )
     truncated_matchups = matchups[:truncate_pt]
 

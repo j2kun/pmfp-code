@@ -48,7 +48,7 @@ def gray_code_iter(num_settings: int) -> Iterator[SettingsChange]:
     i = 0
     next_value = to_gray_code(i)
     yield SettingsChange(
-        num_settings=num_settings, settings=next_value, flipped_bit=None
+        num_settings=num_settings, settings=next_value, flipped_bit=None,
     )
 
     for i in range(1, 2**num_settings):
@@ -56,5 +56,5 @@ def gray_code_iter(num_settings: int) -> Iterator[SettingsChange]:
         next_value = to_gray_code(i)
         flipped_bit = (next_value ^ last_value).bit_length() - 1
         yield SettingsChange(
-            num_settings=num_settings, settings=next_value, flipped_bit=flipped_bit
+            num_settings=num_settings, settings=next_value, flipped_bit=flipped_bit,
         )

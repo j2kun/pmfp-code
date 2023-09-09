@@ -51,7 +51,7 @@ def test_reservoir_sample_probability(sampler):
         for (i, j, k) in itertools.combinations(stream, sample_size)
     )
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int, ((result, counter[result] / experiment_count) for result in counter),
     )
 
     total_variation = total_variation_distance(expected, actual)
@@ -84,7 +84,7 @@ def test_weighted_sample_with_replacement_uniform_weights():
         for (k, _) in stream
     )
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int, ((result, counter[result] / experiment_count) for result in counter),
     )
     total_variation = total_variation_distance(expected, actual)
     assert total_variation < 0.01
@@ -130,7 +130,7 @@ def test_weighted_sample_with_replacement_nonuniform_weights():
     )
 
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int, ((result, counter[result] / experiment_count) for result in counter),
     )
 
     total_variation = total_variation_distance(expected, actual)

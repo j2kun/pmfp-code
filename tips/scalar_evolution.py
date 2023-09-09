@@ -143,7 +143,7 @@ class Recurrence:
                 return b
             case Recurrence(increment=Recurrence()) as r:
                 return Recurrence(
-                    base=r.base, op=r.op, increment=r.increment.normalize()
+                    base=r.base, op=r.op, increment=r.increment.normalize(),
                 )
             case _:
                 return self
@@ -235,7 +235,7 @@ def reduce_strength(loop: Loop) -> Loop:
             Assign(
                 lhs=ast.Name(id=ids[rec]),
                 rhs=ast.Constant(value=rec if isinstance(rec, int) else rec.base),
-            )
+            ),
         )
 
     def make_body(recurrence):
@@ -245,7 +245,7 @@ def reduce_strength(loop: Loop) -> Loop:
             Increment(
                 lhs=ast.Name(id=ids[recurrence]),
                 rhs=ast.Name(id=ids[recurrence.increment]),
-            )
+            ),
         )
 
     for lhs, scev in body_scevs.items():

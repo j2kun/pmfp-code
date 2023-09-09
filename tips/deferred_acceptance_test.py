@@ -31,7 +31,7 @@ def market(
                 id=student_id,
                 preferences=preferences[:truncate_pt],
                 best_unrejected=0,
-            )
+            ),
         )
 
     for school_id in school_ids:
@@ -42,7 +42,7 @@ def market(
                 preferences=preferences,
                 capacity=draw(school_capacity),
                 held=list(),
-            )
+            ),
         )
 
     return (students, schools)

@@ -45,7 +45,7 @@ def test_fill_box():
 
 def test_box_with_hole():
     box_with_hole = geo.box(10, 10, 16, 16, ccw=True).difference(
-        geo.box(12, 12, 14, 14, ccw=True)
+        geo.box(12, 12, 14, 14, ccw=True),
     )
     grating_segments = [
         ((10, 10), (16, 10)),
@@ -93,7 +93,7 @@ def test_box_with_hole():
 
 def test_box_with_hole_non_aligned_grating():
     box_with_hole = geo.box(10, 10, 16, 16, ccw=True).difference(
-        geo.box(12, 12, 14, 14, ccw=True)
+        geo.box(12, 12, 14, 14, ccw=True),
     )
     rows = intersect_region_with_grating(
         shape=box_with_hole,
@@ -122,8 +122,8 @@ def random_shape_difference(draw, min_points=3, max_points=10):
     ]
     angle = draw(
         floats(
-            min_value=0, max_value=2 * math.pi, allow_nan=False, allow_infinity=False
-        )
+            min_value=0, max_value=2 * math.pi, allow_nan=False, allow_infinity=False,
+        ),
     )
     poly1 = geo.MultiPoint([[p.x, p.y] for p in poly1_points]).convex_hull
     poly2 = geo.MultiPoint([[p.x, p.y] for p in poly2_points]).convex_hull
@@ -276,7 +276,7 @@ def intersect_region_with_grating(shape, angle, row_spacing):
     normal = direction.rotate(math.pi / 2)
     center = InkstitchPoint((minx + maxx) / 2.0, (miny + maxy) / 2.0)
     _, start, _, end = affine.rotate(
-        shape, angle, origin="center", use_radians=True
+        shape, angle, origin="center", use_radians=True,
     ).bounds
     start -= center.y
     end -= center.y
@@ -297,7 +297,7 @@ def intersect_region_with_grating(shape, angle, row_spacing):
         res = grating_line.intersection(shape)
 
         if isinstance(res, shapely.geometry.MultiLineString) or isinstance(
-            res, geo.GeometryCollection
+            res, geo.GeometryCollection,
         ):
             runs = [
                 line_string.coords

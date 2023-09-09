@@ -201,7 +201,7 @@ class ResidencyProgram:
     def select(self, pool: Set[Student]) -> Set[Student]:
         """Select students from `pool` by priority. Return unchosen students."""
         chosen = heapq.nsmallest(
-            self.capacity, pool, key=lambda s: self.preferences.index(s.id)
+            self.capacity, pool, key=lambda s: self.preferences.index(s.id),
         )
         return pool - set(chosen)
 
@@ -232,7 +232,7 @@ class ProgramIndex:
         return iter(self.index.values())
 
     def next_to_apply(
-        self, applicant: Applicant
+        self, applicant: Applicant,
     ) -> Tuple[ResidencyProgram, Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.index[applicant.to_apply()], None)
@@ -263,7 +263,7 @@ class Matching:
                 self.matches[student] = program
 
     def current_match(
-        self, applicant: Applicant
+        self, applicant: Applicant,
     ) -> Tuple[Optional[ResidencyProgram], Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.matches[applicant], None)
@@ -289,7 +289,7 @@ class Matching:
 
     def __str__(self):
         return "\n".join(
-            [f"{student} -> {program}" for (student, program) in self.matches.items()]
+            [f"{student} -> {program}" for (student, program) in self.matches.items()],
         )
 
 
@@ -317,7 +317,7 @@ class InstabilityChaining:
         # Processing couples last reduces the chance of cycles
         self.applicants: List[Applicant] = singles + list(couples)
         self.matching = Matching(
-            matches=dict(), applicants=self.applicants, programs=list(programs)
+            matches=dict(), applicants=self.applicants, programs=list(programs),
         )
 
         # a log used to detect cycles
@@ -349,7 +349,7 @@ class InstabilityChaining:
                 program = self.program_stack.pop()
                 logging.debug(f"Processing {program} from the program stack.")
                 unstable_applicants = unstable_pairs(
-                    program, self.matching, self.program_index
+                    program, self.matching, self.program_index,
                 )
                 for applicant in unstable_applicants:
                     applicant.reset_best()
@@ -361,7 +361,7 @@ class InstabilityChaining:
                     m1, m2 = self.matching.current_match(applicant)
                     logging.debug(
                         f"Adding potentially withdrawn programs {m1}, {m2} "
-                        "to the program stack."
+                        "to the program stack.",
                     )
                     assert m1 is not None
                     self.program_stack.add(m1)
@@ -372,7 +372,7 @@ class InstabilityChaining:
                     logging.debug(
                         f"Adding unstable applicants "
                         f"{','.join(str(x) for x in unstable_applicants)} "
-                        f"to the applicant stack"
+                        f"to the applicant stack",
                     )
                 self.applicant_stack.extend(unstable_applicants)
 
@@ -386,7 +386,7 @@ class InstabilityChaining:
         )
         if hashable in self.log:
             logging.debug(
-                f"Found a cycle: log={self.log}\nNext entry would be {hashable}"
+                f"Found a cycle: log={self.log}\nNext entry would be {hashable}",
             )
             raise ValueError("Found a cycle")
         self.log.add(hashable)
@@ -408,7 +408,7 @@ class InstabilityChaining:
             if partner and program != partner_program:
                 assert partner_program is not None
                 displ |= partner_program.select(
-                    self.matching.make_pool(self.program_index, partner)
+                    self.matching.make_pool(self.program_index, partner),
                 )
 
             if not displ:
@@ -424,7 +424,7 @@ class InstabilityChaining:
                 rejectee = f"{proposer if proposer in displ else partner}"
                 rejecter = f"{program if proposer in displ else partner_program}"
                 logging.debug(
-                    f"Application rejected ({rejectee} rejected by {rejecter})"
+                    f"Application rejected ({rejectee} rejected by {rejecter})",
                 )
                 proposer.best_unrejected += 1
                 if partner:
@@ -449,7 +449,7 @@ class InstabilityChaining:
             for bumped in singles:
                 logging.debug(
                     f"{bumped} (matched to {self.matching.matches[bumped]}) "
-                    f"displaced by {applicant}"
+                    f"displaced by {applicant}",
                 )
                 self.matching.reject(bumped)
 
@@ -471,7 +471,7 @@ class InstabilityChaining:
                     f"by {applicant}\n"
                     f"{withdrawer} withdrawing from {self.matching.matches[withdrawer]}\n"
                     f"Adding withdrawn program {self.matching.matches[withdrawer]} to "
-                    "the program stack"
+                    "the program stack",
                 )
                 displaced_couples.add(couple)
                 self.program_stack.add(self.matching.matches[withdrawer])
@@ -481,7 +481,7 @@ class InstabilityChaining:
             applicant = displaced_couples.pop()
             logging.debug(
                 f"Adding displaced couples {displaced_couples} and singles {singles} "
-                f"to the applicant stack"
+                f"to the applicant stack",
             )
             self.applicant_stack.extend(displaced_couples)
             self.applicant_stack.extend(singles)
@@ -548,7 +548,7 @@ def unstable_pairs(
                         program_pref = p1.prefers(matching, *couple.members)
                     else:
                         program_pref = p1.prefers(matching, s1) and p2.prefers(
-                            matching, s2
+                            matching, s2,
                         )
 
                     if applicant_pref and program_pref:

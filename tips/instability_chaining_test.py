@@ -44,7 +44,7 @@ def market(
                 id=student_id,
                 preferences=preferences,
                 best_unrejected=0,
-            )
+            ),
         )
 
     student_index = {s.id: s for s in students}
@@ -56,7 +56,7 @@ def market(
                 id=program_id,
                 preferences=preferences,
                 capacity=max(min_capacity, draw(program_capacity)),
-            )
+            ),
         )
 
     couples = []
@@ -319,7 +319,7 @@ def test_unstable_pairs_unstable_with_couple():
         [
             (couples[0], programs[0]),
             (couples[0], programs[1]),
-        ]
+        ],
     )
 
 

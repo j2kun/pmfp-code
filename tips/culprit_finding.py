@@ -203,7 +203,7 @@ def find_culprits(
     tested_changes: set[Change] = set()
     sentinel = Change(id=1 + max(c.id for c in suspects))
     dist = Distribution(
-        probs=dict(zip(suspects + [sentinel], prior)), flake_rate=flakiness
+        probs=dict(zip(suspects + [sentinel], prior)), flake_rate=flakiness,
     )
 
     most_likely_culprit = max(dist, key=lambda c: dist.probs[c])

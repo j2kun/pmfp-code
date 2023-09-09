@@ -39,20 +39,20 @@ def test_np_convolve_4by4_with_2by2():
             [2, -3, 4, -1],
             [3, 3, 0, 2],
             [1, 9, -2, 2],
-        ]
+        ],
     )
     kernel = np.array(
         [
             [1, 2],
             [-1, -2],
-        ]
+        ],
     )
     expected = np.array(
         [
             [9, 3, 9],
             [-13, 2, -2],
             [-10, -2, 2],
-        ]
+        ],
     )
     actual = np_convolve2d(matrix, kernel)
     np.testing.assert_array_equal(actual, expected)
@@ -73,27 +73,27 @@ def random_matrix_and_kernel(draw, min_dim=1, max_dim=10):
             lists(values, min_size=matrix_col_count, max_size=matrix_col_count),
             min_size=matrix_row_count,
             max_size=matrix_row_count,
-        )
+        ),
     )
 
     kernel_row_count = draw(
         integers(
             min_value=1,
             max_value=matrix_row_count,
-        )
+        ),
     )
     kernel_col_count = draw(
         integers(
             min_value=1,
             max_value=matrix_col_count,
-        )
+        ),
     )
     kernel = draw(
         lists(
             lists(values, min_size=kernel_col_count, max_size=kernel_col_count),
             min_size=kernel_row_count,
             max_size=kernel_row_count,
-        )
+        ),
     )
 
     return (matrix, kernel)
@@ -165,7 +165,7 @@ def random_matrix(draw, min_dim=1, max_dim=10):
             lists(values, min_size=matrix_col_count, max_size=matrix_col_count),
             min_size=matrix_row_count,
             max_size=matrix_row_count,
-        )
+        ),
     )
     return matrix
 
