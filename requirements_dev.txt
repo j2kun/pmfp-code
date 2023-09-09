@@ -56,7 +56,7 @@ pytest==7.2.0
 python-coveralls==2.9.3
 python-dateutil==2.8.1
 python-sat==0.1.7.dev3
-requests==2.25.1
+requests==2.31.0
 shapely==2.0.0
 six==1.15.0
 sortedcontainers==2.3.0
