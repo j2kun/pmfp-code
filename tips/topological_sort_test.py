@@ -13,7 +13,7 @@ from tips.topological_sort import topological_sort
 def assert_satisfies_dependency_order(dag, sorted_nodes):
     # Test that a sorted output satisfies the dependency requirements of the
     # DAG.
-    for (node, dependents) in dag.items():
+    for node, dependents in dag.items():
         for dependent in dependents:
             node_index = sorted_nodes.index(node)
             dependent_index = sorted_nodes.index(dependent)
@@ -110,7 +110,7 @@ def random_dag(
     dag = {i: [] for i in nodes}
     random.shuffle(nodes)
 
-    for (i, j) in combinations(nodes, 2):
+    for i, j in combinations(nodes, 2):
         if draw(dependency_decider):
             dag[i].append(j)
 
@@ -144,7 +144,7 @@ def random_dag_with_loop(
     loop = list(chosen_nodes)
     random.shuffle(loop)
 
-    for (i, j) in zip(loop, loop[1:]):
+    for i, j in zip(loop, loop[1:]):
         dependents = set(dag[i])
         dependents.add(j)
         dag[i] = list(dependents)

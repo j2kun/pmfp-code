@@ -59,7 +59,8 @@ def ucb1(actions: List[Action], reward: RewardFn) -> Generator[Action, None, Non
             for i in range(num_actions)
         ]
         chosen_action_index: int = max(
-            range(num_actions), key=lambda i: upper_confidence_bounds[i],
+            range(num_actions),
+            key=lambda i: upper_confidence_bounds[i],
         )
         chosen_action: Action = actions[chosen_action_index]
         yield chosen_action

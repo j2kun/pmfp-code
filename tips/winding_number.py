@@ -43,7 +43,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> bool:
     winding_number = 0
 
     # each polygon edge is a (source, target) pair of subsequent vertices
-    for (source, target) in pairwise(polygon):
+    for source, target in pairwise(polygon):
         if source.y <= point.y:
             if target.y > point.y and is_left(point, source, target) > 0:
                 winding_number += 1

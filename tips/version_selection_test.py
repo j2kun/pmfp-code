@@ -241,7 +241,7 @@ def test_arbitrary_dep_graph_feasible(graph):
     assume(chosen != dict())
 
     index = NameVerIndex(graph)
-    for (name, version) in chosen.items():
+    for name, version in chosen.items():
         p = index(name)[version]
         for dep_name, allowed_versions in p.dependencies:
             assert dep_name in chosen

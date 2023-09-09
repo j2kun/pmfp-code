@@ -52,6 +52,7 @@ def pairwise_cyclic(itr):
 
 def pick_edge(edges, segment_edges):
     """Pick an edge to traverse next."""
+
     # The sort key is as follows: first prefer to always take a segment edge if
     # possible, then prefer the edge that is closest to an unvisited grating
     # segment, where closest is geometrically. Closest could be defined by
@@ -127,7 +128,8 @@ def find_stitch_path(
                 continue
 
             source, target, key = pick_edge(
-                graph.edges(current_vertex, keys=True), segment_edges,
+                graph.edges(current_vertex, keys=True),
+                segment_edges,
             )
             if target:
                 vertex_stack.append(target)

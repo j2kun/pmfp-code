@@ -56,7 +56,7 @@ def select_dependent_versions(
             (NOT v1) OR (NOT v2)
         """
         versions = [p.package_id for p in package_index(next_package.name).values()]
-        for (v1, v2) in combinations(versions, 2):
+        for v1, v2 in combinations(versions, 2):
             clauses.append([-v1, -v2])
 
         """

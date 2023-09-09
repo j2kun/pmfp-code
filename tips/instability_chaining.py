@@ -200,7 +200,9 @@ class ResidencyProgram:
     def select(self, pool: Set[Student]) -> Set[Student]:
         """Select students from `pool` by priority. Return unchosen students."""
         chosen = heapq.nsmallest(
-            self.capacity, pool, key=lambda s: self.preferences.index(s.id),
+            self.capacity,
+            pool,
+            key=lambda s: self.preferences.index(s.id),
         )
         return pool - set(chosen)
 
@@ -231,7 +233,8 @@ class ProgramIndex:
         return iter(self.index.values())
 
     def next_to_apply(
-        self, applicant: Applicant,
+        self,
+        applicant: Applicant,
     ) -> Tuple[ResidencyProgram, Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.index[applicant.to_apply()], None)
@@ -256,13 +259,14 @@ class Matching:
         self,
         *matches: Tuple[Optional[Student], Optional[ResidencyProgram]],
     ) -> None:
-        for (student, program) in matches:
+        for student, program in matches:
             if student and program:
                 logging.debug(f"Matching {student} to {program}")
                 self.matches[student] = program
 
     def current_match(
-        self, applicant: Applicant,
+        self,
+        applicant: Applicant,
     ) -> Tuple[Optional[ResidencyProgram], Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.matches[applicant], None)
@@ -316,7 +320,9 @@ class InstabilityChaining:
         # Processing couples last reduces the chance of cycles
         self.applicants: List[Applicant] = singles + list(couples)
         self.matching = Matching(
-            matches=dict(), applicants=self.applicants, programs=list(programs),
+            matches=dict(),
+            applicants=self.applicants,
+            programs=list(programs),
         )
 
         # a log used to detect cycles
@@ -348,7 +354,9 @@ class InstabilityChaining:
                 program = self.program_stack.pop()
                 logging.debug(f"Processing {program} from the program stack.")
                 unstable_applicants = unstable_pairs(
-                    program, self.matching, self.program_index,
+                    program,
+                    self.matching,
+                    self.program_index,
                 )
                 for applicant in unstable_applicants:
                     applicant.reset_best()
@@ -536,7 +544,7 @@ def unstable_pairs(
             else:
                 couple = cast(Couple, applicant)
                 s1, s2 = couple.members
-                for (p1_id, p2_id) in couple.joint_preferences():
+                for p1_id, p2_id in couple.joint_preferences():
                     p1, p2 = index[p1_id], index[p2_id]
                     if p1 != program and p2 != program:
                         continue
@@ -547,7 +555,8 @@ def unstable_pairs(
                         program_pref = p1.prefers(matching, *couple.members)
                     else:
                         program_pref = p1.prefers(matching, s1) and p2.prefers(
-                            matching, s2,
+                            matching,
+                            s2,
                         )
 
                     if applicant_pref and program_pref:

@@ -76,9 +76,9 @@ def convolve(matrix: Matrix, kernel: Matrix) -> Matrix:
     kernel_indices = list(indices(len(kernel), len(kernel[0])))
 
     output = [[0] * output_num_cols for _ in range(output_num_rows)]
-    for (row, col) in indices(output_num_rows, output_num_cols):
+    for row, col in indices(output_num_rows, output_num_cols):
         value = 0
-        for (i, j) in kernel_indices:
+        for i, j in kernel_indices:
             value += kernel[i][j] * matrix[row + i][col + j]
         output[row][col] = value
 
@@ -91,7 +91,7 @@ def sobel_optimized(matrix: Matrix) -> Matrix:
     output_num_rows, output_num_cols = (len(matrix) - 2, len(matrix[0]) - 2)
 
     output = [[0] * output_num_cols for _ in range(output_num_rows)]
-    for (row, col) in indices(output_num_rows, output_num_cols):
+    for row, col in indices(output_num_rows, output_num_cols):
         m00 = matrix[row][col]
         m01 = matrix[row][col + 1]
         m02 = matrix[row][col + 2]
@@ -117,7 +117,9 @@ def np_convolve2d(matrix: np.ndarray, kernel: np.ndarray):
     view_shape = tuple(np.subtract(matrix.shape, sub_shape) + 1) + sub_shape
     strides = 2 * matrix.strides
     sub_matrix = np.lib.stride_tricks.as_strided(
-        matrix, shape=view_shape, strides=strides,
+        matrix,
+        shape=view_shape,
+        strides=strides,
     )
     return np.einsum("kl,ijkl->ij", kernel, sub_matrix)
 

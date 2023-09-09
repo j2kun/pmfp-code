@@ -22,7 +22,7 @@ def test_sketch_error_guarantee_achieved(values, accuracy):
     for value in values:
         sketch.increment(value)
 
-    for (value, true_count) in Counter(values).items():
+    for value, true_count in Counter(values).items():
         est_count = sketch.count(value)
         assert true_count <= est_count
         assert est_count <= true_count + sketch.additive_error_guarantee()

@@ -15,7 +15,10 @@ class SloMetric:
 
 
 def error_budget_remaining(
-    requests: TimeSeries, errors: TimeSeries, budget: float, window_minutes: int,
+    requests: TimeSeries,
+    errors: TimeSeries,
+    budget: float,
+    window_minutes: int,
 ) -> SloMetric:
     """Return a guess of the estimated time until an error budget is exhausted.
 

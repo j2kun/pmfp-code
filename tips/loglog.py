@@ -120,7 +120,9 @@ class LogLog:
 
 
 def cardinality(
-    data: Iterable[Hashable], log_bucket_count: int = 14, estimator="improved",
+    data: Iterable[Hashable],
+    log_bucket_count: int = 14,
+    estimator="improved",
 ) -> float:
     """Estimate the number of unique items in the input dataset, up to 2^64.
 

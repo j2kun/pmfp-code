@@ -56,13 +56,15 @@ def run_round(
 
     new_held_students = {
         id: heapq.nsmallest(
-            schools[id].capacity, app_ids, key=schools[id].preferences.index,
+            schools[id].capacity,
+            app_ids,
+            key=schools[id].preferences.index,
         )
         for (id, app_ids) in applications.items()
     }
 
     rejections = set()
-    for (id, school) in schools.items():
+    for id, school in schools.items():
         school.held = new_held_students[id]
         rejections |= set(applications[id]) - set(new_held_students[id])
 
@@ -70,7 +72,8 @@ def run_round(
 
 
 def deferred_acceptance(
-    students: Iterable[Student], schools: Iterable[School],
+    students: Iterable[Student],
+    schools: Iterable[School],
 ) -> Matching:
     """Construct a stable matching of students to schools.
 
@@ -111,7 +114,9 @@ def deferred_acceptance(
 
 
 def find_unstable_pair(
-    students: Iterable[Student], schools: Iterable[School], matching: Matching,
+    students: Iterable[Student],
+    schools: Iterable[School],
+    matching: Matching,
 ) -> Optional[Tuple[Student, School]]:
     """Returns an unstable pair in the matching, or None if none exists."""
 
@@ -123,7 +128,9 @@ def find_unstable_pair(
         # assigned school
         try:
             return precedes(
-                student.preferences, school.id, matching.matches[student].id,
+                student.preferences,
+                school.id,
+                matching.matches[student].id,
             )
         except ValueError:
             # If the student doesn't have the school in their list, treat as
@@ -142,7 +149,7 @@ def find_unstable_pair(
         ]
         return any(student_cmps)
 
-    for (student, school) in itertools.product(students, schools):
+    for student, school in itertools.product(students, schools):
         if student not in matching.unassigned:
             if (
                 school != matching.matches[student]

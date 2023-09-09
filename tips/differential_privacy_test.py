@@ -135,7 +135,9 @@ def test_privatize_single_number(name, mechanism):
         [
             max(0, round(x))
             for x in np.random.default_rng(1).laplace(
-                number, 1.0 / privacy_parameter, sample_size,
+                number,
+                1.0 / privacy_parameter,
+                sample_size,
             )
         ],
     )

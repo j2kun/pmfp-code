@@ -138,7 +138,10 @@ class LaplaceMechanism(ABC):
 
     @abstractmethod
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float,
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         ...
 
@@ -148,7 +151,10 @@ class InsecureLaplaceMechanism(LaplaceMechanism):
         self.rng = rng or np.random.default_rng(1)
 
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float,
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         scale = sensitivity / privacy_parameter
         return (value, round(self.rng.laplace(0, scale, 1)[0]))
@@ -173,12 +179,16 @@ class SecureLaplaceMechanism(LaplaceMechanism):
         self.rng = rng
 
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float,
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         eps = privacy_parameter
         granularity = next_power_of_two((sensitivity / eps) / self.GRANULARITY_PARAM)
         noise = sample_two_sided_geometric(
-            self.rng, granularity * eps / (sensitivity + granularity),
+            self.rng,
+            granularity * eps / (sensitivity + granularity),
         )
 
         # note this is where we rely on `value` being an integer, otherwise
@@ -199,7 +209,9 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
 
 def privatize_histogram(
-    hist: Histogram, privacy_parameter: float, laplace: LaplaceMechanism,
+    hist: Histogram,
+    privacy_parameter: float,
+    laplace: LaplaceMechanism,
 ):
     """Privatize a histogram for public release.
 

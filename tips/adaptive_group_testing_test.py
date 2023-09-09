@@ -30,7 +30,9 @@ def intersecting_test(S):
 def test_find_10():
     subjects = list(range(100))
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, intersecting_test([10]), 1,
+        subjects,
+        intersecting_test([10]),
+        1,
     )
 
     assert_that(actual).is_equal_to([10])
@@ -39,7 +41,9 @@ def test_find_10():
 def test_reversed_find_10():
     subjects = list(reversed(range(100)))
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, intersecting_test([10]), 1,
+        subjects,
+        intersecting_test([10]),
+        1,
     )
 
     assert_that(actual).is_equal_to([10])
@@ -59,7 +63,9 @@ def test_finds_specific_subjects_with_exact_bound(positive_subjects):
 
     test = intersecting_test(positive_subjects)
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, test, len(positive_subjects),
+        subjects,
+        test,
+        len(positive_subjects),
     )
 
     assert_that(actual).contains_only(*positive_subjects)
@@ -75,7 +81,9 @@ def test_optimality(positive_subjects):
 
     test = intersecting_test(positive_subjects)
     _ = adaptive_group_testing.generalized_binary_split(
-        subjects, test, len(positive_subjects),
+        subjects,
+        test,
+        len(positive_subjects),
     )
 
     # this is a weak assertion because the number of tests only approaches

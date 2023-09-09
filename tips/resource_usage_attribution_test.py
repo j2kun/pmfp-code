@@ -83,7 +83,10 @@ def test_err_on_unnormalized_inputs():
         return usages.get((x, y), 0)
 
     assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn,
+        RESOURCES,
+        SERVICES,
+        CUSTOMERS,
+        usageFn,
     )
 
 
@@ -99,7 +102,10 @@ def test_err_on_unnormalized_inputs_2():
         return usages.get((x, y), 0)
 
     assert_that(attribute_resource_usage).raises(ValueError).when_called_with(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn,
+        RESOURCES,
+        SERVICES,
+        CUSTOMERS,
+        usageFn,
     )
 
 
@@ -217,7 +223,10 @@ def test_unequal_split_at_both_service_and_customer():
     }
 
     actual_attribution = attribute_resource_usage(
-        RESOURCES, SERVICES, CUSTOMERS, usageFn,
+        RESOURCES,
+        SERVICES,
+        CUSTOMERS,
+        usageFn,
     )
 
     for resource in RESOURCES:
@@ -248,7 +257,10 @@ def test_many_cycles_slight_bias():
         return no_bias
 
     actual_attribution = attribute_resource_usage(
-        resources, services, customers, usageFn,
+        resources,
+        services,
+        customers,
+        usageFn,
     )
 
     for resource in resources:
@@ -287,7 +299,9 @@ def decimal_as_float(draw):
 )
 @given(
     providers_to_customers_transition=arrays(
-        float, (2 * DIM, 2 * DIM), elements=decimal_as_float(),
+        float,
+        (2 * DIM, 2 * DIM),
+        elements=decimal_as_float(),
     ),
 )
 def test_exact_solution_matches_simulated_approximation(
@@ -306,12 +320,7 @@ def test_exact_solution_matches_simulated_approximation(
     def normalize_rows(array):
         """Return a new array containing the normalized rows of the input array."""
         row_sums = array.sum(axis=1, keepdims=True)
-        return (
-            array
-            / row_sums[
-                :,
-            ]
-        )
+        return array / row_sums[:,]
 
     providers_to_customers_transition = normalize_rows(
         providers_to_customers_transition,
@@ -336,7 +345,10 @@ def test_exact_solution_matches_simulated_approximation(
         return providers_to_customers_transition[x_id, y_id]
 
     actual_attribution = attribute_resource_usage(
-        resources, services, customers, usageFn,
+        resources,
+        services,
+        customers,
+        usageFn,
     )
 
     total_transition_matrix = numpy.zeros((3 * DIM, 3 * DIM), dtype=float)
@@ -347,12 +359,12 @@ def test_exact_solution_matches_simulated_approximation(
     # from state i and given that we took k steps to get to state j
     exponentiated_transition = numpy.linalg.matrix_power(total_transition_matrix, 1024)
 
-    for (i, resource) in enumerate(resources):
+    for i, resource in enumerate(resources):
         state = numpy.zeros(3 * DIM, dtype=float)
         state[i] = 1.0
         state = numpy.dot(state, exponentiated_transition)
 
-        for (j, customer) in enumerate(customers):
+        for j, customer in enumerate(customers):
             expected_attribution = state[2 * DIM + j]
             assert_that(actual_attribution[resource][customer]).described_as(
                 "attribution[{}][{}]".format(resource, customer),

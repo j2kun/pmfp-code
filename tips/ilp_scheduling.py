@@ -45,7 +45,9 @@ class PreferenceRule(ABC):
 
     @abstractmethod
     def build_model(
-        self, solver, game_vars: dict[Game, pywraplp.Variable],
+        self,
+        solver,
+        game_vars: dict[Game, pywraplp.Variable],
     ) -> pywraplp.Variable:
         """Make necessary model changes for one subset of games, and output a
         single variable to be included in the objective. This variable is
@@ -100,10 +102,12 @@ def optimal_schedule(
 
     # generate indices for efficient model building
     vars_by_team = partition_by(
-        game_vars, keys=[lambda g: g.home_team, lambda g: g.away_team],
+        game_vars,
+        keys=[lambda g: g.home_team, lambda g: g.away_team],
     )
     vars_by_matchup = partition_by(
-        game_vars, key=lambda g: tuple(sorted([g.home_team, g.away_team])),
+        game_vars,
+        key=lambda g: tuple(sorted([g.home_team, g.away_team])),
     )
 
     # Exactly one game for a matchup is chosen.
@@ -177,7 +181,9 @@ class MinimizeThreeAwayGames(PreferenceRule):
         team = next(iter(game_vars.keys())).away_team
         assert len(which_weeks) == 3  # or else subset generator is broken
         violation_var = solver.IntVar(
-            0, 1, f"ThreeAwayGames_{team}_{','.join(which_weeks)}",
+            0,
+            1,
+            f"ThreeAwayGames_{team}_{','.join(which_weeks)}",
         )
 
         # A modeling technique for an implication. The RHS is at most three due

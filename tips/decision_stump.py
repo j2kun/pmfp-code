@@ -52,7 +52,9 @@ class ThresholdResult:
 
 
 def best_threshold_for_feature(
-    data: Dataset, index: int, error_fn: ErrorFn,
+    data: Dataset,
+    index: int,
+    error_fn: ErrorFn,
 ) -> ThresholdResult:
     """Compute best threshold for a given feature."""
     thresholds = [point[index] for (point, label) in data]
@@ -63,12 +65,16 @@ def best_threshold_for_feature(
     }
     best_threshold = min(errors, key=lambda x: errors[x])
     return ThresholdResult(
-        feature_index=index, threshold=best_threshold, error=errors[best_threshold],
+        feature_index=index,
+        threshold=best_threshold,
+        error=errors[best_threshold],
     )
 
 
 def train_decision_stump(
-    draw_example: DrawIter, sample_size: int = 200, debug: bool = False,
+    draw_example: DrawIter,
+    sample_size: int = 200,
+    debug: bool = False,
 ):
     data = [next(draw_example) for _ in range(sample_size)]
     num_features = len(data[0][0])
@@ -84,7 +90,10 @@ def train_decision_stump(
     lt_label = most_common_label([x for x in data if x[0][feature] < thresh])
 
     stump = DecisionStump(
-        feature_index=feature, threshold=thresh, gt_label=gt_label, lt_label=lt_label,
+        feature_index=feature,
+        threshold=thresh,
+        gt_label=gt_label,
+        lt_label=lt_label,
     )
 
     return stump.classify

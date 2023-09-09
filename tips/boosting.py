@@ -65,7 +65,9 @@ def boost(examples: Dataset, weak_learner: Learner, rounds: int) -> Hypothesis:
     for t in range(rounds):
         hypothesis = weak_learner(DrawExample(distr, examples))
         hypotheses.append(hypothesis)
-        prediction_results = [hypothesis(x) * y for (x, y) in examples]  # +1 if correct, else -1
+        prediction_results = [
+            hypothesis(x) * y for (x, y) in examples
+        ]  # +1 if correct, else -1
         weighted_error = sum(w for (z, w) in zip(prediction_results, distr) if z < 0)
 
         alpha = 0.5 * math.log((1 - weighted_error) / (0.0001 + weighted_error))
@@ -78,6 +80,9 @@ def boost(examples: Dataset, weak_learner: Learner, rounds: int) -> Hypothesis:
     def final_hypothesis(x):
         return sign(sum(a * h(x) for (a, h) in zip(alphas, hypotheses)))
 
-    print("Final hypothesis training error %.3f" % (compute_error(final_hypothesis, examples)))
+    print(
+        "Final hypothesis training error %.3f"
+        % (compute_error(final_hypothesis, examples)),
+    )
 
     return final_hypothesis

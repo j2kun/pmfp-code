@@ -12,11 +12,13 @@ P = numpy.array(
 # fmt: on
 
 generator_matrix = numpy.concatenate(
-    (numpy.identity(n=4, dtype=numpy.uint8), P), axis=1,
+    (numpy.identity(n=4, dtype=numpy.uint8), P),
+    axis=1,
 )
 
 parity_check_matrix = numpy.concatenate(
-    (P.transpose(), numpy.identity(n=3, dtype=numpy.uint8)), axis=1,
+    (P.transpose(), numpy.identity(n=3, dtype=numpy.uint8)),
+    axis=1,
 )
 
 

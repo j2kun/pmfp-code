@@ -109,7 +109,7 @@ class GpUcb:
         gp = GaussianProcessRegressor()
         gp.train(self.obs_inputs, self.obs_outputs)
         self.mean, cov = gp.predict(self.input_space)
-        self.stdev = cov.diagonal()**0.5
+        self.stdev = cov.diagonal() ** 0.5
 
     def unwind_estimates(self):
         output = dict()

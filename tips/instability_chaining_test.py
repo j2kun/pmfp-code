@@ -316,8 +316,8 @@ def test_unstable_pairs_unstable_with_couple():
     # Oh well.
     assert len(result) == 2
     assert set(result) == {
-            (couples[0], programs[0]),
-            (couples[0], programs[1]),
+        (couples[0], programs[0]),
+        (couples[0], programs[1]),
     }
 
 

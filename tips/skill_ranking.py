@@ -28,7 +28,10 @@ def truncate(x, xmin: int = 0, xmax: int = 3000):
 
 
 def elo_update(
-    e1: EloSkill, e2: EloSkill, outcome: int, alpha: float,
+    e1: EloSkill,
+    e2: EloSkill,
+    outcome: int,
+    alpha: float,
 ) -> Tuple[EloSkill, EloSkill]:
     """Update the EloSkills of two players based on a game outcome.
 

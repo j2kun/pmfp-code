@@ -39,7 +39,7 @@ def test_two_player_tournament(player1_skill_mean, player2_skill_mean):
     print([int(x > y) for (x, y) in outcomes])
     print(Counter([int(x > y) for (x, y) in outcomes]))
 
-    for (p1_perf, p2_perf) in outcomes:
+    for p1_perf, p2_perf in outcomes:
         outcome = 1 if p1_perf > p2_perf else -1
         if abs(p1_perf - p2_perf) < 1e-03:
             outcome = 0  # a tie
@@ -87,7 +87,7 @@ def test_n_player_tournament():
                 perf_dists[j].samples(3),
             ),
         )
-        for (p1_perf, p2_perf) in outcomes:
+        for p1_perf, p2_perf in outcomes:
             outcome = 1 if p1_perf > p2_perf else -1
             if abs(p1_perf - p2_perf) < 1e-03:
                 outcome = 0  # a tie

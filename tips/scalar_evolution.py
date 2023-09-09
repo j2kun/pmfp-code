@@ -143,7 +143,9 @@ class Recurrence:
                 return b
             case Recurrence(increment=Recurrence()) as r:
                 return Recurrence(
-                    base=r.base, op=r.op, increment=r.increment.normalize(),
+                    base=r.base,
+                    op=r.op,
+                    increment=r.increment.normalize(),
                 )
             case _:
                 return self
