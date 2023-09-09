@@ -1,9 +1,14 @@
-name: Python package
-
-on: [push]
-
+name: Build and Test
+permissions: read-all
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
-  run-tests:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - uses: chartboost/ruff-action@v1
-      - name: Test with pytest
+      - name: Test and calculate coverage
         run: |
           python -m pytest
           python -m coveralls
