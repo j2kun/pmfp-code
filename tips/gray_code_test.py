@@ -18,7 +18,9 @@ def test_convert_and_back(x):
 
 def test_iter():
     n = 4
-    settings = lambda n, s, f: SettingsChange(num_settings=n, settings=s, flipped_bit=f)
+
+    def settings(n, s, f):
+        return SettingsChange(num_settings=n, settings=s, flipped_bit=f)
 
     expected = [
         settings(n, 0, None),

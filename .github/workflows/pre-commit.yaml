@@ -1,0 +1,15 @@
+name: Pre-commit checks
+permissions: read-all
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pre-commit-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4.7.0
+      - name: Run pre-commit github action
+        uses: pre-commit/action@v3

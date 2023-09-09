@@ -140,7 +140,8 @@ def test_fuzz(shape_and_angle):
         row_spacing=1,
     )
     segments = [tuple(point for point in segment) for row in rows for segment in row]
-    starting_point = segments[0][0]
+    starting_segment = segments[0]
+    starting_point = starting_segment[0]
     # assert no error
     find_stitch_path(shape, segments, starting_point)
     # uncomment to matplotlib show the resulting stitch plan

@@ -1,0 +1,55 @@
+[tool.ruff]
+line-length = 100
+select = ["E", "F"]
+exclude = [
+  ".git",
+  ".ruff_cache",
+  "__pycache__",
+  "build",
+  "data",
+  "node_modules",
+  "venv",
+]
+ignore = [
+  "E402",
+]
+
+[tool.pytest.ini_options]
+# addopts = "-n auto --mypy --doctest-modules -v --cov-report term-missing --cov ."
+addopts = "-n auto --mypy --doctest-modules -v --cov-report html:cov_html --cov-report annotate:cov_annotate --junitxml=test-results/pytest/results.xml --cov-report term-missing --cov ."
+norecursedirs = [
+  ".git",
+  "__pycache__",
+  "data",
+  "node_modules",
+  "venv",
+]
+
+[tool.isort]
+profile = "open_stack"
+
+[tool.mypy]
+python_version = "3.10"
+
+[[tool.mypy.overrides]]
+module = [
+  "PIL",
+  "PIL.Image",
+  "assertpy",
+  "bitstring",
+  "matplotlib",
+  "matplotlib.dates",
+  "matplotlib.patches",
+  "matplotlib.pyplot",
+  "mypy-numpy",
+  "networkx",
+  "ortools.linear_solver",
+  "pysat.solvers",
+  "pytest",
+  "scipy.linalg",
+  "scipy.spatial.distance",
+  "shapely",
+  "shapely.affinity",
+]
+ignore_missing_imports = true
+
