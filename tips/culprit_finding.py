@@ -11,14 +11,12 @@ class Change:
     id: int
 
 
+# A TestFn represents the result of running a test at a specific change. In this
+# demo, changes are linearly ordered by their id, and the TestFn may return an
+# incorrect answer in one direction only. I.e., if the result is True, then
+# change did not introduce a bug. If the result is False, then the test may fail
+# because it is flaky, or because the change introduced a bug.
 TestFn = Callable[[Change], bool]
-"""
-A TestFn represents the result of running a test at a specific change. In this
-demo, changes are linearly ordered by their id, and the TestFn may return an
-incorrect answer in one direction only. I.e., if the result is True, then
-change did not introduce a bug. If the result is False, then the test may fail
-because it is flaky, or because the change introduced a bug.
-"""
 
 
 @dataclass(frozen=True)

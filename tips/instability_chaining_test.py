@@ -323,9 +323,7 @@ def test_unstable_pairs_unstable_with_couple():
     )
 
 
-"""
-    End to end tests that involve no couples
-"""
+# ------ End to end tests that involve no couples
 
 
 def test_stable_matching_two():
@@ -441,9 +439,7 @@ def test_stability_with_no_couples(students_and_programs):
     assert_stable(matching)
 
 
-"""
-    End to end tests that involve couples
-"""
+# -------- End to end tests that involve couples
 
 
 def test_couple_displaces_single():

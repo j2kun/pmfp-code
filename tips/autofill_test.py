@@ -201,11 +201,9 @@ def draw_line_segments(segments):
     plt.show()
 
 
-"""The code below was copied from Ink/Stitch for the purpose of generating randomized tests.
-
-- https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/utils/geometry.py#L150
-- https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/stitches/fill.py#L95
-"""
+# The code below was copied from Ink/Stitch for the purpose of generating randomized tests.
+# - https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/utils/geometry.py#L150
+# - https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/stitches/fill.py#L95
 
 
 class InkstitchPoint:
