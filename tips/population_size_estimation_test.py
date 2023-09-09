@@ -17,7 +17,7 @@ def test_estimate_is_accurate(n, sample_frac):
     for i in range(attempts):
         sample = random.sample(subjects, int(n * sample_frac))
 
-        low, high = size_confidence_interval(sample, 0.01)
+        low, high = size_confidence_interval(sample, 0.001)
         success = low <= n <= high
         if not success:
             failures += 1

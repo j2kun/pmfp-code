@@ -24,7 +24,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - uses: chartboost/ruff-action@v1
-      - name: Test and calculate coverage
+      - name: Run tests
         run: |
           python -m pytest
-          python -m coveralls
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
