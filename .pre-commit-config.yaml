@@ -45,7 +45,10 @@ repos:
   - id: docformatter
     additional_dependencies: [tomli]
     args: [--black, --in-place]
-  # - repo: https://github.com/pycqa/pydocstyle
-  #   rev: 6.3.0
-  #   hooks:
-  #   - id: pydocstyle
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.16
+  hooks:
+  - id: mdformat
+    additional_dependencies:
+    - mdformat-gfm
+    - mdformat_frontmatter
