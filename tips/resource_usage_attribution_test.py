@@ -307,14 +307,13 @@ def decimal_as_float(draw):
 def test_exact_solution_matches_simulated_approximation(
     providers_to_customers_transition,
 ):
-    """
-    A hypothesis test with 10 resources, 10 services, arbitrary transitions,
-    and arbitrary customer usage (normalized during test setup).
+    """A hypothesis test with 10 resources, 10 services, arbitrary transitions, and
+    arbitrary customer usage (normalized during test setup).
 
-    Assert that the implementation is close to the process of iteratively applying
-    the transition matrix to a vector of all 1's for each resource, i.e. simulating
-    the flow. To help avoid numerical error messing things up, lower bound each
-    transition probability to 0.1.
+    Assert that the implementation is close to the process of iteratively applying the
+    transition matrix to a vector of all 1's for each resource, i.e. simulating the
+    flow. To help avoid numerical error messing things up, lower bound each transition
+    probability to 0.1.
     """
 
     def normalize_rows(array):

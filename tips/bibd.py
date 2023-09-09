@@ -66,10 +66,10 @@ ALL_BIBDS = [
 class BIBDParams:
     """A parameter set describing a Balanced Incomplete Block Design (BIBD).
 
-    The members of this class will be described in both clinical trials
-    language (subjects & treatments) and in the notation of Dinitz-Colbourn's
-    Handbook of Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD),
-    which are the parameters (v, b, r, k, lambda).
+    The members of this class will be described in both clinical trials language
+    (subjects & treatments) and in the notation of Dinitz-Colbourn's Handbook of
+    Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD), which are the
+    parameters (v, b, r, k, lambda).
     """
 
     """
@@ -121,13 +121,12 @@ class BIBDParams:
         return self.subjects_per_treatment_pair
 
     def satisfies_necessary_conditions(self) -> bool:
-        """Determine if the parameters satisfy the necessary conditions for
-        the existence of a BIBD.
+        """Determine if the parameters satisfy the necessary conditions for the
+        existence of a BIBD.
 
-        Note that even if this function returns true, a BIBD may not exist
-        for these parameters. One can relax the balancedness condition and
-        still achieve a useful design for an experiment, but the statistical
-        analysis is more complicated.
+        Note that even if this function returns true, a BIBD may not exist for these
+        parameters. One can relax the balancedness condition and still achieve a useful
+        design for an experiment, but the statistical analysis is more complicated.
         """
         v, r, b, k, lambda_ = self.v, self.r, self.b, self.k, self.lambda_
 
@@ -143,10 +142,9 @@ class BIBDParams:
     def efficiency_factor(self) -> float:
         """Return the efficiency factor of the design.
 
-        The efficiency factor E measures the relative precision of a
-        statistical experiment using a BIBD when compared to a complete block
-        design, i.e., a block design in which every treatment is applied to
-        every subject (RCBD, see
+        The efficiency factor E measures the relative precision of a statistical
+        experiment using a BIBD when compared to a complete block design, i.e., a block
+        design in which every treatment is applied to every subject (RCBD, see
         https://en.wikipedia.org/wiki/Generalized_randomized_block_design).
 
         The quantity 100 * (1-E) is a bound on the percent reduction in
@@ -160,7 +158,8 @@ class BIBDParams:
     def from_bibd(bibd: BIBD) -> "BIBDParams":
         """Return the parameters for a BIBD.
 
-        Assumes the input is a valid BIBD."""
+        Assumes the input is a valid BIBD.
+        """
         elements = {x for block in bibd for x in block}
         k = len(next(iter(bibd)))
         b = len(bibd)

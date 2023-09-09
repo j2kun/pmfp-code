@@ -9,9 +9,8 @@ LARGE_RANDOM_PRIME = 50075507486621659027
 def trailing_zeros(n, z):
     """Return the count of trailing 0's in the binary representation of an int.
 
-    If the integer is zero, return z as a default. This assumes the input is
-    truncated from a larger non-zero number, so z describes the length of the
-    truncation.
+    If the integer is zero, return z as a default. This assumes the input is truncated
+    from a larger non-zero number, so z describes the length of the truncation.
     """
     if n == 0:
         return z
@@ -70,7 +69,7 @@ class LogLog:
         return self.estimator()
 
     def geometric_mean_estimate(self):
-        """Geometric mean of {m 2^b[0], ..., m 2^b[m-1]} with a bias correction
+        """Geometric mean of {m 2^b[0], ..., m 2^b[m-1]} with a bias correction.
 
         Simplified formula computing:
 
@@ -82,7 +81,7 @@ class LogLog:
         return 0.39701181 * self.m * 2 ** (float(sum(self.buckets)) / self.m)
 
     def harmonic_mean_estimate(self):
-        """Harmonic mean of {m 2^b[0], ..., m 2^b[m-1]} with a bias correction
+        """Harmonic mean of {m 2^b[0], ..., m 2^b[m-1]} with a bias correction.
 
         Simplified formula computing:
             m / ((1 / (m 2^b[0])) + ... + (1 / (m 2^b[m-1])))
@@ -92,7 +91,10 @@ class LogLog:
         return 0.72134752 * self.m**2 / sum(2 ** (-b) for b in self.buckets)
 
     def improved_raw_estimate(self):
-        """A modified harmonic mean, cf.  https://arxiv.org/abs/1702.01284."""
+        """A modified harmonic mean, cf.
+
+        https://arxiv.org/abs/1702.01284.
+        """
         q = self.non_index_bits
 
         # Here we're counting the frequency of each run-length of trailing zeros,

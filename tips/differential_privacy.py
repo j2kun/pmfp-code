@@ -1,5 +1,5 @@
-"""An implementation of the Laplacian mechanism for privately releasing a
-histogram where each underlying user contributes to a single bin."""
+"""An implementation of the Laplacian mechanism for privately releasing a histogram
+where each underlying user contributes to a single bin."""
 
 from abc import ABC
 from abc import abstractmethod
@@ -44,6 +44,7 @@ def next_power_of_two(x: float) -> float:
 
 def sample_geometric(rng, exponent):
     """Returns a sample drawn from the geometric distribution of parameter p =
+
     1 - e^-exponent, i.e., the number of Bernoulli trials until the first
     success where the success probability is 1 - e^-exponent.
     """
@@ -95,7 +96,8 @@ def sample_geometric(rng, exponent):
 
 
 def sample_two_sided_geometric(rng, exponent):
-    """Returns a sample drawn from a geometric distribution that is mirrored at
+    """Returns a sample drawn from a geometric distribution that is mirrored at.
+
     0. The non-negative part of the distribution's PDF matches the PDF of a
     geometric distribution of parameter p = 1 - e^-exponent that is
     shifted to the left by 1 and scaled accordingly.
@@ -113,10 +115,9 @@ def sample_two_sided_geometric(rng, exponent):
 
 
 class LaplaceMechanism(ABC):
-    """An interface for a random number generator that adds Laplacian noise to
-    a single number, generated from a 0-mean discrete Laplacian distribution,
-    i.e., with density h(y) proportional to exp(−|y|/scale), where scale is a
-    parameter.
+    """An interface for a random number generator that adds Laplacian noise to a single
+    number, generated from a 0-mean discrete Laplacian distribution, i.e., with density
+    h(y) proportional to exp(−|y|/scale), where scale is a parameter.
 
     Because the scale and the details of the mechanism depend on the privacy
     parameter, the method does not accept scale directly, but must instead
@@ -165,7 +166,7 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
     Follows the outline of
     https://github.com/google/differential-privacy/blob/main/common_docs/Secure_Noise_Generation.pdf
-    and the reference implementation at
+     and the reference implementation at
     https://github.com/google/differential-privacy/blob/c2376f0daaf406e1524b462accaa9cbb548fd6d1/java/main/com/google/privacy/differentialprivacy/LaplaceNoise.java
 
     For simplicity, we only support adding noise to integers. Adding noise to

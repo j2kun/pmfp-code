@@ -9,10 +9,8 @@ def to_gray_code(x: int) -> int:
 
 
 def from_gray_code(n: int) -> int:
-    """
-    Convert a Gray code to its corresponding index in the sequence of
-    Gray code iteration.
-    """
+    """Convert a Gray code to its corresponding index in the sequence of Gray code
+    iteration."""
     # This implementation is from John D. Cook, reproduced with
     # permission.
     # https://www.johndcook.com/blog/2020/09/08/inverse-gray-code/
@@ -29,22 +27,15 @@ class SettingsChange:
     """The numbers of binary settings."""
 
     num_settings: int
-
-    """
-    The choice of values for the settings, as a bit mask of length
-    num_settings.
-    """
+    """The choice of values for the settings, as a bit mask of length num_settings."""
     settings: int
-
     """Which bit was flipped last."""
     flipped_bit: Optional[int]
 
 
 def gray_code_iter(num_settings: int) -> Iterator[SettingsChange]:
-    """
-    Iterate over the range 1..2^num_settings, where each step in the
-    iteration modifies only a single bit at a time.
-    """
+    """Iterate over the range 1..2^num_settings, where each step in the iteration
+    modifies only a single bit at a time."""
     i = 0
     next_value = to_gray_code(i)
     yield SettingsChange(

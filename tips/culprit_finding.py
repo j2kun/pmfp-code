@@ -22,8 +22,11 @@ TestFn = Callable[[Change], bool]
 @dataclass(frozen=True)
 class Distribution:
     """A Distribution has length equal to one plus the number of changes considered
-    suspect. Each entry represents the probability that the change introduced the
-    culprit. The last entry represents the probability that there is no culprit."""
+    suspect.
+
+    Each entry represents the probability that the change introduced the culprit. The
+    last entry represents the probability that there is no culprit.
+    """
 
     probs: dict[Change, float]
     flake_rate: float
@@ -108,18 +111,17 @@ def next_change_to_test(
 ) -> Optional[Change]:
     """Determine the next change to test.
 
-    Do this by converting the (linearly ordered) distribution of culprit
-    probabilities into a cumulative distribution, and then finding the first
-    change for which the cumulative probability of a culprit preceding that
-    change is 0.5.
+    Do this by converting the (linearly ordered) distribution of culprit probabilities
+    into a cumulative distribution, and then finding the first change for which the
+    cumulative probability of a culprit preceding that change is 0.5.
 
-    This function makes optional an optimization from the Henderson paper,
-    which is to test the run preceding the one to try next, the idea being: if
-    you think the next change to test is going to fail, you'll get more
-    information by first trying the preceding test (which you think will pass)
-    and then trying the test that you think will fail. This takes advantage of
-    the information asymmetry of passing and failing tests. If tested_changes is
-    passed and nonempty, then it will apply this optimization.
+    This function makes optional an optimization from the Henderson paper, which is to
+    test the run preceding the one to try next, the idea being: if you think the next
+    change to test is going to fail, you'll get more information by first trying the
+    preceding test (which you think will pass) and then trying the test that you think
+    will fail. This takes advantage of the information asymmetry of passing and failing
+    tests. If tested_changes is passed and nonempty, then it will apply this
+    optimization.
     """
     epsilon = 1e-08
     # to avoid floating point roundoff errors

@@ -13,12 +13,12 @@ def respond_privately(true_answer: bool) -> bool:
 
 
 def aggregate_responses(responses: List[bool]) -> Tuple[float, float]:
-    """Return the estimated fraction of survey respondents that have a truthful
-    "Yes" answer to the survey question.
+    """Return the estimated fraction of survey respondents that have a truthful "Yes"
+    answer to the survey question.
 
-    If p is the true fraction of respondents with a "Yes" answer, then in
-    expectation we will see (1/4)(1-p) + (3/4)p = (1/4) + p/2 "Yes" responses.
-    This function solves for p.
+    If p is the true fraction of respondents with a "Yes" answer, then in expectation we
+    will see (1/4)(1-p) + (3/4)p = (1/4) + p/2 "Yes" responses. This function solves for
+    p.
     """
     yes_response_count = sum(responses)
     n = len(responses)

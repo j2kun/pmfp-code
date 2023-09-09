@@ -110,8 +110,8 @@ def sobel_optimized(matrix: Matrix) -> Matrix:
 def np_convolve2d(matrix: np.ndarray, kernel: np.ndarray):
     """An optimized 2d convolution routine using numpy.
 
-    Kudos to the many answers on StackOverflow describing the use of
-    as_strided and einsum.
+    Kudos to the many answers on StackOverflow describing the use of as_strided and
+    einsum.
     """
     sub_shape = kernel.shape
     view_shape = tuple(np.subtract(matrix.shape, sub_shape) + 1) + sub_shape

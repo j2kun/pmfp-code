@@ -13,7 +13,8 @@ class EloSkill:
 
 
 def standard_normal_cumulative_density(x):
-    """Cumulative density function for a normal distribution with zero mean and variance 1."""
+    """Cumulative density function for a normal distribution with zero mean and variance
+    1."""
     return (1.0 + erf(x / sqrt(2.0))) / 2.0
 
 

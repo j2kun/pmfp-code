@@ -69,10 +69,8 @@ class Applicant(ABC):
 @dataclass
 class Student(Applicant):
     id: int
-
     """Preferences on ResidencyProgram.id, from highest priority to lowest priority."""
     preferences: List[int]
-
     """The highest priority program this student has yet to be rejected from."""
     best_unrejected: int = 0
 
@@ -190,15 +188,16 @@ class Couple(Applicant):
 @dataclass
 class ResidencyProgram:
     id: int
-
     """Preferences on Student.id, from highest priority to lowest priority."""
     preferences: List[int]
-
     """The number of open spots."""
     capacity: int
 
     def select(self, pool: Set[Student]) -> Set[Student]:
-        """Select students from `pool` by priority. Return unchosen students."""
+        """Select students from `pool` by priority.
+
+        Return unchosen students.
+        """
         chosen = heapq.nsmallest(
             self.capacity,
             pool,
@@ -207,7 +206,8 @@ class ResidencyProgram:
         return pool - set(chosen)
 
     def prefers(self, matching: "Matching", *students: Student) -> bool:
-        """Return True if program prefers all input students to its match in `matching`."""
+        """Return True if program prefers all input students to its match in
+        `matching`."""
         student_set = set(students)
         displ = self.select(student_set | matching.students_matched_to(self))
         return not (student_set & displ)

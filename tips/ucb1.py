@@ -46,10 +46,9 @@ def ucb1(actions: List[Action], reward: RewardFn) -> Generator[Action, None, Non
     def upperBound(step: int, num_plays: int) -> float:
         """Return the margin of the confidence bound from its mean.
 
-        This method does not need to know the expected value of the action
-        being attempted. The confidence bound depends only on the number of
-        total actions attempted and the number of times one particular action
-        has been tried.
+        This method does not need to know the expected value of the action being
+        attempted. The confidence bound depends only on the number of total actions
+        attempted and the number of times one particular action has been tried.
         """
         return math.sqrt(2 * math.log(step) / num_plays)
 

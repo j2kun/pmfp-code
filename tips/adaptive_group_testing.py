@@ -48,7 +48,8 @@ def next_group_to_test(
     test_subjects: List[TestSubject],
     defective_count_bound: int,
 ) -> Tuple[List[TestSubject], List[TestSubject]]:
-    """Return the next group to test according to the Genralized Binary Splitting Algorithm.
+    """Return the next group to test according to the Genralized Binary Splitting
+    Algorithm.
 
     Arguments:
       - test_subjects: a list of test subjects remaining to test

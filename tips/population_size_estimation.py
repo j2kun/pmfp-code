@@ -3,9 +3,8 @@ from typing import Tuple
 
 
 def estimate_size(sample: List[int]) -> float:
-    """
-    Estimate the size of a set {1, 2, ..., n}, given a uniform random sample
-    of its members without replacement.
+    """Estimate the size of a set {1, 2, ..., n}, given a uniform random sample of its
+    members without replacement.
 
     Args:
       - sample: a uniform random subset of the population

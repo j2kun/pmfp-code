@@ -63,14 +63,13 @@ T = TypeVar("T")
 def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
     """Find the data entries that occur at least len(values) / k times.
 
-    This computes an approximate "heavy hitters" function, whereby it
-    guarantees to return all data entries that occur at least len(values) / k
-    times, but it may return some values that occur at least len(values) / (2k)
-    times. It is guaranteed with high probability not to return any values that
-    occur fewer than len(values) / (2k) times.
+    This computes an approximate "heavy hitters" function, whereby it guarantees to
+    return all data entries that occur at least len(values) / k times, but it may return
+    some values that occur at least len(values) / (2k) times. It is guaranteed with high
+    probability not to return any values that occur fewer than len(values) / (2k) times.
 
-    In exchange for this approximation, this method uses only O(k) space,
-    and O(log(k)) time per data entry.
+    In exchange for this approximation, this method uses only O(k) space, and O(log(k))
+    time per data entry.
     """
     heap: List[Tuple[int, T]] = []
     candidates: Set[T] = set()

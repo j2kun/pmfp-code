@@ -128,9 +128,8 @@ def random_dag_with_loop(
     dag_builder=random_dag(num_nodes=integers(min_value=1, max_value=50)),
     loop_member_picker=booleans(),
 ):
-    """Generate a random DAG, then pick a random subset of nodes and form a
-    directed loop.
-    """
+    """Generate a random DAG, then pick a random subset of nodes and form a directed
+    loop."""
     dag = draw(dag_builder)
 
     # the cycle must have at least one node, and the picker may always return

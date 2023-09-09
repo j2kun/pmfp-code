@@ -17,9 +17,8 @@ Polygon = List[Point]
 def is_left(point: Point, l0: Point, l1: Point) -> float:
     """Determine if a point is to the left of the line through l0 and l1.
 
-    Returns 0 if the point is on the line, a positive number if the point is to
-    the left of the line, and a negative number if the point is on the right of
-    the line.
+    Returns 0 if the point is on the line, a positive number if the point is to the left
+    of the line, and a negative number if the point is on the right of the line.
 
     The line is oriented in the direction from l0 to l1.
     """
