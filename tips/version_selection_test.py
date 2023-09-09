@@ -1,10 +1,11 @@
+from itertools import groupby
+from itertools import takewhile
+
 from hypothesis import assume
 from hypothesis import given
 from hypothesis.strategies import booleans
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
-from itertools import groupby
-from itertools import takewhile
 import pytest
 
 from tips.version_selection import PackageVersion

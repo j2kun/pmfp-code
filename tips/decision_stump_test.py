@@ -1,7 +1,7 @@
 import itertools
-import pytest
 
 import numpy as np
+import pytest
 
 from tips.decision_stump import DecisionStump
 from tips.decision_stump import compute_error

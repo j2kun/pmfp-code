@@ -1,6 +1,5 @@
 import math
 import random
-
 from typing import Iterable
 from typing import List
 from typing import Tuple

@@ -1,8 +1,9 @@
+import math
+
 from assertpy import assert_that
 from hypothesis import given
-from hypothesis.strategies import lists
 from hypothesis.strategies import integers
-import math
+from hypothesis.strategies import lists
 
 import tips.adaptive_group_testing as adaptive_group_testing
 

@@ -1,12 +1,13 @@
 from datetime import timedelta
+
 from hypothesis import assume
 from hypothesis import example
 from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 
-from tips.error_budget import error_budget_remaining
 from tips.error_budget import SloMetric
+from tips.error_budget import error_budget_remaining
 
 
 def test_no_errors_no_requests():

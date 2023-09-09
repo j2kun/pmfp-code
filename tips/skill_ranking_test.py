@@ -1,7 +1,7 @@
 from collections import Counter
+import random
 from statistics import NormalDist
 from statistics import mean
-import random
 
 from hypothesis import assume
 from hypothesis import given

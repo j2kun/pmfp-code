@@ -1,11 +1,11 @@
 import math
 
-from hypothesis import given
 from hypothesis import example
+from hypothesis import given
 from hypothesis.strategies import integers
 
-from tips.randomized_response import respond_privately
 from tips.randomized_response import aggregate_responses
+from tips.randomized_response import respond_privately
 
 
 @given(integers(min_value=25, max_value=1000), integers(min_value=25, max_value=1000))

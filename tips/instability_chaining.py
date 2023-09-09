@@ -2,6 +2,8 @@
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+import heapq
+import logging
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -12,9 +14,6 @@ from typing import Set
 from typing import Tuple
 from typing import TypeVar
 from typing import cast
-import heapq
-import logging
-
 
 T = TypeVar("T")
 

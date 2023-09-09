@@ -1,8 +1,8 @@
+import hypothesis
 from hypothesis import given
 from hypothesis.strategies import composite
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
-import hypothesis
 import numpy as np
 import pytest
 

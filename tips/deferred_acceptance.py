@@ -1,14 +1,14 @@
 """An implementation of the student-proposing deferred acceptance algorithm."""
 from dataclasses import dataclass
 from dataclasses import field
+import heapq
+import itertools
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
-import heapq
-import itertools
 
 
 @dataclass

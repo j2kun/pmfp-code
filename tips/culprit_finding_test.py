@@ -7,8 +7,8 @@ from hypothesis.strategies import floats
 from hypothesis.strategies import integers
 from hypothesis.strategies import lists
 
-from tips.culprit_finding import find_culprits
 from tips.culprit_finding import Change
+from tips.culprit_finding import find_culprits
 
 
 def make_test_fn(culprit: Change, true_flake_rate: float):

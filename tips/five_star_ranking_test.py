@@ -2,7 +2,6 @@ from assertpy import assert_that
 
 import tips.five_star_ranking as five_star_ranking
 
-
 TOLERANCE = 1e-10
 
 

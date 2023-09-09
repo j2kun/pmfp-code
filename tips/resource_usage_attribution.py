@@ -4,6 +4,7 @@ from typing import List
 from typing import TypeVar
 from typing import Union
 from typing import cast
+
 import numpy
 
 EPSILON = 1e-10

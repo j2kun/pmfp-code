@@ -3,7 +3,6 @@ from datetime import timedelta
 from typing import List
 from typing import Optional
 
-
 # assume minute-aligned samples
 TimeSeries = List[int]
 
@@ -55,9 +54,10 @@ def error_budget_remaining(
 if __name__ == "__main__":
     from datetime import datetime
     from itertools import accumulate
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as dates
     import random
+
+    import matplotlib.dates as dates
+    import matplotlib.pyplot as plt
 
     random.seed(123)
     samples = 1000

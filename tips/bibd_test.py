@@ -1,10 +1,11 @@
 from dataclasses import replace
+
 import pytest
 
 from tips.bibd import ALL_BIBDS
 from tips.bibd import BIBDParams
-from tips.bibd import bibd_15_3_1
 from tips.bibd import bibd_8_4_3
+from tips.bibd import bibd_15_3_1
 from tips.bibd import is_bibd
 
 

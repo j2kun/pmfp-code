@@ -8,7 +8,6 @@ from typing import Tuple
 
 from pysat.solvers import Glucose4
 
-
 Name = str
 Version = int
 

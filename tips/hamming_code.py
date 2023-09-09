@@ -5,7 +5,6 @@
 from bitstring import BitStream
 from bitstring import Bits
 
-
 encoder = [0, 15, 19, 28, 37, 42, 54, 57, 70, 73, 85, 90, 99, 108, 112, 127]
 syndrome_table = [0, 1, 2, 16, 4, 32, 64, 8]
 

@@ -2,9 +2,9 @@ from collections import Counter
 import math
 import random
 
-from hypothesis import strategies as st
-from hypothesis import given
 from hypothesis import example
+from hypothesis import given
+from hypothesis import strategies as st
 import numpy as np
 import pytest
 

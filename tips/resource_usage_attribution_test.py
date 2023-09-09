@@ -1,8 +1,8 @@
 from assertpy import assert_that
 from hypothesis import HealthCheck
+from hypothesis.extra.numpy import arrays
 from hypothesis import given
 from hypothesis import settings
-from hypothesis.extra.numpy import arrays
 from hypothesis.strategies import composite
 from hypothesis.strategies import decimals
 import numpy

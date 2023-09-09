@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from more_itertools import pairwise
 from typing import List
+
+from more_itertools import pairwise
 
 
 @dataclass(frozen=True)

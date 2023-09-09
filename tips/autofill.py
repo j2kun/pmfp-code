@@ -13,8 +13,8 @@ from typing import Iterable
 from typing import List
 from typing import Tuple
 
-from shapely import geometry as geo
 import networkx
+from shapely import geometry as geo
 
 Point = Tuple[float, float]
 GratingSegment = Tuple[Point, Point]

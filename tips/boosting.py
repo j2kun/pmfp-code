@@ -1,11 +1,10 @@
 """An implementation of AdaBoost for binary classification."""
 
+import math
+import random
 from typing import Callable
 from typing import Iterable
 from typing import Iterator
-import math
-import random
-
 
 LabeledExample = tuple[list[float], int]
 Dataset = list[LabeledExample]
