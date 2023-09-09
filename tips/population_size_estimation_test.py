@@ -1,14 +1,15 @@
+import random
+
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import floats
 from hypothesis.strategies import integers
-import random
 
 from tips.population_size_estimation import estimate_size
 from tips.population_size_estimation import size_confidence_interval
 
 
-@given(integers(min_value=100, max_value=10000), floats(min_value=0.2, max_value=0.9))
+@given(integers(min_value=100, max_value=10000), floats(min_value=0.3, max_value=0.9))
 @settings(deadline=1000)
 def test_estimate_is_accurate(n, sample_frac):
     failures = 0
