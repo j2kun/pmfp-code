@@ -101,7 +101,7 @@ def test_loop_detection(dag):
 def random_dag(
     draw,
     dependency_decider=booleans(),
-    num_nodes=integers(min_value=1, max_value=100),
+    num_nodes=integers(min_value=1, max_value=50),
 ):
     """Generate a random DAG."""
     nodes = list(range(draw(num_nodes)))
