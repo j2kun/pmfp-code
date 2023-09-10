@@ -42,5 +42,5 @@ def size_confidence_interval(
     """
     k = len(sample)
     m = max(sample)
-    B = 1 / confidence ** (1 / k)
+    B = 1 / (1 - confidence) ** (1 / k)
     return (m, B * m)
