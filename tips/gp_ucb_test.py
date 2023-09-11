@@ -1,7 +1,6 @@
 import numpy as np
 
-from tips.gp_ucb import GaussianProcessRegressor
-from tips.gp_ucb import GpUcb
+from tips.gp_ucb import GaussianProcessRegressor, GpUcb
 
 TRAIN_X = np.array(
     [
@@ -11,13 +10,13 @@ TRAIN_X = np.array(
         [0.4, 0.5, 0.6, 0.7, 0.8],
         [0.5, 0.6, 0.7, 0.8, 0.9],
         [0.6, 0.7, 0.8, 0.9, 1.0],
-    ]
+    ],
 )
 TRAIN_Y = np.array([0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
 TEST_X = np.array(
     [
         [0.11, 0.19, 0.32, 0.38, 0.495],
-    ]
+    ],
 )
 
 

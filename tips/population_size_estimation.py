@@ -1,11 +1,9 @@
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 
 
 def estimate_size(sample: List[int]) -> float:
-    """
-    Estimate the size of a set {1, 2, ..., n}, given a uniform random sample
-    of its members without replacement.
+    """Estimate the size of a set {1, 2, ..., n}, given a uniform random sample of its
+    members without replacement.
 
     Args:
       - sample: a uniform random subset of the population
@@ -19,7 +17,8 @@ def estimate_size(sample: List[int]) -> float:
 
 
 def size_confidence_interval(
-    sample: List[int], confidence: float
+    sample: List[int],
+    confidence: float,
 ) -> Tuple[float, float]:
     """Return a confidence interval analogue of estimate_size.
 
@@ -43,5 +42,5 @@ def size_confidence_interval(
     """
     k = len(sample)
     m = max(sample)
-    B = 1 / confidence ** (1 / k)
+    B = 1 / (1 - confidence) ** (1 / k)
     return (m, B * m)

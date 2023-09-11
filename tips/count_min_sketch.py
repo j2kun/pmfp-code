@@ -1,13 +1,7 @@
-from typing import Hashable
-from typing import Iterable
-from typing import List
-from typing import Set
-from typing import Tuple
-from typing import TypeVar
 import heapq
 import math
 import random
-
+from typing import Hashable, Iterable, List, Set, Tuple, TypeVar
 
 LARGE_RANDOM_PRIME = 175927138426321871
 
@@ -47,7 +41,7 @@ class CountMinSketch:
             [
                 self.sketch[i][self.hashes[i](hash(value)) % self.width]
                 for i, h in enumerate(self.hashes)
-            ]
+            ],
         )
 
     def __len__(self):
@@ -64,14 +58,13 @@ T = TypeVar("T")
 def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
     """Find the data entries that occur at least len(values) / k times.
 
-    This computes an approximate "heavy hitters" function, whereby it
-    guarantees to return all data entries that occur at least len(values) / k
-    times, but it may return some values that occur at least len(values) / (2k)
-    times. It is guaranteed with high probability not to return any values that
-    occur fewer than len(values) / (2k) times.
+    This computes an approximate "heavy hitters" function, whereby it guarantees to
+    return all data entries that occur at least len(values) / k times, but it may return
+    some values that occur at least len(values) / (2k) times. It is guaranteed with high
+    probability not to return any values that occur fewer than len(values) / (2k) times.
 
-    In exchange for this approximation, this method uses only O(k) space,
-    and O(log(k)) time per data entry.
+    In exchange for this approximation, this method uses only O(k) space, and O(log(k))
+    time per data entry.
     """
     heap: List[Tuple[int, T]] = []
     candidates: Set[T] = set()
@@ -104,7 +97,7 @@ def heavy_hitters(data: Iterable[T], k: int) -> Set[T]:
             candidates.add(value)
             heapq.heappush(heap, (est_count, value))
 
-    return set([x for (c, x) in heap])
+    return {x for (c, x) in heap}
 
 
 if __name__ == "__main__":

@@ -1,15 +1,10 @@
-from collections import Counter
 import random
+from collections import Counter
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import floats
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
-from hypothesis.strategies import text
+from hypothesis import given, settings
+from hypothesis.strategies import floats, integers, lists, text
 
-from tips.count_min_sketch import CountMinSketch
-from tips.count_min_sketch import heavy_hitters
+from tips.count_min_sketch import CountMinSketch, heavy_hitters
 
 
 @settings(deadline=2000)
@@ -22,7 +17,7 @@ def test_sketch_error_guarantee_achieved(values, accuracy):
     for value in values:
         sketch.increment(value)
 
-    for (value, true_count) in Counter(values).items():
+    for value, true_count in Counter(values).items():
         est_count = sketch.count(value)
         assert true_count <= est_count
         assert est_count <= true_count + sketch.additive_error_guarantee()

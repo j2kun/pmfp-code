@@ -1,14 +1,10 @@
 """An integer linear program that schedules a sports season."""
-from abc import ABC
-from abc import abstractmethod
-from collections import defaultdict
-from collections.abc import Callable
-from collections.abc import Iterable
-from dataclasses import dataclass
-from dataclasses import replace
-from typing import Optional
-from typing import TypeVar
 import itertools
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, replace
+from typing import Optional, TypeVar
 
 from ortools.linear_solver import pywraplp
 
@@ -33,9 +29,9 @@ Schedule = list[Game]
 class PreferenceRule(ABC):
     """A PreferenceRule represents a 'would like' constraint in the scheduler.
 
-    The rule is responsible for modifying the model by adding necessary
-    variables and constraints, and then returns a set of variables and a
-    penalty to be optimized for in the solver objective.
+    The rule is responsible for modifying the model by adding necessary variables and
+    constraints, and then returns a set of variables and a penalty to be optimized for
+    in the solver objective.
     """
 
     @abstractmethod
@@ -45,12 +41,13 @@ class PreferenceRule(ABC):
 
     @abstractmethod
     def build_model(
-        self, solver, game_vars: dict[Game, pywraplp.Variable]
+        self,
+        solver,
+        game_vars: dict[Game, pywraplp.Variable],
     ) -> pywraplp.Variable:
-        """Make necessary model changes for one subset of games, and output a
-        single variable to be included in the objective. This variable is
-        interpreted as a count or severity of violating the rule, and will be
-        minimized.
+        """Make necessary model changes for one subset of games, and output a single
+        variable to be included in the objective. This variable is interpreted as a
+        count or severity of violating the rule, and will be minimized.
 
         Note: mutates the input `solver` object.
         """
@@ -69,7 +66,8 @@ def partition_by(
 ) -> dict[K, dict[Game, V]]:
     """Partitions the given Game dict into sub dictionaries using the given keys.
 
-    Values from multiple keys are merged in the final output dict."""
+    Values from multiple keys are merged in the final output dict.
+    """
     partitions: defaultdict[K, dict[Game, V]] = defaultdict(dict)
     keys = list(keys) if keys else []
     if key:
@@ -100,10 +98,12 @@ def optimal_schedule(
 
     # generate indices for efficient model building
     vars_by_team = partition_by(
-        game_vars, keys=[lambda g: g.home_team, lambda g: g.away_team]
+        game_vars,
+        keys=[lambda g: g.home_team, lambda g: g.away_team],
     )
     vars_by_matchup = partition_by(
-        game_vars, key=lambda g: tuple(sorted([g.home_team, g.away_team]))
+        game_vars,
+        key=lambda g: tuple(sorted([g.home_team, g.away_team])),
     )
 
     # Exactly one game for a matchup is chosen.
@@ -146,18 +146,18 @@ def optimal_schedule(
 
 
 class MinimizeThreeAwayGames(PreferenceRule):
-    """A rule that incentivizes against a team having three away games on
-    consecutive weeks."""
+    """A rule that incentivizes against a team having three away games on consecutive
+    weeks."""
 
     def __init__(self, penalty: int = 10):
         self.penalty = penalty
 
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
-        """For each week and team, yield the list of away games for that week
-        and the subsequent two weeks."""
+        """For each week and team, yield the list of away games for that week and the
+        subsequent two weeks."""
         # index by away team and week
         index: defaultdict[int, defaultdict[Team, list[Game]]] = defaultdict(
-            lambda: defaultdict(list)
+            lambda: defaultdict(list),
         )
         for game in all_games:
             index[game.week][game.away_team].append(game)
@@ -169,15 +169,20 @@ class MinimizeThreeAwayGames(PreferenceRule):
                     yield games + index[week + 1][team] + index[week + 2][team]
 
     def build_model(self, solver, game_vars) -> Iterable[list[pywraplp.Variable]]:
-        """Create a new variable that is constrained to be 1 if there are three
-        away games in the given variables. Note a separate constraint enforces
-        that only one game is played per (team, week). This indicates an
-        instance of a violation of the "no three away games in a row" rule."""
-        which_weeks = list(sorted(list(set(str(g.week) for g in game_vars))))
+        """Create a new variable that is constrained to be 1 if there are three away
+        games in the given variables.
+
+        Note a separate constraint enforces that only one game is played per (team,
+        week). This indicates an instance of a violation of the "no three away games in
+        a row" rule.
+        """
+        which_weeks = list(sorted(list({str(g.week) for g in game_vars})))
         team = next(iter(game_vars.keys())).away_team
         assert len(which_weeks) == 3  # or else subset generator is broken
         violation_var = solver.IntVar(
-            0, 1, f"ThreeAwayGames_{team}_{','.join(which_weeks)}"
+            0,
+            1,
+            f"ThreeAwayGames_{team}_{','.join(which_weeks)}",
         )
 
         # A modeling technique for an implication. The RHS is at most three due
@@ -194,19 +199,19 @@ class MinimizeThreeAwayGames(PreferenceRule):
 
 
 class NoFarTravel(PreferenceRule):
-    """A rule that incentivizes against a team having to travel far in two
-    consecutive weeks."""
+    """A rule that incentivizes against a team having to travel far in two consecutive
+    weeks."""
 
     def __init__(self, far_pairs: Iterable[tuple[Team, Team]], penalty: int = 1):
-        self.far_pairs = set(tuple(sorted(x)) for x in far_pairs)
+        self.far_pairs = {tuple(sorted(x)) for x in far_pairs}
         self.penalty = penalty
 
     def game_subset_generator(self, all_games: Iterable[Game]) -> Iterable[list[Game]]:
-        """For each week and team, yield the list of games for that week
-        and the subsequent week."""
+        """For each week and team, yield the list of games for that week and the
+        subsequent week."""
         # index by week and team
         index: defaultdict[int, defaultdict[Team, list[Game]]] = defaultdict(
-            lambda: defaultdict(list)
+            lambda: defaultdict(list),
         )
         for game in all_games:
             index[game.week][game.away_team].append(game)
@@ -219,9 +224,9 @@ class NoFarTravel(PreferenceRule):
                     yield games + index[week + 1][team]
 
     def build_model(self, solver, game_vars) -> Iterable[list[pywraplp.Variable]]:
-        """Create new variables constrained to be 1 if a two games in subsequent
-        weeks involve traveling far."""
-        which_weeks = list(sorted(list(set(g.week for g in game_vars))))
+        """Create new variables constrained to be 1 if a two games in subsequent weeks
+        involve traveling far."""
+        which_weeks = list(sorted(list({g.week for g in game_vars})))
         assert len(which_weeks) == 2  # or else subset generator is broken
         week1, week2 = which_weeks
 

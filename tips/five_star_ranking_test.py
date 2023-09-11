@@ -2,7 +2,6 @@ from assertpy import assert_that
 
 import tips.five_star_ranking as five_star_ranking
 
-
 TOLERANCE = 1e-10
 
 
@@ -43,7 +42,9 @@ def test_thumbs_up_thumbs_down_with_prior_and_utility():
 
     expected_score = (-4.0 * 20 + 3 * 20) / 40
     actual_score = five_star_ranking.score(
-        ratings=ratings, rating_prior=prior, rating_utility=utility
+        ratings=ratings,
+        rating_prior=prior,
+        rating_utility=utility,
     )
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)
@@ -57,7 +58,9 @@ def test_five_star_rating():
     total = 41
     expected_score = (-44.0 + -15 + 16 + 50) / total
     actual_score = five_star_ranking.score(
-        ratings=ratings, rating_prior=prior, rating_utility=utility
+        ratings=ratings,
+        rating_prior=prior,
+        rating_utility=utility,
     )
 
     assert_that(expected_score).is_close_to(actual_score, TOLERANCE)

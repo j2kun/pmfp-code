@@ -1,16 +1,11 @@
-from collections import Counter
-from statistics import NormalDist
-from statistics import mean
 import random
+from collections import Counter
+from statistics import NormalDist, mean
 
-from hypothesis import assume
-from hypothesis import given
-from hypothesis import settings
+from hypothesis import assume, given, settings
 from hypothesis.strategies import integers
 
-from tips.skill_ranking import EloSkill
-from tips.skill_ranking import elo_player1_win_prob
-from tips.skill_ranking import elo_update
+from tips.skill_ranking import EloSkill, elo_player1_win_prob, elo_update
 
 
 @settings(deadline=2000)
@@ -39,7 +34,7 @@ def test_two_player_tournament(player1_skill_mean, player2_skill_mean):
     print([int(x > y) for (x, y) in outcomes])
     print(Counter([int(x > y) for (x, y) in outcomes]))
 
-    for (p1_perf, p2_perf) in outcomes:
+    for p1_perf, p2_perf in outcomes:
         outcome = 1 if p1_perf > p2_perf else -1
         if abs(p1_perf - p2_perf) < 1e-03:
             outcome = 0  # a tie
@@ -85,9 +80,9 @@ def test_n_player_tournament():
             zip(
                 perf_dists[i].samples(3),
                 perf_dists[j].samples(3),
-            )
+            ),
         )
-        for (p1_perf, p2_perf) in outcomes:
+        for p1_perf, p2_perf in outcomes:
             outcome = 1 if p1_perf > p2_perf else -1
             if abs(p1_perf - p2_perf) < 1e-03:
                 outcome = 0  # a tie

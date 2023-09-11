@@ -1,13 +1,9 @@
 from collections import deque
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Callable
-from typing import Dict
-from typing import Iterable
-from typing import Tuple
+from typing import Callable, Dict, Iterable, Tuple
 
 from pysat.solvers import Glucose4
-
 
 Name = str
 Version = int
@@ -43,26 +39,23 @@ def select_dependent_versions(
     while to_process:
         next_package = to_process.pop()
         processed.add(next_package)
+        """At most one version of any package may be installed.  While SAT solvers admit
+        many ways to model "cardinality constraints", we choose a simple "pairwise"
+        model that adds the constraint.
 
-        """
-        At most one version of any package may be installed.  While SAT 
-        solvers admit many ways to model "cardinality constraints", we
-        choose a simple "pairwise" model that adds the constraint
+        v1 => NOT v2
 
-            v1 => NOT v2
+        for two distinct versions v1, v2, of the same package. This is equivalent to
 
-        for two distinct versions v1, v2, of the same package. 
-        This is equivalent to
-
-            (NOT v1) OR (NOT v2)
+        (NOT v1) OR (NOT v2)
         """
         versions = [p.package_id for p in package_index(next_package.name).values()]
-        for (v1, v2) in combinations(versions, 2):
+        for v1, v2 in combinations(versions, 2):
             clauses.append([-v1, -v2])
 
         """
-        For each dependency DEP, we need a clause that says 
-        "if next_package is chosen, one of DEP's allowed versions 
+        For each dependency DEP, we need a clause that says
+        "if next_package is chosen, one of DEP's allowed versions
         must be installed."
 
             next_package => (DEP_v1 OR DEP_v2 OR ...)

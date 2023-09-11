@@ -1,24 +1,24 @@
-from collections import Counter
 import math
 import random
+from collections import Counter
 
-from hypothesis import strategies as st
-from hypothesis import given
-from hypothesis import example
 import numpy as np
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 
-from tips.differential_privacy import InsecureLaplaceMechanism
-from tips.differential_privacy import SecureLaplaceMechanism
-from tips.differential_privacy import next_power_of_two
-from tips.differential_privacy import privatize_histogram
-from tips.differential_privacy import sample_geometric
+from tips.differential_privacy import (
+    InsecureLaplaceMechanism,
+    SecureLaplaceMechanism,
+    next_power_of_two,
+    privatize_histogram,
+    sample_geometric,
+)
 
 
 def distributions_are_close(hist1, hist2, L2_tolerance):
-    """
-     Decides whether two sets of random samples were likely drawn from similar
-     discrete distributions.
+    """Decides whether two sets of random samples were likely drawn from similar
+    discrete distributions.
 
      The distributions are considered similar if the l2 distance between them
      is less than half the specified l2 tolerance t. Otherwise, if the distance
@@ -60,15 +60,14 @@ def distributions_are_close(hist1, hist2, L2_tolerance):
 def dp_test_statistic(s1, s2, privacy_parameter):
     """Compute the epsilon-delta differential privacy test statistic.
 
-    This checks whether the differential privacy mechanism, which outputs
-    samples s1 and s2 from two neighboring databases, approximately satisfies
-    differential privacy. Because the code in this Tip focuses on epsilon-DP,
-    not epsilon-delta DP, but epsilon-DP is not testable in general, we resort
-    to testing for epsilon-delta DP with a very small delta, hard coded in the
-    tests that call this function.
+    This checks whether the differential privacy mechanism, which outputs samples s1 and
+    s2 from two neighboring databases, approximately satisfies differential privacy.
+    Because the code in this Tip focuses on epsilon-DP, not epsilon-delta DP, but
+    epsilon-DP is not testable in general, we resort to testing for epsilon-delta DP
+    with a very small delta, hard coded in the tests that call this function.
 
-    This statistic is from Gilbert-McMillan 2018, "Property Testing for
-    Differential Privacy", Theorem 14 and Algorithm 2.
+    This statistic is from Gilbert-McMillan 2018, "Property Testing for Differential
+    Privacy", Theorem 14 and Algorithm 2.
     https://arxiv.org/abs/1806.06427
 
     Also see a reference implementation at
@@ -94,7 +93,7 @@ def make_mechanisms():
         allow_infinity=False,
         allow_nan=False,
         exclude_min=True,
-    )
+    ),
 )
 @example(float(2**-1023))
 @example(float(2**1023))
@@ -127,7 +126,7 @@ def test_privatize_single_number(name, mechanism):
             [
                 privatize_histogram([num], privacy_parameter, mechanism)[0]
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_outputs = sample(number)
@@ -135,9 +134,11 @@ def test_privatize_single_number(name, mechanism):
         [
             max(0, round(x))
             for x in np.random.default_rng(1).laplace(
-                number, 1.0 / privacy_parameter, sample_size
+                number,
+                1.0 / privacy_parameter,
+                sample_size,
             )
-        ]
+        ],
     )
     assert distributions_are_close(sample_outputs, baseline, 1e-02)
 
@@ -154,7 +155,7 @@ def test_privatize_single_bin_histogram(name, mechanism):
             [
                 tuple(privatize_histogram(hist, privacy_parameter, mechanism))
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_hist1 = sample(hist1)
@@ -193,7 +194,7 @@ def test_privatize_multi_bin_histogram(name, mechanism, neighboring_hists):
             [
                 tuple(privatize_histogram(hist, privacy_parameter, mechanism))
                 for _ in range(sample_size)
-            ]
+            ],
         )
 
     sample_hist1 = sample(hist1)

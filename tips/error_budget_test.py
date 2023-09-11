@@ -1,12 +1,9 @@
 from datetime import timedelta
-from hypothesis import assume
-from hypothesis import example
-from hypothesis import given
-from hypothesis.strategies import floats
-from hypothesis.strategies import integers
 
-from tips.error_budget import error_budget_remaining
-from tips.error_budget import SloMetric
+from hypothesis import assume, example, given
+from hypothesis.strategies import floats, integers
+
+from tips.error_budget import SloMetric, error_budget_remaining
 
 
 def test_no_errors_no_requests():
@@ -49,7 +46,7 @@ def test_error_rate_just_below_budget(budget, measurement_index):
         window_minutes=10,
     )
 
-    assert actual.violated == False
+    assert actual.violated is False
     assert actual.budget_growth_rate == 0
 
 
@@ -70,7 +67,7 @@ def test_negative_budget_growth_rate(budget, error_rate, measurement_index):
         window_minutes=10,
     )
 
-    assert actual.violated == False
+    assert actual.violated is False
     assert actual.budget_growth_rate > 0
 
 
@@ -79,7 +76,7 @@ def test_positive_budget_growth_rate():
     errors = list(range(1000))
     actual = error_budget_remaining(requests[:21], errors[:21], 0.8, window_minutes=10)
 
-    assert actual.violated == False
+    assert actual.violated is False
     assert actual.budget_growth_rate == -1
 
     # 780 minutes because our budget is 800 errors,

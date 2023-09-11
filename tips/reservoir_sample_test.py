@@ -1,13 +1,15 @@
-from collections import defaultdict
 import itertools
 import math
 import random
+from collections import defaultdict
 
 import pytest
 
-from tips.reservoir_sample import algorithm_L
-from tips.reservoir_sample import sample_without_replacement
-from tips.reservoir_sample import weighted_sample_with_replacement
+from tips.reservoir_sample import (
+    algorithm_L,
+    sample_without_replacement,
+    weighted_sample_with_replacement,
+)
 
 
 # used to assert the expected probability of each outcome
@@ -46,12 +48,13 @@ def test_reservoir_sample_probability(sampler):
 
     assert len(counter) == int(1 / expected_weight)
 
-    expected = dict(
-        ((i, j, k), expected_weight)
+    expected = {
+        (i, j, k): expected_weight
         for (i, j, k) in itertools.combinations(stream, sample_size)
-    )
+    }
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int,
+        ((result, counter[result] / experiment_count) for result in counter),
     )
 
     total_variation = total_variation_distance(expected, actual)
@@ -77,14 +80,15 @@ def test_weighted_sample_with_replacement_uniform_weights():
 
     assert len(counter) == int(1 / expected_weight)
 
-    expected = dict(
-        ((i, j, k), expected_weight)
+    expected = {
+        (i, j, k): expected_weight
         for (i, _) in stream
         for (j, _) in stream
         for (k, _) in stream
-    )
+    }
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int,
+        ((result, counter[result] / experiment_count) for result in counter),
     )
     total_variation = total_variation_distance(expected, actual)
     assert total_variation < 0.01
@@ -122,15 +126,16 @@ def test_weighted_sample_with_replacement_nonuniform_weights():
         counter[result] += 1
 
     weight_sum = sum(x[1] for x in stream)
-    expected = dict(
-        ((i, j, k), i_weight * j_weight * k_weight / weight_sum**sample_size)
+    expected = {
+        (i, j, k): i_weight * j_weight * k_weight / weight_sum**sample_size
         for (i, i_weight) in stream
         for (j, j_weight) in stream
         for (k, k_weight) in stream
-    )
+    }
 
     actual = defaultdict(
-        int, ((result, counter[result] / experiment_count) for result in counter)
+        int,
+        ((result, counter[result] / experiment_count) for result in counter),
     )
 
     total_variation = total_variation_distance(expected, actual)

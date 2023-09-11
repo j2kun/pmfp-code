@@ -1,14 +1,9 @@
 import random
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import floats
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
+from hypothesis import given, settings
+from hypothesis.strategies import composite, floats, integers, lists
 
-from tips.culprit_finding import find_culprits
-from tips.culprit_finding import Change
+from tips.culprit_finding import Change, find_culprits
 
 
 def make_test_fn(culprit: Change, true_flake_rate: float):
@@ -69,12 +64,14 @@ def test_prior_is_no_culprit_but_there_is_one():
     assert flake == actual
 
 
-
 @composite
 def hidden_culprit(
     draw,
     changes=lists(
-        integers(min_value=1, max_value=100), min_size=3, max_size=100, unique=True
+        integers(min_value=1, max_value=100),
+        min_size=3,
+        max_size=100,
+        unique=True,
     ),
 ):
     changes = [Change(id=i) for i in draw(changes)]
@@ -107,7 +104,10 @@ def test_uniform_prior_and_true_flake_rate(changes_and_culprit, true_flake_rate,
 )
 @settings(print_blob=True)
 def test_uniform_prior_and_inaccurate_estimated_flakiness_rate(
-    changes_and_culprit, true_flake_rate, est_deviation, seed
+    changes_and_culprit,
+    true_flake_rate,
+    est_deviation,
+    seed,
 ):
     random.seed(seed)
     changes, culprit = changes_and_culprit
@@ -125,10 +125,16 @@ def test_uniform_prior_and_inaccurate_estimated_flakiness_rate(
 def hidden_culprit_and_prior(
     draw,
     changes=lists(
-        integers(min_value=1, max_value=100), min_size=3, max_size=100, unique=True
+        integers(min_value=1, max_value=100),
+        min_size=3,
+        max_size=100,
+        unique=True,
     ),
     prior_deviations=floats(
-        min_value=-0.5, max_value=0.5, allow_infinity=False, allow_nan=False
+        min_value=-0.5,
+        max_value=0.5,
+        allow_infinity=False,
+        allow_nan=False,
     ),
 ):
     changes = [Change(id=i) for i in draw(changes)]
@@ -155,7 +161,10 @@ def hidden_culprit_and_prior(
 )
 @settings(print_blob=True)
 def test_arbitrary_prior_and_inaccurate_flake_rate(
-    changes_culprit_prior, true_flake_rate, est_deviation, seed
+    changes_culprit_prior,
+    true_flake_rate,
+    est_deviation,
+    seed,
 ):
     random.seed(seed)
     changes, culprit, prior = changes_culprit_prior

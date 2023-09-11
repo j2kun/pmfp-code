@@ -1,7 +1,7 @@
 import random
+from dataclasses import dataclass
 
 from assertpy import assert_that
-from dataclasses import dataclass
 
 from tips.ucb1 import ucb1
 

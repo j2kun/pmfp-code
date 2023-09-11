@@ -2,9 +2,7 @@
 # doesn't support non-byte-aligned formats and part of the point of this is to
 # pack into blocks of 7 bits. You could manually pack into bytearrays, but
 # bitstring makes the code shorter so it fits better in the book.
-from bitstring import BitStream
-from bitstring import Bits
-
+from bitstring import Bits, BitStream
 
 encoder = [0, 15, 19, 28, 37, 42, 54, 57, 70, 73, 85, 90, 99, 108, 112, 127]
 syndrome_table = [0, 1, 2, 16, 4, 32, 64, 8]

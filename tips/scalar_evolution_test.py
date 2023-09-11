@@ -3,11 +3,7 @@ import operator
 
 import pytest
 
-from tips.scalar_evolution import Assign
-from tips.scalar_evolution import Increment
-from tips.scalar_evolution import Loop
-from tips.scalar_evolution import Recurrence
-from tips.scalar_evolution import reduce_strength
+from tips.scalar_evolution import Assign, Increment, Loop, Recurrence, reduce_strength
 
 
 def test_basic_recurrence_repr():
@@ -32,7 +28,9 @@ def test_chain_recurrence_evaluate():
     # for x in range(n):
     #   value = x^3 + 2x^2 + 3x + 7
     rec = Recurrence(
-        7, operator.add, Recurrence(6, operator.add, Recurrence(10, operator.add, 6))
+        7,
+        operator.add,
+        Recurrence(6, operator.add, Recurrence(10, operator.add, 6)),
     )
     assert 61 == rec.evaluate(3)
 
@@ -216,7 +214,7 @@ def test_reduce_strength():
     loop = Loop(
         header=[],
         body=[
-            Increment(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7"))
+            Increment(lhs=ast.Name("y"), rhs=parse_to_binop("x*x*x + 2*x*x + 3*x + 7")),
         ],
         context={
             "x": Recurrence(0, operator.add, 1),

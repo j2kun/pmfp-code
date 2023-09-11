@@ -1,12 +1,9 @@
 from assertpy import assert_that
 from bitstring import BitStream
 from hypothesis import given
-from hypothesis.strategies import binary
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
+from hypothesis.strategies import binary, composite, integers
 
-from tips.hamming_code import decode
-from tips.hamming_code import encode
+from tips.hamming_code import decode, encode
 
 
 @composite

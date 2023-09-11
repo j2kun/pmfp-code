@@ -1,7 +1,4 @@
-from tips.skill_ranking_teams import Player
-from tips.skill_ranking_teams import Rating
-from tips.skill_ranking_teams import Team
-from tips.skill_ranking_teams import update_ratings
+from tips.skill_ranking_teams import Player, Rating, Team, update_ratings
 
 p1 = Player(1)
 p2 = Player(2)
@@ -19,13 +16,13 @@ def test_unsurprising_t1_win():
         ratings={
             p1: p1_rating,
             p2: p2_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = 1
@@ -52,13 +49,13 @@ def test_surprising_t2_win():
         ratings={
             p1: p1_rating,
             p2: p2_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = -1
@@ -89,14 +86,14 @@ def test_team_asymmetry():
     team1 = Team(
         ratings={
             p1: p1_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p2: p2_rating,
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = -1
@@ -129,14 +126,14 @@ def test_team_asymmetry_draw():
     team1 = Team(
         ratings={
             p1: p1_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p2: p2_rating,
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = 0
@@ -158,10 +155,10 @@ def test_team_asymmetry_draw():
     # p3's rating goes down more due to having a bigger share of the total
     # prior skill contribution to the team
     assert abs(new_p2_rating.mean - p2_rating.mean) > abs(
-        new_p3_rating.mean - p3_rating.mean
+        new_p3_rating.mean - p3_rating.mean,
     )
     assert abs(new_p2_rating.mean - p2_rating.mean) > abs(
-        new_p4_rating.mean - p4_rating.mean
+        new_p4_rating.mean - p4_rating.mean,
     )
 
 
@@ -177,13 +174,13 @@ def test_huge_upset_via_win():
         ratings={
             p1: p1_rating,
             p2: p2_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = 1
@@ -212,13 +209,13 @@ def test_huge_upset_via_draw():
         ratings={
             p1: p1_rating,
             p2: p2_rating,
-        }
+        },
     )
     team2 = Team(
         ratings={
             p3: p3_rating,
             p4: p4_rating,
-        }
+        },
     )
 
     outcome = 0

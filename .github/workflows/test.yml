@@ -1,0 +1,33 @@
+name: Build and Test
+permissions: read-all
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # giving up on Python 3.11, too many bugs with the CI system e.g.,
+        # can't get pytest-cov to work properly (phantom uncovered lines)
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - uses: chartboost/ruff-action@v1
+      - name: Run tests
+        run: |
+          python -m pytest
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2

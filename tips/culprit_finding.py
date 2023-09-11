@@ -1,9 +1,7 @@
 """An implementation of flake-aware culprit finding."""
 
-from dataclasses import dataclass
-from dataclasses import replace
-from typing import Callable
-from typing import Optional
+from dataclasses import dataclass, replace
+from typing import Callable, Optional
 
 
 @dataclass(eq=True, frozen=True)
@@ -11,21 +9,22 @@ class Change:
     id: int
 
 
+# A TestFn represents the result of running a test at a specific change. In this
+# demo, changes are linearly ordered by their id, and the TestFn may return an
+# incorrect answer in one direction only. I.e., if the result is True, then
+# change did not introduce a bug. If the result is False, then the test may fail
+# because it is flaky, or because the change introduced a bug.
 TestFn = Callable[[Change], bool]
-"""
-A TestFn represents the result of running a test at a specific change. In this
-demo, changes are linearly ordered by their id, and the TestFn may return an
-incorrect answer in one direction only. I.e., if the result is True, then
-change did not introduce a bug. If the result is False, then the test may fail
-because it is flaky, or because the change introduced a bug.
-"""
 
 
 @dataclass(frozen=True)
 class Distribution:
     """A Distribution has length equal to one plus the number of changes considered
-    suspect. Each entry represents the probability that the change introduced the
-    culprit. The last entry represents the probability that there is no culprit."""
+    suspect.
+
+    Each entry represents the probability that the change introduced the culprit. The
+    last entry represents the probability that there is no culprit.
+    """
 
     probs: dict[Change, float]
     flake_rate: float
@@ -110,18 +109,17 @@ def next_change_to_test(
 ) -> Optional[Change]:
     """Determine the next change to test.
 
-    Do this by converting the (linearly ordered) distribution of culprit
-    probabilities into a cumulative distribution, and then finding the first
-    change for which the cumulative probability of a culprit preceding that
-    change is 0.5.
+    Do this by converting the (linearly ordered) distribution of culprit probabilities
+    into a cumulative distribution, and then finding the first change for which the
+    cumulative probability of a culprit preceding that change is 0.5.
 
-    This function makes optional an optimization from the Henderson paper,
-    which is to test the run preceding the one to try next, the idea being: if
-    you think the next change to test is going to fail, you'll get more
-    information by first trying the preceding test (which you think will pass)
-    and then trying the test that you think will fail. This takes advantage of
-    the information asymmetry of passing and failing tests. If tested_changes is
-    passed and nonempty, then it will apply this optimization.
+    This function makes optional an optimization from the Henderson paper, which is to
+    test the run preceding the one to try next, the idea being: if you think the next
+    change to test is going to fail, you'll get more information by first trying the
+    preceding test (which you think will pass) and then trying the test that you think
+    will fail. This takes advantage of the information asymmetry of passing and failing
+    tests. If tested_changes is passed and nonempty, then it will apply this
+    optimization.
     """
     epsilon = 1e-08
     # to avoid floating point roundoff errors
@@ -205,7 +203,8 @@ def find_culprits(
     tested_changes: set[Change] = set()
     sentinel = Change(id=1 + max(c.id for c in suspects))
     dist = Distribution(
-        probs=dict(zip(suspects + [sentinel], prior)), flake_rate=flakiness
+        probs=dict(zip(suspects + [sentinel], prior)),
+        flake_rate=flakiness,
     )
 
     most_likely_culprit = max(dist, key=lambda c: dist.probs[c])

@@ -1,9 +1,5 @@
-from typing import Callable
-from typing import Generator
-from typing import List
-from typing import TypeVar
 import math
-
+from typing import Callable, Generator, List, TypeVar
 
 # just for type clarity
 Action = TypeVar("Action")
@@ -47,10 +43,9 @@ def ucb1(actions: List[Action], reward: RewardFn) -> Generator[Action, None, Non
     def upperBound(step: int, num_plays: int) -> float:
         """Return the margin of the confidence bound from its mean.
 
-        This method does not need to know the expected value of the action
-        being attempted. The confidence bound depends only on the number of
-        total actions attempted and the number of times one particular action
-        has been tried.
+        This method does not need to know the expected value of the action being
+        attempted. The confidence bound depends only on the number of total actions
+        attempted and the number of times one particular action has been tried.
         """
         return math.sqrt(2 * math.log(step) / num_plays)
 
@@ -60,7 +55,8 @@ def ucb1(actions: List[Action], reward: RewardFn) -> Generator[Action, None, Non
             for i in range(num_actions)
         ]
         chosen_action_index: int = max(
-            range(num_actions), key=lambda i: upper_confidence_bounds[i]
+            range(num_actions),
+            key=lambda i: upper_confidence_bounds[i],
         )
         chosen_action: Action = actions[chosen_action_index]
         yield chosen_action

@@ -1,8 +1,8 @@
+import math
+
 from assertpy import assert_that
 from hypothesis import given
-from hypothesis.strategies import lists
-from hypothesis.strategies import integers
-import math
+from hypothesis.strategies import integers, lists
 
 import tips.adaptive_group_testing as adaptive_group_testing
 
@@ -29,7 +29,9 @@ def intersecting_test(S):
 def test_find_10():
     subjects = list(range(100))
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, intersecting_test([10]), 1
+        subjects,
+        intersecting_test([10]),
+        1,
     )
 
     assert_that(actual).is_equal_to([10])
@@ -38,7 +40,9 @@ def test_find_10():
 def test_reversed_find_10():
     subjects = list(reversed(range(100)))
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, intersecting_test([10]), 1
+        subjects,
+        intersecting_test([10]),
+        1,
     )
 
     assert_that(actual).is_equal_to([10])
@@ -58,14 +62,16 @@ def test_finds_specific_subjects_with_exact_bound(positive_subjects):
 
     test = intersecting_test(positive_subjects)
     actual = adaptive_group_testing.generalized_binary_split(
-        subjects, test, len(positive_subjects)
+        subjects,
+        test,
+        len(positive_subjects),
     )
 
     assert_that(actual).contains_only(*positive_subjects)
 
 
 @given(
-    lists(integers(min_value=0, max_value=999), min_size=1, max_size=20, unique=True)
+    lists(integers(min_value=0, max_value=999), min_size=1, max_size=20, unique=True),
 )
 def test_optimality(positive_subjects):
     subjects = list(range(1000))
@@ -74,7 +80,9 @@ def test_optimality(positive_subjects):
 
     test = intersecting_test(positive_subjects)
     _ = adaptive_group_testing.generalized_binary_split(
-        subjects, test, len(positive_subjects)
+        subjects,
+        test,
+        len(positive_subjects),
     )
 
     # this is a weak assertion because the number of tests only approaches

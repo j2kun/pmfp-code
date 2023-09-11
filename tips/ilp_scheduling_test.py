@@ -1,19 +1,11 @@
-from collections import defaultdict
 import itertools
+from collections import defaultdict
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import lists
-from hypothesis.strategies import permutations
-from hypothesis.strategies import text
 import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import composite, integers, lists, permutations, text
 
-from tips.ilp_scheduling import optimal_schedule
-from tips.ilp_scheduling import MinimizeThreeAwayGames
-from tips.ilp_scheduling import NoFarTravel
-
+from tips.ilp_scheduling import MinimizeThreeAwayGames, NoFarTravel, optimal_schedule
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -92,9 +84,7 @@ def teams_violating_three_away_game(solution):
         away_games_by_team[game.away_team].add(game.week)
         num_weeks = max(num_weeks, game.week)
 
-    possible_failing_week_triples = set(
-        [(i, i + 1, i + 2) for i in range(num_weeks - 2)]
-    )
+    possible_failing_week_triples = {(i, i + 1, i + 2) for i in range(num_weeks - 2)}
     violations = dict()
     for team, away_game_weeks in away_games_by_team.items():
         triples_of_away_game_weeks = itertools.combinations(sorted(away_game_weeks), 3)
@@ -185,7 +175,7 @@ def random_matchups(draw, min_teams=4, max_teams=10, max_matchups=30):
     team_pairs = list(itertools.combinations(teams, 2))
     matchups = draw(permutations(team_pairs))
     truncate_pt = draw(
-        integers(min_value=4, max_value=min(max_matchups, len(matchups)))
+        integers(min_value=4, max_value=min(max_matchups, len(matchups))),
     )
     truncated_matchups = matchups[:truncate_pt]
 

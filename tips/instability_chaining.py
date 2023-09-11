@@ -1,20 +1,20 @@
 """An implementation of the student-proposing instability chaining algorithm."""
-from abc import ABC
-from abc import abstractmethod
-from dataclasses import dataclass
-from typing import Any
-from typing import Callable
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import TypeVar
-from typing import cast
 import heapq
 import logging
-
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    cast,
+)
 
 T = TypeVar("T")
 
@@ -70,10 +70,8 @@ class Applicant(ABC):
 @dataclass
 class Student(Applicant):
     id: int
-
     """Preferences on ResidencyProgram.id, from highest priority to lowest priority."""
     preferences: List[int]
-
     """The highest priority program this student has yet to be rejected from."""
     best_unrejected: int = 0
 
@@ -191,22 +189,26 @@ class Couple(Applicant):
 @dataclass
 class ResidencyProgram:
     id: int
-
     """Preferences on Student.id, from highest priority to lowest priority."""
     preferences: List[int]
-
     """The number of open spots."""
     capacity: int
 
     def select(self, pool: Set[Student]) -> Set[Student]:
-        """Select students from `pool` by priority. Return unchosen students."""
+        """Select students from `pool` by priority.
+
+        Return unchosen students.
+        """
         chosen = heapq.nsmallest(
-            self.capacity, pool, key=lambda s: self.preferences.index(s.id)
+            self.capacity,
+            pool,
+            key=lambda s: self.preferences.index(s.id),
         )
         return pool - set(chosen)
 
     def prefers(self, matching: "Matching", *students: Student) -> bool:
-        """Return True if program prefers all input students to its match in `matching`."""
+        """Return True if program prefers all input students to its match in
+        `matching`."""
         student_set = set(students)
         displ = self.select(student_set | matching.students_matched_to(self))
         return not (student_set & displ)
@@ -232,7 +234,8 @@ class ProgramIndex:
         return iter(self.index.values())
 
     def next_to_apply(
-        self, applicant: Applicant
+        self,
+        applicant: Applicant,
     ) -> Tuple[ResidencyProgram, Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.index[applicant.to_apply()], None)
@@ -257,13 +260,14 @@ class Matching:
         self,
         *matches: Tuple[Optional[Student], Optional[ResidencyProgram]],
     ) -> None:
-        for (student, program) in matches:
+        for student, program in matches:
             if student and program:
                 logging.debug(f"Matching {student} to {program}")
                 self.matches[student] = program
 
     def current_match(
-        self, applicant: Applicant
+        self,
+        applicant: Applicant,
     ) -> Tuple[Optional[ResidencyProgram], Optional[ResidencyProgram]]:
         if isinstance(applicant, Student):
             return (self.matches[applicant], None)
@@ -281,15 +285,15 @@ class Matching:
 
     def students_matched_to(self, program: ResidencyProgram) -> Set[Student]:
         # Inefficient, but let's keep it simple.
-        return set(s for (s, prog) in self.matches.items() if prog.id == program.id)
+        return {s for (s, prog) in self.matches.items() if prog.id == program.id}
 
     def make_pool(self, program_index: ProgramIndex, student: Student) -> Set[Student]:
         program, _ = program_index.next_to_apply(student)
-        return set([student]) | self.students_matched_to(program)
+        return {student} | self.students_matched_to(program)
 
     def __str__(self):
         return "\n".join(
-            [f"{student} -> {program}" for (student, program) in self.matches.items()]
+            [f"{student} -> {program}" for (student, program) in self.matches.items()],
         )
 
 
@@ -301,11 +305,11 @@ class InstabilityChaining:
     ):
         self.program_index = ProgramIndex(programs)
 
-        couples = set(x for x in applicants if isinstance(x, Couple))
+        couples = {x for x in applicants if isinstance(x, Couple)}
         partner_mapping = dict(c.members for c in couples)
-        self.partner_mapping = partner_mapping | dict(
-            (v, k) for k, v in partner_mapping.items()
-        )
+        self.partner_mapping = partner_mapping | {
+            v: k for k, v in partner_mapping.items()
+        }
 
         # Clean up dupes if a couple and its members are in applicants.
         singles: List[Applicant] = [
@@ -317,7 +321,9 @@ class InstabilityChaining:
         # Processing couples last reduces the chance of cycles
         self.applicants: List[Applicant] = singles + list(couples)
         self.matching = Matching(
-            matches=dict(), applicants=self.applicants, programs=list(programs)
+            matches=dict(),
+            applicants=self.applicants,
+            programs=list(programs),
         )
 
         # a log used to detect cycles
@@ -349,7 +355,9 @@ class InstabilityChaining:
                 program = self.program_stack.pop()
                 logging.debug(f"Processing {program} from the program stack.")
                 unstable_applicants = unstable_pairs(
-                    program, self.matching, self.program_index
+                    program,
+                    self.matching,
+                    self.program_index,
                 )
                 for applicant in unstable_applicants:
                     applicant.reset_best()
@@ -361,7 +369,7 @@ class InstabilityChaining:
                     m1, m2 = self.matching.current_match(applicant)
                     logging.debug(
                         f"Adding potentially withdrawn programs {m1}, {m2} "
-                        "to the program stack."
+                        "to the program stack.",
                     )
                     assert m1 is not None
                     self.program_stack.add(m1)
@@ -372,7 +380,7 @@ class InstabilityChaining:
                     logging.debug(
                         f"Adding unstable applicants "
                         f"{','.join(str(x) for x in unstable_applicants)} "
-                        f"to the applicant stack"
+                        f"to the applicant stack",
                     )
                 self.applicant_stack.extend(unstable_applicants)
 
@@ -386,7 +394,7 @@ class InstabilityChaining:
         )
         if hashable in self.log:
             logging.debug(
-                f"Found a cycle: log={self.log}\nNext entry would be {hashable}"
+                f"Found a cycle: log={self.log}\nNext entry would be {hashable}",
             )
             raise ValueError("Found a cycle")
         self.log.add(hashable)
@@ -408,7 +416,7 @@ class InstabilityChaining:
             if partner and program != partner_program:
                 assert partner_program is not None
                 displ |= partner_program.select(
-                    self.matching.make_pool(self.program_index, partner)
+                    self.matching.make_pool(self.program_index, partner),
                 )
 
             if not displ:
@@ -424,7 +432,7 @@ class InstabilityChaining:
                 rejectee = f"{proposer if proposer in displ else partner}"
                 rejecter = f"{program if proposer in displ else partner_program}"
                 logging.debug(
-                    f"Application rejected ({rejectee} rejected by {rejecter})"
+                    f"Application rejected ({rejectee} rejected by {rejecter})",
                 )
                 proposer.best_unrejected += 1
                 if partner:
@@ -435,21 +443,23 @@ class InstabilityChaining:
 
             self.matching.set((proposer, program), (partner, partner_program))
 
-            # Not being rejected means that we have to handle all the displaced applicants.
-            # This can come in two cases:
+            # Not being rejected means that we have to handle all the displaced
+            # applicants. This can come in two cases:
             #
-            #  - If all displaced applicants are single, continue with one such person as
-            #    the new applicant, put the remaining applicants on the applicant stack.
+            #  - If all displaced applicants are single, continue with one such
+            #  person as the new applicant, put the remaining applicants on the
+            #  applicant stack.
             #
-            #  - Each displaced member of a couple has their partner withdraw from their
-            #    matched program (if any) and the program is added to the program stack.
-            #    Pick one such couple and continue with them applying jointly down their
-            #    preference lists, and put the remaining couples on the applicant stack.
+            #  - Each displaced member of a couple has their partner withdraw
+            #  from their matched program (if any) and the program is added to
+            #  the program stack. Pick one such couple and continue with them
+            #  applying jointly down their preference lists, and put the
+            #  remaining couples on the applicant stack.
             couples, singles = split_by(displ, lambda s: s in self.partner_mapping)
             for bumped in singles:
                 logging.debug(
                     f"{bumped} (matched to {self.matching.matches[bumped]}) "
-                    f"displaced by {applicant}"
+                    f"displaced by {applicant}",
                 )
                 self.matching.reject(bumped)
 
@@ -465,13 +475,13 @@ class InstabilityChaining:
                 if couple in displaced_couples:
                     continue
                 logging.debug(
-                    f"{couple} displaced (was matched to "
-                    f"{self.matching.matches[bumped]}, "
-                    f"{self.matching.matches[withdrawer]}) "
-                    f"by {applicant}\n"
-                    f"{withdrawer} withdrawing from {self.matching.matches[withdrawer]}\n"
-                    f"Adding withdrawn program {self.matching.matches[withdrawer]} to "
-                    "the program stack"
+                    f"""{couple} displaced (was matched to
+                                            {self.matching.matches[bumped]},
+                                            {self.matching.matches[withdrawer]})
+                    by {applicant}\n {withdrawer} withdrawing from
+                    {self.matching.matches[withdrawer]} Adding withdrawn
+                    program {self.matching.matches[withdrawer]} to the program
+                    stack""",
                 )
                 displaced_couples.add(couple)
                 self.program_stack.add(self.matching.matches[withdrawer])
@@ -481,7 +491,7 @@ class InstabilityChaining:
             applicant = displaced_couples.pop()
             logging.debug(
                 f"Adding displaced couples {displaced_couples} and singles {singles} "
-                f"to the applicant stack"
+                f"to the applicant stack",
             )
             self.applicant_stack.extend(displaced_couples)
             self.applicant_stack.extend(singles)
@@ -537,7 +547,7 @@ def unstable_pairs(
             else:
                 couple = cast(Couple, applicant)
                 s1, s2 = couple.members
-                for (p1_id, p2_id) in couple.joint_preferences():
+                for p1_id, p2_id in couple.joint_preferences():
                     p1, p2 = index[p1_id], index[p2_id]
                     if p1 != program and p2 != program:
                         continue
@@ -548,7 +558,8 @@ def unstable_pairs(
                         program_pref = p1.prefers(matching, *couple.members)
                     else:
                         program_pref = p1.prefers(matching, s1) and p2.prefers(
-                            matching, s2
+                            matching,
+                            s2,
                         )
 
                     if applicant_pref and program_pref:

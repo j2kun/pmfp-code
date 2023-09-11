@@ -1,16 +1,13 @@
-"""An implementation of the Laplacian mechanism for privately releasing a
-histogram where each underlying user contributes to a single bin."""
+"""An implementation of the Laplacian mechanism for privately releasing a histogram
+where each underlying user contributes to a single bin."""
 
-from abc import ABC, abstractmethod
-from struct import pack
-from struct import unpack
-from typing import List
-from typing import Tuple
 import math
+import sys
+from abc import ABC, abstractmethod
+from struct import pack, unpack
+from typing import List, Tuple
 
 import numpy as np
-import sys
-
 
 Histogram = List[int]
 
@@ -44,6 +41,7 @@ def next_power_of_two(x: float) -> float:
 
 def sample_geometric(rng, exponent):
     """Returns a sample drawn from the geometric distribution of parameter p =
+
     1 - e^-exponent, i.e., the number of Bernoulli trials until the first
     success where the success probability is 1 - e^-exponent.
     """
@@ -53,10 +51,11 @@ def sample_geometric(rng, exponent):
     if rng.random() > -1.0 * math.expm1(-1.0 * exponent * max_value):
         return max_value
 
-    # Perform a binary search for the sample in the interval from 1 to max long. Each iteration
-    # splits the interval in two and randomly keeps either the left or the right subinterval
-    # depending on the respective probability of the sample being contained in them. The search
-    # ends once the interval only contains a single sample.
+    # Perform a binary search for the sample in the interval from 1 to max
+    # long. Each iteration splits the interval in two and randomly keeps either
+    # the left or the right subinterval depending on the respective probability
+    # of the sample being contained in them. The search ends once the interval
+    # only contains a single sample.
     left = 0  # exclusive
     right = max_value  # inclusive
 
@@ -71,7 +70,7 @@ def sample_geometric(rng, exponent):
         mid = math.ceil(
             left
             - (math.log(0.5) + math.log1p(math.exp(exponent * (left - right))))
-            / exponent
+            / exponent,
         )
 
         # Ensure that mid is contained in the search interval. This is a
@@ -95,7 +94,8 @@ def sample_geometric(rng, exponent):
 
 
 def sample_two_sided_geometric(rng, exponent):
-    """Returns a sample drawn from a geometric distribution that is mirrored at
+    """Returns a sample drawn from a geometric distribution that is mirrored at.
+
     0. The non-negative part of the distribution's PDF matches the PDF of a
     geometric distribution of parameter p = 1 - e^-exponent that is
     shifted to the left by 1 and scaled accordingly.
@@ -113,10 +113,9 @@ def sample_two_sided_geometric(rng, exponent):
 
 
 class LaplaceMechanism(ABC):
-    """An interface for a random number generator that adds Laplacian noise to
-    a single number, generated from a 0-mean discrete Laplacian distribution,
-    i.e., with density h(y) proportional to exp(−|y|/scale), where scale is a
-    parameter.
+    """An interface for a random number generator that adds Laplacian noise to a single
+    number, generated from a 0-mean discrete Laplacian distribution, i.e., with density
+    h(y) proportional to exp(−|y|/scale), where scale is a parameter.
 
     Because the scale and the details of the mechanism depend on the privacy
     parameter, the method does not accept scale directly, but must instead
@@ -138,7 +137,10 @@ class LaplaceMechanism(ABC):
 
     @abstractmethod
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         ...
 
@@ -148,7 +150,10 @@ class InsecureLaplaceMechanism(LaplaceMechanism):
         self.rng = rng or np.random.default_rng(1)
 
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         scale = sensitivity / privacy_parameter
         return (value, round(self.rng.laplace(0, scale, 1)[0]))
@@ -159,7 +164,7 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
     Follows the outline of
     https://github.com/google/differential-privacy/blob/main/common_docs/Secure_Noise_Generation.pdf
-    and the reference implementation at
+     and the reference implementation at
     https://github.com/google/differential-privacy/blob/c2376f0daaf406e1524b462accaa9cbb548fd6d1/java/main/com/google/privacy/differentialprivacy/LaplaceNoise.java
 
     For simplicity, we only support adding noise to integers. Adding noise to
@@ -173,12 +178,16 @@ class SecureLaplaceMechanism(LaplaceMechanism):
         self.rng = rng
 
     def add_noise(
-        self, value: int, privacy_parameter: float, sensitivity: float
+        self,
+        value: int,
+        privacy_parameter: float,
+        sensitivity: float,
     ) -> Tuple[int, int]:
         eps = privacy_parameter
         granularity = next_power_of_two((sensitivity / eps) / self.GRANULARITY_PARAM)
         noise = sample_two_sided_geometric(
-            self.rng, granularity * eps / (sensitivity + granularity)
+            self.rng,
+            granularity * eps / (sensitivity + granularity),
         )
 
         # note this is where we rely on `value` being an integer, otherwise
@@ -199,7 +208,9 @@ class SecureLaplaceMechanism(LaplaceMechanism):
 
 
 def privatize_histogram(
-    hist: Histogram, privacy_parameter: float, laplace: LaplaceMechanism
+    hist: Histogram,
+    privacy_parameter: float,
+    laplace: LaplaceMechanism,
 ):
     """Privatize a histogram for public release.
 
@@ -227,5 +238,6 @@ if __name__ == "__main__":
 
     cProfile.run(
         "for i in range(100000): "
-        "privatize_histogram((17,), math.log(3), SecureLaplaceMechanism(random.SystemRandom()))"
+        + "privatize_histogram((17,), math.log(3), "
+        + "SecureLaplaceMechanism(random.SystemRandom()))",
     )

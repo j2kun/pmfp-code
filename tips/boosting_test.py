@@ -1,10 +1,8 @@
 import numpy as np
 
-from tips.boosting import boost
-from tips.boosting import compute_error
-from tips.decision_stump import train_decision_stump
-
 import data.adult as adult
+from tips.boosting import boost, compute_error
+from tips.decision_stump import train_decision_stump
 
 
 def test_learn_line():
@@ -22,5 +20,9 @@ def test_learn_line():
 
 def test_adult_dataset():
     test, train = adult.load()
-    h = boost(train, lambda draw: train_decision_stump(draw, sample_size=300), rounds=15)
+    h = boost(
+        train,
+        lambda draw: train_decision_stump(draw, sample_size=400),
+        rounds=15,
+    )
     assert compute_error(h, test) < 0.16

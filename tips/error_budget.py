@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import List
-from typing import Optional
-
+from typing import List, Optional
 
 # assume minute-aligned samples
 TimeSeries = List[int]
@@ -16,7 +14,10 @@ class SloMetric:
 
 
 def error_budget_remaining(
-    requests: TimeSeries, errors: TimeSeries, budget: float, window_minutes: int
+    requests: TimeSeries,
+    errors: TimeSeries,
+    budget: float,
+    window_minutes: int,
 ) -> SloMetric:
     """Return a guess of the estimated time until an error budget is exhausted.
 
@@ -53,11 +54,12 @@ def error_budget_remaining(
 
 
 if __name__ == "__main__":
+    import random
     from datetime import datetime
     from itertools import accumulate
-    import matplotlib.pyplot as plt
+
     import matplotlib.dates as dates
-    import random
+    import matplotlib.pyplot as plt
 
     random.seed(123)
     samples = 1000

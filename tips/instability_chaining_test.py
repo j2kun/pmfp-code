@@ -1,23 +1,22 @@
 import math
 
-from hypothesis import given
-from hypothesis import settings
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import permutations
 import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import composite, integers, permutations
 
-from tips.instability_chaining import Couple
-from tips.instability_chaining import Matching
-from tips.instability_chaining import ResidencyProgram
-from tips.instability_chaining import Student
-from tips.instability_chaining import find_unstable_pairs
-from tips.instability_chaining import stable_matching
+from tips.instability_chaining import (
+    Couple,
+    Matching,
+    ResidencyProgram,
+    Student,
+    find_unstable_pairs,
+    stable_matching,
+)
 
 
 def build_partner_mapping(couples):
     partner_mapping = dict(couple.members for couple in couples)
-    return partner_mapping | dict((v, k) for k, v in partner_mapping.items())
+    return partner_mapping | {v: k for k, v in partner_mapping.items()}
 
 
 @composite
@@ -44,7 +43,7 @@ def market(
                 id=student_id,
                 preferences=preferences,
                 best_unrejected=0,
-            )
+            ),
         )
 
     student_index = {s.id: s for s in students}
@@ -56,7 +55,7 @@ def market(
                 id=program_id,
                 preferences=preferences,
                 capacity=max(min_capacity, draw(program_capacity)),
-            )
+            ),
         )
 
     couples = []
@@ -84,11 +83,15 @@ def err_msg(matching, unstable_pair):
         str(x) for (x, y) in matching.matches.items() if y == program
     ]
     student_assigned = matching.matches[student]
-    msg = (
-        f"\n({applicant}, {program}) form an unstable pair in matching \n\n{matching} "
-        f"\n\nbecause {student} prefers {program} to their assignment {student_assigned}"
-        f"\nand {program} prefers {student} over at least one of {assigned_to_program}.\n"
-    )
+    msg = f"""
+        ({applicant}, {program}) form an unstable pair in matching
+
+        {matching}
+
+        because {student} prefers {program} to their assignment
+        {student_assigned} and {program} prefers {student} over at least one of
+        {assigned_to_program}.
+        """
 
     if partner:
         partner_assigned = matching.matches[partner]
@@ -96,11 +99,10 @@ def err_msg(matching, unstable_pair):
         assigned_to_program = [
             str(x) for (x, y) in matching.matches.items() if y.id == partner_program
         ]
-        msg += (
-            f"And {student}'s partner {partner} simultaneously prefers Program({partner_program}) "
-            f"over their assignment {partner_assigned}\nand Program({partner_program}) prefers "
-            f"{partner} over at least one of {assigned_to_program}.\n"
-        )
+        msg += f"""And {student}'s partner {partner} simultaneously prefers
+            Program({partner_program}) over their assignment
+            {partner_assigned}\nand Program({partner_program}) prefers
+            {partner} over at least one of {assigned_to_program}."""
 
     return msg
 
@@ -315,17 +317,13 @@ def test_unstable_pairs_unstable_with_couple():
     # represent the "program" side of an unstable pairs as a pair of programs.
     # Oh well.
     assert len(result) == 2
-    assert set(result) == set(
-        [
-            (couples[0], programs[0]),
-            (couples[0], programs[1]),
-        ]
-    )
+    assert set(result) == {
+        (couples[0], programs[0]),
+        (couples[0], programs[1]),
+    }
 
 
-"""
-    End to end tests that involve no couples
-"""
+# ------ End to end tests that involve no couples
 
 
 def test_stable_matching_two():
@@ -441,9 +439,7 @@ def test_stability_with_no_couples(students_and_programs):
     assert_stable(matching)
 
 
-"""
-    End to end tests that involve couples
-"""
+# -------- End to end tests that involve couples
 
 
 def test_couple_displaces_single():

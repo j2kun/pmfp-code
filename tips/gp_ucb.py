@@ -1,15 +1,14 @@
 """An implementation of Gaussian Process UCB.
 
-The Gaussain Process Regressor was adapted from the
-sci-kit learn implementation.
+The Gaussain Process Regressor was adapted from the sci-kit learn implementation.
 
 https://github.com/scikit-learn/scikit-learn/blob/8c9c1f27b7e21201cfffb118934999025fd50cca/sklearn/gaussian_process/_gpr.py
 """
 import itertools
 
-from scipy.linalg import cholesky, cho_solve, solve_triangular
-from scipy.spatial.distance import cdist
 import numpy as np
+from scipy.linalg import cho_solve, cholesky, solve_triangular
+from scipy.spatial.distance import cdist
 
 
 class GaussianProcessRegressor:
@@ -107,7 +106,7 @@ class GpUcb:
         gp = GaussianProcessRegressor()
         gp.train(self.obs_inputs, self.obs_outputs)
         self.mean, cov = gp.predict(self.input_space)
-        self.stdev = cov.diagonal()**0.5
+        self.stdev = cov.diagonal() ** 0.5
 
     def unwind_estimates(self):
         output = dict()

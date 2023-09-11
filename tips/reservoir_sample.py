@@ -1,10 +1,6 @@
 import math
 import random
-
-from typing import Iterable
-from typing import List
-from typing import Tuple
-from typing import TypeVar
+from typing import Iterable, List, Tuple, TypeVar
 
 T = TypeVar("T")
 
@@ -52,7 +48,8 @@ def algorithm_L(sample_size: int, stream: Iterable[T]) -> List[T]:
 
 
 def weighted_sample_with_replacement(
-    sample_size: int, stream: Iterable[Tuple[T, float]]
+    sample_size: int,
+    stream: Iterable[Tuple[T, float]],
 ) -> List[T]:
     """Sample with replacement from a stream according to item weights.
 
@@ -65,7 +62,7 @@ def weighted_sample_with_replacement(
     """
     chosen: List[T] = []
     cumulative_weight = 0.0
-    for (element, weight) in stream:
+    for element, weight in stream:
         cumulative_weight += weight
         if cumulative_weight == 0:
             continue

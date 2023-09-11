@@ -3,9 +3,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Collection
-from typing import DefaultDict
-from typing import Tuple
+from typing import Collection, DefaultDict, Tuple
 
 BIBD = Collection[Collection[str]]
 
@@ -66,10 +64,10 @@ ALL_BIBDS = [
 class BIBDParams:
     """A parameter set describing a Balanced Incomplete Block Design (BIBD).
 
-    The members of this class will be described in both clinical trials
-    language (subjects & treatments) and in the notation of Dinitz-Colbourn's
-    Handbook of Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD),
-    which are the parameters (v, b, r, k, lambda).
+    The members of this class will be described in both clinical trials language
+    (subjects & treatments) and in the notation of Dinitz-Colbourn's Handbook of
+    Combinatorial Designs (2nd edition), section II.1 (abbreviated HCD), which are the
+    parameters (v, b, r, k, lambda).
     """
 
     """
@@ -121,13 +119,12 @@ class BIBDParams:
         return self.subjects_per_treatment_pair
 
     def satisfies_necessary_conditions(self) -> bool:
-        """Determine if the parameters satisfy the necessary conditions for
-        the existence of a BIBD.
+        """Determine if the parameters satisfy the necessary conditions for the
+        existence of a BIBD.
 
-        Note that even if this function returns true, a BIBD may not exist
-        for these parameters. One can relax the balancedness condition and
-        still achieve a useful design for an experiment, but the statistical
-        analysis is more complicated.
+        Note that even if this function returns true, a BIBD may not exist for these
+        parameters. One can relax the balancedness condition and still achieve a useful
+        design for an experiment, but the statistical analysis is more complicated.
         """
         v, r, b, k, lambda_ = self.v, self.r, self.b, self.k, self.lambda_
 
@@ -143,10 +140,9 @@ class BIBDParams:
     def efficiency_factor(self) -> float:
         """Return the efficiency factor of the design.
 
-        The efficiency factor E measures the relative precision of a
-        statistical experiment using a BIBD when compared to a complete block
-        design, i.e., a block design in which every treatment is applied to
-        every subject (RCBD, see
+        The efficiency factor E measures the relative precision of a statistical
+        experiment using a BIBD when compared to a complete block design, i.e., a block
+        design in which every treatment is applied to every subject (RCBD, see
         https://en.wikipedia.org/wiki/Generalized_randomized_block_design).
 
         The quantity 100 * (1-E) is a bound on the percent reduction in
@@ -160,8 +156,9 @@ class BIBDParams:
     def from_bibd(bibd: BIBD) -> "BIBDParams":
         """Return the parameters for a BIBD.
 
-        Assumes the input is a valid BIBD."""
-        elements = set(x for block in bibd for x in block)
+        Assumes the input is a valid BIBD.
+        """
+        elements = {x for block in bibd for x in block}
         k = len(next(iter(bibd)))
         b = len(bibd)
         v = len(elements)
@@ -184,7 +181,7 @@ class BIBDParams:
 
 def is_bibd(bibd: BIBD) -> bool:
     """Determine if a given list of blocks is a BIBD."""
-    block_sizes = set(len(block) for block in bibd)
+    block_sizes = {len(block) for block in bibd}
     if len(block_sizes) != 1:
         print(f"Block sizes = {block_sizes}")
         return False
@@ -213,7 +210,7 @@ def is_bibd(bibd: BIBD) -> bool:
     if len(pairwise_memberships.keys()) != n * (n - 1) / 2:
         print(
             "Not all pairs represented. Only found "
-            f"{len(pairwise_memberships.keys())} when expecting {n * (n-1) / 2}"
+            f"{len(pairwise_memberships.keys())} when expecting {n * (n-1) / 2}",
         )
         return False
 

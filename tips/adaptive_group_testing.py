@@ -1,16 +1,14 @@
-from math import floor
-from math import log2
-from typing import Callable
-from typing import List
-from typing import Tuple
-from typing import TypeVar
+from math import floor, log2
+from typing import Callable, List, Tuple, TypeVar
 
 TestSubject = TypeVar("TestSubject")
 Test = Callable[[List[TestSubject]], bool]
 
 
 def generalized_binary_split(
-    test_subjects: List[TestSubject], test: Test, defective_count_bound: int
+    test_subjects: List[TestSubject],
+    test: Test,
+    defective_count_bound: int,
 ) -> List[TestSubject]:
     """Find up to defective_count_bound subjects that test positively.
 
@@ -34,16 +32,20 @@ def generalized_binary_split(
     if test(test_group):
         positive, unknown = binary_search(test_group, test)
         return [positive] + generalized_binary_split(
-            remainder + unknown, test, defective_count_bound - 1
+            remainder + unknown,
+            test,
+            defective_count_bound - 1,
         )
     else:
         return generalized_binary_split(remainder, test, defective_count_bound)
 
 
 def next_group_to_test(
-    test_subjects: List[TestSubject], defective_count_bound: int
+    test_subjects: List[TestSubject],
+    defective_count_bound: int,
 ) -> Tuple[List[TestSubject], List[TestSubject]]:
-    """Return the next group to test according to the Genralized Binary Splitting Algorithm.
+    """Return the next group to test according to the Genralized Binary Splitting
+    Algorithm.
 
     Arguments:
       - test_subjects: a list of test subjects remaining to test
@@ -63,7 +65,8 @@ def next_group_to_test(
 
 
 def binary_search(
-    subjects: List[TestSubject], test: Test
+    subjects: List[TestSubject],
+    test: Test,
 ) -> Tuple[TestSubject, List[TestSubject]]:
     """Perform a binary search to find a positive test subject.
 

@@ -4,17 +4,12 @@ Based on https://github.com/inkstitch/inkstitch/blob/main/lib/stitches/auto_fill
 """
 
 from collections import deque
-from itertools import groupby
 from itertools import pairwise  # type: ignore
-from typing import Any
-from typing import Deque
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Tuple
+from itertools import groupby
+from typing import Any, Deque, Dict, Iterable, List, Tuple
 
-from shapely import geometry as geo
 import networkx
+from shapely import geometry as geo
 
 Point = Tuple[float, float]
 GratingSegment = Tuple[Point, Point]
@@ -52,6 +47,7 @@ def pairwise_cyclic(itr):
 
 def pick_edge(edges, segment_edges):
     """Pick an edge to traverse next."""
+
     # The sort key is as follows: first prefer to always take a segment edge if
     # possible, then prefer the edge that is closest to an unvisited grating
     # segment, where closest is geometrically. Closest could be defined by
@@ -121,13 +117,14 @@ def find_stitch_path(
         else:
             # This could be made more efficient by keeping track of the
             # remaining segment edges as you go.
-            segment_edges = set(e for e in graph.edges(keys=True) if e[2] == "segment")
+            segment_edges = {e for e in graph.edges(keys=True) if e[2] == "segment"}
             if not segment_edges:
                 graph.clear_edges()
                 continue
 
             source, target, key = pick_edge(
-                graph.edges(current_vertex, keys=True), segment_edges
+                graph.edges(current_vertex, keys=True),
+                segment_edges,
             )
             if target:
                 vertex_stack.append(target)

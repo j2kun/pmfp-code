@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 from math import sqrt
 from statistics import NormalDist
-from typing import Dict
-from typing import NewType
+from typing import Dict, NewType
 
 STANDARD_NORMAL = NormalDist(0, 1)
 DEFAULT_MEAN = 25
@@ -34,20 +33,16 @@ class Team:
 
 
 def compute_draw_margin() -> float:
-    """
-    The margin to use to consider the game a draw, based on the (pre-set)
-    probability of a draw, which is typically set by measuring the draw rates
-    of a large number of games. Derived by inverting the formula
+    """The margin to use to consider the game a draw, based on the (pre-set) probability
+    of a draw, which is typically set by measuring the draw rates of a large number of
+    games. Derived by inverting the formula.
 
-      P(draw) = -1 + 2 * normal_cdf(
-          draw_margin / sqrt(player_count * skill_class_width)
-      )
+    P(draw) = -1 + 2 * normal_cdf(     draw_margin / sqrt(player_count *
+    skill_class_width) )
 
     or, as written exactly in the paper,
 
-      P(draw) = -1 + 2 * normal_cdf(
-          draw_margin / (sqrt(n1 + n2) * beta)
-      )
+    P(draw) = -1 + 2 * normal_cdf(     draw_margin / (sqrt(n1 + n2) * beta) )
     """
     inv_cdf_arg = 0.5 * (DRAW_PROBABILITY + 1)
     inv_cdf_output = STANDARD_NORMAL.inv_cdf(inv_cdf_arg)
@@ -72,9 +67,9 @@ def truncated_onesided_gaussian_v(t: float, lower: float) -> float:
 def truncated_onesided_gaussian_w(t: float, lower: float) -> float:
     """Equation 4.8 from Herbrich '05, On Gaussian Expectation Propagation.
 
-    Representing the additive correction factor to the variance of a rectified
-    Gaussian that is only truncated from below. This is a smooth approximation
-    to an indicator function for the condition t <= lower.
+    Representing the additive correction factor to the variance of a rectified Gaussian
+    that is only truncated from below. This is a smooth approximation to an indicator
+    function for the condition t <= lower.
     """
     v_value = truncated_onesided_gaussian_v(t, lower)
     return v_value * (v_value + t - lower)
@@ -83,8 +78,8 @@ def truncated_onesided_gaussian_w(t: float, lower: float) -> float:
 def truncated_twosided_gaussian_v(t, lower, upper):
     """Equation 4.4 from Herbrich '05, On Gaussian Expectation Propagation.
 
-    Representing the additive correction factor to the mean of a rectified
-    Gaussian that is truncated on both sides.
+    Representing the additive correction factor to the mean of a rectified Gaussian that
+    is truncated on both sides.
     """
     normalization = STANDARD_NORMAL.cdf(upper - t) - STANDARD_NORMAL.cdf(lower - t)
     if normalization < TOLERANCE:
@@ -99,12 +94,12 @@ def truncated_twosided_gaussian_v(t, lower, upper):
 def truncated_twosided_gaussian_w(perf_diff, draw_margin):
     """Equation 4.4 from Herbrich '05, On Gaussian Expectation Propagation.
 
-    Representing the additive correction factor to the variance of a rectified
-    Gaussian that is truncated on both sides.
+    Representing the additive correction factor to the variance of a rectified Gaussian
+    that is truncated on both sides.
     """
     abs_diff = abs(perf_diff)
     normalization = STANDARD_NORMAL.cdf(draw_margin - abs_diff) - STANDARD_NORMAL.cdf(
-        -draw_margin - abs_diff
+        -draw_margin - abs_diff,
     )
     if normalization < TOLERANCE:
         return 1
@@ -139,7 +134,9 @@ def update_one_team(team1: Team, team2: Team, outcome: int) -> Dict[Player, Rati
     # performance values was close to zero.
     if outcome == 0:
         v = truncated_twosided_gaussian_v(
-            perf_diff / c, -draw_margin / c, draw_margin / c
+            perf_diff / c,
+            -draw_margin / c,
+            draw_margin / c,
         )
         w = truncated_twosided_gaussian_w(perf_diff / c, draw_margin / c)
         mean_adjustment_direction = 1
@@ -170,5 +167,7 @@ def update_ratings(team1: Team, team2: Team, outcome: int = 1) -> Dict[Player, R
     # Nb: in Python3.9 the bitwise-or operator is overloaded for dictionaries
     # to perform a union of the key-value pairs. See PEP584.
     return update_one_team(team1, team2, outcome) | update_one_team(
-        team2, team1, -outcome
+        team2,
+        team1,
+        -outcome,
     )

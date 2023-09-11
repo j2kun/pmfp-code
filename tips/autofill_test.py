@@ -2,15 +2,13 @@ import math
 import random
 
 import hypothesis
-from hypothesis import given
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from hypothesis.strategies import floats
-from matplotlib.patches import FancyArrowPatch
-from shapely import geometry as geo
 import matplotlib.pyplot as plt
 import shapely
 import shapely.affinity as affine
+from hypothesis import given
+from hypothesis.strategies import composite, floats, integers
+from matplotlib.patches import FancyArrowPatch
+from shapely import geometry as geo
 
 from tips.autofill import find_stitch_path
 
@@ -45,7 +43,7 @@ def test_fill_box():
 
 def test_box_with_hole():
     box_with_hole = geo.box(10, 10, 16, 16, ccw=True).difference(
-        geo.box(12, 12, 14, 14, ccw=True)
+        geo.box(12, 12, 14, 14, ccw=True),
     )
     grating_segments = [
         ((10, 10), (16, 10)),
@@ -93,7 +91,7 @@ def test_box_with_hole():
 
 def test_box_with_hole_non_aligned_grating():
     box_with_hole = geo.box(10, 10, 16, 16, ccw=True).difference(
-        geo.box(12, 12, 14, 14, ccw=True)
+        geo.box(12, 12, 14, 14, ccw=True),
     )
     rows = intersect_region_with_grating(
         shape=box_with_hole,
@@ -122,8 +120,11 @@ def random_shape_difference(draw, min_points=3, max_points=10):
     ]
     angle = draw(
         floats(
-            min_value=0, max_value=2 * math.pi, allow_nan=False, allow_infinity=False
-        )
+            min_value=0,
+            max_value=2 * math.pi,
+            allow_nan=False,
+            allow_infinity=False,
+        ),
     )
     poly1 = geo.MultiPoint([[p.x, p.y] for p in poly1_points]).convex_hull
     poly2 = geo.MultiPoint([[p.x, p.y] for p in poly2_points]).convex_hull
@@ -140,7 +141,8 @@ def test_fuzz(shape_and_angle):
         row_spacing=1,
     )
     segments = [tuple(point for point in segment) for row in rows for segment in row]
-    starting_point = segments[0][0]
+    starting_segment = segments[0]
+    starting_point = starting_segment[0]
     # assert no error
     find_stitch_path(shape, segments, starting_point)
     # uncomment to matplotlib show the resulting stitch plan
@@ -200,11 +202,10 @@ def draw_line_segments(segments):
     plt.show()
 
 
-"""The code below was copied from Ink/Stitch for the purpose of generating randomized tests.
-
-- https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/utils/geometry.py#L150
-- https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/stitches/fill.py#L95
-"""
+# The code below was copied from Ink/Stitch for the purpose of generating
+# randomized tests.
+# https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/utils/geometry.py#L150
+# https://github.com/inkstitch/inkstitch/blob/dbded7c9b15a652677c04264fe1c6ee281e114ce/lib/stitches/fill.py#L95
 
 
 class InkstitchPoint:
@@ -228,7 +229,7 @@ class InkstitchPoint:
         elif isinstance(other, (int, float)):
             return self.__class__(self.x * other, self.y * other)
         else:
-            raise ValueError("cannot multiply %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot multiply {} by {}".format(type(self), type(other)))
 
     def __neg__(self):
         return self * -1
@@ -237,13 +238,13 @@ class InkstitchPoint:
         if isinstance(other, (int, float)):
             return self.__mul__(other)
         else:
-            raise ValueError("cannot multiply %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot multiply {} by {}".format(type(self), type(other)))
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return self * (1.0 / other)
         else:
-            raise ValueError("cannot divide %s by %s" % (type(self), type(other)))
+            raise ValueError("cannot divide {} by {}".format(type(self), type(other)))
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
@@ -277,7 +278,10 @@ def intersect_region_with_grating(shape, angle, row_spacing):
     normal = direction.rotate(math.pi / 2)
     center = InkstitchPoint((minx + maxx) / 2.0, (miny + maxy) / 2.0)
     _, start, _, end = affine.rotate(
-        shape, angle, origin="center", use_radians=True
+        shape,
+        angle,
+        origin="center",
+        use_radians=True,
     ).bounds
     start -= center.y
     end -= center.y
@@ -298,7 +302,8 @@ def intersect_region_with_grating(shape, angle, row_spacing):
         res = grating_line.intersection(shape)
 
         if isinstance(res, shapely.geometry.MultiLineString) or isinstance(
-            res, geo.GeometryCollection
+            res,
+            geo.GeometryCollection,
         ):
             runs = [
                 line_string.coords

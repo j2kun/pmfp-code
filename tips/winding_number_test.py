@@ -1,11 +1,7 @@
 from hypothesis import given
-from hypothesis.strategies import composite
-from hypothesis.strategies import floats
-from hypothesis.strategies import lists
+from hypothesis.strategies import composite, floats, lists
 
-from tips.winding_number import Point
-from tips.winding_number import is_left
-from tips.winding_number import point_in_polygon
+from tips.winding_number import Point, is_left, point_in_polygon
 
 
 def test_is_left_upward_left():

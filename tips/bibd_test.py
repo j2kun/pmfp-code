@@ -1,11 +1,8 @@
 from dataclasses import replace
+
 import pytest
 
-from tips.bibd import ALL_BIBDS
-from tips.bibd import BIBDParams
-from tips.bibd import bibd_15_3_1
-from tips.bibd import bibd_8_4_3
-from tips.bibd import is_bibd
+from tips.bibd import ALL_BIBDS, BIBDParams, bibd_8_4_3, bibd_15_3_1, is_bibd
 
 
 @pytest.mark.parametrize("bibd", ALL_BIBDS)
@@ -38,7 +35,7 @@ def test_incorrect_pairwise_membership_counts_breaks_isbibd():
             (5, 6, 8),
             (6, 7, 8),
             (5, 7, 8),
-        )
+        ),
     )
 
 
@@ -55,7 +52,7 @@ def test_unequal_pairwise_memberships_breaks_isbibd():
             (5, 7, 8),
             (1, 2, 5),
             (3, 6, 7),
-        )
+        ),
     )
 
 

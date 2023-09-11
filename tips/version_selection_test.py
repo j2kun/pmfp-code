@@ -1,19 +1,15 @@
-from hypothesis import assume
-from hypothesis import given
-from hypothesis.strategies import booleans
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
-from itertools import groupby
-from itertools import takewhile
-import pytest
+from itertools import groupby, takewhile
 
-from tips.version_selection import PackageVersion
-from tips.version_selection import select_dependent_versions
+import pytest
+from hypothesis import assume, given
+from hypothesis.strategies import booleans, composite, integers
+
+from tips.version_selection import PackageVersion, select_dependent_versions
 
 
 class IdIndex:
     def __init__(self, packages):
-        self.id_index = dict((p.package_id, p) for p in packages)
+        self.id_index = {p.package_id: p for p in packages}
 
     def __str__(self):
         return str(self.id_index)
@@ -27,10 +23,10 @@ class IdIndex:
 
 class NameVerIndex:
     def __init__(self, packages):
-        self.name_ver_index = dict(
-            (key, dict((p.version, p) for p in group))
+        self.name_ver_index = {
+            key: {p.version: p for p in group}
             for (key, group) in groupby(packages, lambda p: p.name)
-        )
+        }
 
     def __str__(self):
         return str(self.name_ver_index)
@@ -222,7 +218,7 @@ def dependency_graph(
                     name=name,
                     version=version,
                     dependencies=tuple(dependencies),
-                )
+                ),
             )
             i += 1
 
@@ -240,7 +236,7 @@ def test_arbitrary_dep_graph_feasible(graph):
     assume(chosen != dict())
 
     index = NameVerIndex(graph)
-    for (name, version) in chosen.items():
+    for name, version in chosen.items():
         p = index(name)[version]
         for dep_name, allowed_versions in p.dependencies:
             assert dep_name in chosen

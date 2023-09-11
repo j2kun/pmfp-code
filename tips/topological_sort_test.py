@@ -1,11 +1,9 @@
-from itertools import combinations
 import random
+from itertools import combinations
 
-from hypothesis import given
-from hypothesis.strategies import booleans
-from hypothesis.strategies import composite
-from hypothesis.strategies import integers
 import pytest
+from hypothesis import given
+from hypothesis.strategies import booleans, composite, integers
 
 from tips.topological_sort import topological_sort
 
@@ -13,7 +11,7 @@ from tips.topological_sort import topological_sort
 def assert_satisfies_dependency_order(dag, sorted_nodes):
     # Test that a sorted output satisfies the dependency requirements of the
     # DAG.
-    for (node, dependents) in dag.items():
+    for node, dependents in dag.items():
         for dependent in dependents:
             node_index = sorted_nodes.index(node)
             dependent_index = sorted_nodes.index(dependent)
@@ -103,14 +101,14 @@ def test_loop_detection(dag):
 def random_dag(
     draw,
     dependency_decider=booleans(),
-    num_nodes=integers(min_value=1, max_value=100),
+    num_nodes=integers(min_value=1, max_value=50),
 ):
     """Generate a random DAG."""
     nodes = list(range(draw(num_nodes)))
-    dag = dict((i, []) for i in nodes)
+    dag = {i: [] for i in nodes}
     random.shuffle(nodes)
 
-    for (i, j) in combinations(nodes, 2):
+    for i, j in combinations(nodes, 2):
         if draw(dependency_decider):
             dag[i].append(j)
 
@@ -128,14 +126,13 @@ def random_dag_with_loop(
     dag_builder=random_dag(num_nodes=integers(min_value=1, max_value=50)),
     loop_member_picker=booleans(),
 ):
-    """Generate a random DAG, then pick a random subset of nodes and form a
-    directed loop.
-    """
+    """Generate a random DAG, then pick a random subset of nodes and form a directed
+    loop."""
     dag = draw(dag_builder)
 
     # the cycle must have at least one node, and the picker may always return
     # false.
-    chosen_nodes = set([random.choice(list(dag.keys()))])
+    chosen_nodes = {random.choice(list(dag.keys()))}
 
     for node in dag.keys():
         if draw(loop_member_picker):
@@ -144,7 +141,7 @@ def random_dag_with_loop(
     loop = list(chosen_nodes)
     random.shuffle(loop)
 
-    for (i, j) in zip(loop, loop[1:]):
+    for i, j in zip(loop, loop[1:]):
         dependents = set(dag[i])
         dependents.add(j)
         dag[i] = list(dependents)
