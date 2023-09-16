@@ -52,6 +52,12 @@ class PoacherParameters:
     # A 2D array of floats representing how attractive a grid cell is for
     # poachers to attack. Referred to as z_i, and the entire set as Z. See
     # equation (5).
+    #
+    # Zero attractiveness corresponds to the middle range: equally likely
+    # as not to place a snare there.
+    #
+    # Negative attractiveness crresponds to disincentive to place a snare
+    # there. The values are passed through the logistic function.
     attractiveness: np.ndarray
 
 
@@ -88,6 +94,9 @@ def update_wildlife(
     patrol_effort: np.ndarray,
     patrol_problem: PatrolProblem,
 ) -> np.ndarray:
+    # Note the input is the _current_ patrol effort vs the _past_ poacher
+    # activity. Snares were set in the past, but might be detected by current
+    # patrol.
     manmade_change = (
         patrol_problem.poacher_strength * poacher_activity * (1 - patrol_effort)
     )
@@ -95,5 +104,8 @@ def update_wildlife(
     return np.maximum(0, natural_growth - manmade_change)
 
 
-def schedule_patrols():
+# TODO: how are the policies represented?
+
+
+def schedule_patrols(patrol_problem: PatrolProblem):
     return None
