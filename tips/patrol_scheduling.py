@@ -107,5 +107,22 @@ def update_wildlife(
 # TODO: how are the policies represented?
 
 
-def schedule_patrols(patrol_problem: PatrolProblem):
+def nash_equilibrium(defender_strategies, attacker_strategies):
+    pass
+
+
+def schedule_patrols(patrol_problem: PatrolProblem, num_epochs: int = 10):
+    # initialize with random data
+    attacker_strategies = [np.random.uniform(shape=patrol_problem.wildlife.shape)]
+    # initialize with heuristics
+    defender_strategies = [
+        # TODO
+    ]
+
+    for epoch in range(num_epochs):
+        defender_strategy, poacher_strategy = nash_equilibrium(
+            defender_strategies,
+            attacker_strategies,
+        )
+
     return None
