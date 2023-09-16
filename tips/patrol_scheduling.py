@@ -55,7 +55,7 @@ class PoacherParameters:
     attractiveness: np.ndarray
 
 
-def probability_of_attack(
+def build_attack_model(
     poacher_parameters: PoacherParameters,
     patrol_problem: PatrolProblem,
     patrol_effort: np.ndarray,
@@ -76,6 +76,23 @@ def probability_of_attack(
         + patrol_problem.displacement_effect * neighbor_effort
     )
     return logistic.cdf(logistic_input)
+
+
+def sample_poacher_activity(attack_model: np.ndarray) -> np.ndarray:
+    return np.random.binomial(1, attack_model)
+
+
+def update_wildlife(
+    wildlife: np.ndarray,
+    poacher_activity: np.ndarray,
+    patrol_effort: np.ndarray,
+    patrol_problem: PatrolProblem,
+) -> np.ndarray:
+    manmade_change = (
+        patrol_problem.poacher_strength * poacher_activity * (1 - patrol_effort)
+    )
+    natural_growth = wildlife**patrol_problem.wildlife_growth_ratio
+    return np.maximum(0, natural_growth - manmade_change)
 
 
 def schedule_patrols():
