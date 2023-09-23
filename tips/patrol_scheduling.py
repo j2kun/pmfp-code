@@ -6,11 +6,14 @@ References to "the paper" and equation markers are in reference to that paper,
 v1 submitted 2021-06-15.
 """
 
+import random
 from dataclasses import dataclass
 
 import numpy as np
 from scipy.ndimage import generic_filter
 from scipy.stats import logistic
+
+from util import ddpg
 
 
 @dataclass
@@ -48,7 +51,7 @@ class PatrolProblem:
 
 
 @dataclass
-class PoacherParameters:
+class PoacherPolicy:
     # A 2D array of floats representing how attractive a grid cell is for
     # poachers to attack. Referred to as z_i, and the entire set as Z. See
     # equation (5).
@@ -61,24 +64,33 @@ class PoacherParameters:
     attractiveness: np.ndarray
 
 
+@dataclass
+class DefenderPolicy:
+    # A 2D array of values in [0,1] representing how much effort to spend
+    # patrolling a given grid cell. Referred to as a_i in the paper, this
+    # class represents the policy for a single time step.
+    patrol_effort: np.ndarray
+
+
 def build_attack_model(
-    poacher_parameters: PoacherParameters,
+    poacher_policy: PoacherPolicy,
     patrol_problem: PatrolProblem,
-    patrol_effort: np.ndarray,
+    defender_policy: DefenderPolicy,
 ) -> np.ndarray:
+    """Computes the probability of poaching activity in each cell."""
     footprint = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
     # computes the sum of values of neighbors of each cell, using zero for
     # values that go outside the boundary of the array.
     neighbor_effort = generic_filter(
-        patrol_effort,
+        defender_policy.patrol_effort,
         np.sum,
         footprint=footprint,
         mode="constant",
         cval=0,
     )
     logistic_input = (
-        poacher_parameters.attractiveness
-        + patrol_problem.return_on_effort * patrol_effort
+        poacher_policy.attractiveness
+        + patrol_problem.return_on_effort * defender_policy.patrol_effort
         + patrol_problem.displacement_effect * neighbor_effort
     )
     return logistic.cdf(logistic_input)
@@ -94,17 +106,82 @@ def update_wildlife(
     patrol_effort: np.ndarray,
     patrol_problem: PatrolProblem,
 ) -> np.ndarray:
+    """Returns the new wildlife population in each cell."""
     # Note the input is the _current_ patrol effort vs the _past_ poacher
     # activity. Snares were set in the past, but might be detected by current
     # patrol.
-    manmade_change = (
+    manmade_change = -(
         patrol_problem.poacher_strength * poacher_activity * (1 - patrol_effort)
     )
     natural_growth = wildlife**patrol_problem.wildlife_growth_ratio
-    return np.maximum(0, natural_growth - manmade_change)
+    return np.maximum(0, natural_growth + manmade_change)
 
 
-# TODO: how are the policies represented?
+def defender_best_response(
+    patrol_problem: PatrolProblem,
+    poacher_strategies: np.ndarray,
+    poacher_distribution: np.ndarray,
+    training_rounds: int = 100,
+    planning_horizon: int = 5,
+):
+    """Returns the defender's best response pure strategy for fixed attacker
+    parameters."""
+    # an action is a choice of patrol effort for each cell.
+    num_actions = patrol_problem.wildlife.size
+    # a state is a concatenation of (wildlife, patrol effort, timestep index)
+    num_states = 2 * patrol_problem.wildlife.size + 1
+    learner = ddpg.DDPG(actions_dim=num_actions, states_dim=num_states)
+    batch_size = 128
+
+    for t in range(training_rounds):
+        wildlife = patrol_problem.wildlife
+        effort = np.zeros(shape=(patrol_problem.wildlife.shape,))
+        poacher_activity = np.zeros(shape=(patrol_problem.wildlife.shape,))
+        initial_state = np.concatenate([wildlife.flatten(), effort.flatten(), 0])
+        state = initial_state
+
+        for step in range(planning_horizon):
+            # simulate one round of the wildlife evolution
+            sampled_poacher_policy = random.choices(
+                poacher_strategies,
+                weights=poacher_distribution,
+            )[0]
+            sampled_defender_policy = learner.select_action(state)
+            p_attack = build_attack_model(
+                PoacherPolicy(sampled_poacher_policy),
+                patrol_problem,
+                # the last step patrol effort, which is what the poachers observe
+                DefenderPolicy(effort),
+            )
+            sample_poacher_activity(p_attack)
+            next_effort = sampled_defender_policy
+            next_wildlife = update_wildlife(
+                wildlife,
+                poacher_activity,
+                next_effort,
+                patrol_problem,
+            )
+
+            # use the expected wildlife at this step as an intermediate reward
+            reward = update_wildlife(wildlife, p_attack, next_effort, patrol_problem)
+            next_state = np.concatenate(
+                [next_wildlife.flatten(), next_effort.flatten(), step + 1],
+            )
+
+            learner.memory.push(
+                state,
+                sampled_defender_policy,
+                np.array([reward]),
+                next_state,
+                step == planning_horizon - 1,
+            )
+
+            if len(ddpg.memory) > batch_size:
+                ddpg.update(batch_size)
+
+            state = next_state
+
+    return learner
 
 
 def nash_equilibrium(defender_strategies, attacker_strategies):
@@ -113,7 +190,7 @@ def nash_equilibrium(defender_strategies, attacker_strategies):
 
 def schedule_patrols(patrol_problem: PatrolProblem, num_epochs: int = 10):
     # initialize with random data
-    attacker_strategies = [np.random.uniform(shape=patrol_problem.wildlife.shape)]
+    attacker_strategies = [np.random.uniform(size=patrol_problem.wildlife.shape)]
     # initialize with heuristics
     defender_strategies = [
         # TODO

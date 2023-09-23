@@ -87,15 +87,16 @@ class NormalizedEnv:
 class DDPG:
     def __init__(
         self,
-        n_targets,
+        actions_dim,
+        states_dim,
         actor_learning_rate=1e-4,
         critic_learning_rate=1e-3,
         gamma=0.99,
         tau=1e-2,
         memory_max_size=50000,
     ):
-        self.states_dim = 2 * n_targets + 1
-        self.actions_dim = n_targets
+        self.actions_dim = actions_dim
+        self.states_dim = states_dim
         self.gamma = gamma
         self.tau = tau
 
