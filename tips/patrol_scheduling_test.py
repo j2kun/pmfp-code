@@ -1,9 +1,11 @@
 import numpy as np
 
 from tips.patrol_scheduling import (
+    DefenderPolicy,
     PatrolProblem,
-    PoacherParameters,
+    PoacherPolicy,
     build_attack_model,
+    defender_best_response,
     update_wildlife,
 )
 
@@ -28,14 +30,17 @@ def test_attack_model():
         return_on_effort=-0.1,
         displacement_effect=0.1,
     )
-    poacher_parameters = PoacherParameters(
+    poacher_policy = PoacherPolicy(
         attractiveness=attractiveness,
+    )
+    patrol_effort = DefenderPolicy(
+        patrol_effort=np.zeros(shape),
     )
 
     attack_prob = build_attack_model(
-        poacher_parameters=poacher_parameters,
+        poacher_policy=poacher_policy,
         patrol_problem=problem,
-        patrol_effort=np.zeros(shape),
+        defender_policy=patrol_effort,
     )
     # fmt: off
     expected_probs = np.array([
@@ -99,3 +104,33 @@ def test_wildlife_update_no_patrolling():
     ]).reshape(shape)
     # fmt: on
     np.testing.assert_allclose(expected_wildlife, new_wildlife, atol=1e-1, rtol=1e-1)
+
+
+def test_defender_best_response():
+    shape = (5, 5)
+    # fmt: off
+    wildlife = np.array([
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 7, 7, 7,
+        0, 0, 7, 9, 7,
+        0, 0, 7, 7, 7,
+    ]).reshape(shape)
+    # fmt: on
+
+    problem = PatrolProblem(
+        wildlife=wildlife,
+        total_budget=1,
+        wildlife_growth_ratio=1.02,
+        poacher_strength=0.9,
+        return_on_effort=-0.1,
+        displacement_effect=0.1,
+    )
+
+    # TODO: add poacher strategies and distribution
+    # inspect structure of the result
+    # convert ddpg instance to simpler format
+    # assert result is sensible somehow
+
+    defender_best_response(problem)
+    __import__("ipdb").set_trace()
