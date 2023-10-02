@@ -5,6 +5,7 @@ Adapted from https://github.com/lily-x/mirror/blob/main/ddpg.py
 import random
 from collections import deque
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -60,11 +61,11 @@ class ReplayBuffer:
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
 
-        s_batch = [experience[0] for experience in batch]
-        a_batch = [experience[1] for experience in batch]
-        r_batch = [experience[2] for experience in batch]
-        ss_batch = [experience[3] for experience in batch]
-        done_batch = [experience[4] for experience in batch]
+        s_batch = np.array([experience[0] for experience in batch])
+        a_batch = np.array([experience[1] for experience in batch])
+        r_batch = np.array([experience[2] for experience in batch])
+        ss_batch = np.array([experience[3] for experience in batch])
+        done_batch = np.array([experience[4] for experience in batch])
 
         return s_batch, a_batch, r_batch, ss_batch, done_batch
 
@@ -94,11 +95,13 @@ class DDPG:
         gamma=0.99,
         tau=1e-2,
         memory_max_size=50000,
+        batch_size=128,
     ):
         self.actions_dim = actions_dim
         self.states_dim = states_dim
         self.gamma = gamma
         self.tau = tau
+        self.batch_size = batch_size
 
         self.actor = Actor(self.states_dim, self.actions_dim)
         self.critic = Critic(self.states_dim + self.actions_dim, 1)
@@ -130,6 +133,9 @@ class DDPG:
         self.memory = ReplayBuffer(memory_max_size)
         self.loss = nn.MSELoss()
 
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.push(state, action, reward, next_state, done)
+
     def select_action(self, state):
         if not torch.is_tensor(state):
             state = torch.from_numpy(state).float().unsqueeze(0)
@@ -139,8 +145,13 @@ class DDPG:
         action = action.detach().numpy()[0]
         return action
 
-    def update(self, batch_size):
-        states, actions, rewards, next_states, dones = self.memory.sample(batch_size)
+    def update(self):
+        if len(self.memory) <= self.batch_size:
+            return
+
+        states, actions, rewards, next_states, dones = self.memory.sample(
+            self.batch_size,
+        )
         states = torch.FloatTensor(states)
         actions = torch.FloatTensor(actions)
         rewards = torch.FloatTensor(rewards)
