@@ -40,6 +40,7 @@ module = [
   "PIL.Image",
   "assertpy",
   "bitstring",
+  "ipdb",
   "matplotlib",
   "matplotlib.dates",
   "matplotlib.patches",
