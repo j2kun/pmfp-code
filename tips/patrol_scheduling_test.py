@@ -1,4 +1,7 @@
+import operator
+
 import numpy as np
+import pytest
 
 from tips.patrol_scheduling import (
     DefenderPolicy,
@@ -151,7 +154,7 @@ def test_wildlife_update_no_patrolling():
     np.testing.assert_allclose(expected_wildlife, new_wildlife, atol=1e-1, rtol=1e-1)
 
 
-def test_simulate_game():
+def test_simulate_game_full_defense():
     shape = (5, 5)
     wildlife = np.zeros(shape)
 
@@ -197,6 +200,85 @@ def test_simulate_game():
         patrol_problem.wildlife_growth_ratio**planning_horizon
     )
     np.testing.assert_allclose(end_wildlife, expected_wildlife, atol=1e-2, rtol=1e-2)
+
+
+@pytest.mark.parametrize("defense", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+def test_simulate_game_partial_defense(defense):
+    shape = (5, 5)
+    wildlife = np.zeros(shape)
+
+    wildlife[2][2:5] = [7, 7, 7]
+    wildlife[3][2:5] = [7, 9, 7]
+    wildlife[4][2:5] = [7, 7, 7]
+
+    patrol_problem = PatrolProblem(
+        wildlife=wildlife,
+        total_budget=defense * 9,
+        wildlife_growth_ratio=1.02,
+        poacher_strength=0.9,
+        return_on_effort=-0.9,
+        displacement_effect=0.1,
+    )
+
+    # poach anywhere there are animals, but don't prioritize
+    attractiveness = -10 * np.ones(shape=shape)
+    attractiveness[2][2:5] = [0, 0, 0]
+    attractiveness[3][2:5] = [0, 0, 0]
+    attractiveness[4][2:5] = [0, 0, 0]
+
+    def draw_poacher_policy():
+        return PoacherPolicy(attractiveness)
+
+    alloc = np.zeros(shape=shape)
+    alloc[2][2:5] = [defense, defense, defense]
+    alloc[3][2:5] = [defense, defense, defense]
+    alloc[4][2:5] = [defense, defense, defense]
+
+    def draw_defender_policy():
+        return DefenderPolicy(alloc)
+
+    planning_horizon = 5
+    end_wildlife = simulate_game(
+        patrol_problem,
+        draw_poacher_policy,
+        draw_defender_policy,
+        planning_horizon=planning_horizon,
+    )
+    # all of the tests reduce wildlife by some amount, but not maximally
+    unpoached_outcome = wildlife ** (
+        patrol_problem.wildlife_growth_ratio**planning_horizon
+    )
+    print(end_wildlife)
+    print(unpoached_outcome)
+    epsilon = 1e-08
+    np.testing.assert_array_compare(
+        operator.le,
+        end_wildlife - epsilon,
+        unpoached_outcome,
+        header="Arrays are not lte-ordered",
+        equal_inf=False,
+    )
+
+    # counterfactual: no defense
+    alloc = np.zeros(shape=shape)
+
+    def draw_defender_policy():
+        return DefenderPolicy(alloc)
+
+    planning_horizon = 5
+    no_defense_end_wildlife = simulate_game(
+        patrol_problem,
+        draw_poacher_policy,
+        draw_defender_policy,
+        planning_horizon=planning_horizon,
+    )
+    np.testing.assert_array_compare(
+        operator.le,
+        no_defense_end_wildlife - epsilon,
+        end_wildlife,
+        header="Arrays are not lte-ordered (no defense)",
+        equal_inf=False,
+    )
 
 
 # A default test harness that individual tests override parts of
