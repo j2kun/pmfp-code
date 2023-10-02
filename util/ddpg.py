@@ -18,7 +18,8 @@ class Critic(nn.Module):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size1)
         self.linear2 = nn.Linear(hidden_size1, hidden_size2)
-        self.linear3 = nn.Linear(hidden_size2, output_size)
+        self.linear3 = nn.Linear(hidden_size2, hidden_size2)
+        self.linear4 = nn.Linear(hidden_size2, output_size)
 
     def forward(self, state, action):
         x = torch.cat([state, action], 1)
@@ -27,6 +28,8 @@ class Critic(nn.Module):
         x = self.linear2(x)
         x = F.relu(x)
         x = self.linear3(x)
+        x = F.relu(x)
+        x = self.linear4(x)
         return x
 
 
@@ -37,7 +40,8 @@ class Actor(nn.Module):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size1)
         self.linear2 = nn.Linear(hidden_size1, hidden_size2)
-        self.linear3 = nn.Linear(hidden_size2, output_size)
+        self.linear3 = nn.Linear(hidden_size2, hidden_size2)
+        self.linear4 = nn.Linear(hidden_size2, output_size)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, state):
@@ -46,6 +50,8 @@ class Actor(nn.Module):
         x = self.linear2(x)
         x = F.relu(x)
         x = self.linear3(x)
+        x = F.relu(x)
+        x = self.linear4(x)
         x = self.softmax(x)
         return x
 

@@ -139,7 +139,7 @@ def test_wildlife_update_no_patrolling():
     new_wildlife = update_wildlife(
         wildlife=wildlife,
         poacher_activity=snares,
-        patrol_effort=patrol_effort,
+        defender_policy=DefenderPolicy(patrol_effort),
         patrol_problem=problem,
     )
     # fmt: off

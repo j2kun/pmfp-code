@@ -8,7 +8,7 @@ v1 submitted 2021-06-15.
 
 import random
 from dataclasses import dataclass
-from typing import Callable, Sequence
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 from scipy.ndimage import generic_filter
@@ -123,17 +123,20 @@ def update_wildlife(
 # A callback whose args are:
 # - step number
 # - current wildlife
-# - current poacher activity
-# - current policy
+# - probability of poacher attack
+# - current defender policy
 # - intermediate reward representing the expected wildlife at the next step
-SimulationStepCallback = Callable[[int, np.ndarray, DefenderPolicy, float], None]
+SimulationStepCallback = Callable[
+    [int, np.ndarray, np.ndarray, DefenderPolicy, float],
+    None,
+]
 
 
 def simulate_game(
     patrol_problem: PatrolProblem,
     draw_poacher_strategy: Callable[[], PoacherPolicy],
     draw_defender_strategy: Callable[[], DefenderPolicy],
-    per_step_callable: SimulationStepCallback = None,
+    per_step_callable: Optional[SimulationStepCallback] = None,
     planning_horizon: int = 5,
 ) -> np.ndarray:
     """Simulate some number of rounds of the game.
@@ -163,7 +166,12 @@ def simulate_game(
         poacher_activity = draw_poacher_activity(p_attack)
 
         defender_policy = draw_defender_strategy()
-        assert np.sum(defender_policy.patrol_effort) <= patrol_problem.total_budget
+        assert (
+            np.sum(defender_policy.patrol_effort) <= patrol_problem.total_budget + 1e-05
+        ), (
+            f"Total patrol effort {np.sum(defender_policy.patrol_effort)} exceeds "
+            f"budget {patrol_problem.total_budget}"
+        )
         next_wildlife = update_wildlife(
             wildlife,
             poacher_activity,
@@ -176,10 +184,46 @@ def simulate_game(
             update_wildlife(wildlife, p_attack, defender_policy, patrol_problem),
         )
         if per_step_callable:
-            per_step_callable(step, wildlife, poacher_activity, defender_policy, reward)
+            per_step_callable(step, wildlife, p_attack, defender_policy, reward)
         wildlife = next_wildlife
 
     return wildlife
+
+
+class GameState:
+    def __init__(self, patrol_problem: PatrolProblem):
+        self.patrol_problem = patrol_problem
+        self.shape = patrol_problem.wildlife.shape
+        self.actions_dim = patrol_problem.wildlife.size
+
+        initial_wildlife = patrol_problem.wildlife.flatten()
+        initial_effort = np.zeros(shape=patrol_problem.wildlife.shape).flatten()
+        initial_state = np.concatenate([initial_wildlife, initial_effort, [0]])
+        self.state = initial_state
+
+    def decompose_state(self):
+        wildlife = self.state[: self.actions_dim].reshape(self.shape)
+        effort = self.state[self.actions_dim : 2 * self.actions_dim].reshape(self.shape)
+        step = self.state[-1]
+        return wildlife, effort, step
+
+    def update_state(self, wildlife, effort, step):
+        old_state = self.state
+        self.state = np.concatenate(
+            [wildlife.flatten(), effort.flatten(), [step + 1]],
+        )
+        return (old_state, self.state)
+
+    def draw_defender_policy(self, learner):
+        sampled_defender_policy = learner.select_action(self.state).reshape(self.shape)
+        # The sampled action is a softmax probability over the cells. We
+        # interpret that as a budget allocation, but the model forces each
+        # cell to have at most effort=1, so we clip anything exceeding 1.
+        # This will impicitly teach the DDPG not to allocate any cell a
+        # value more than budget / grid_size.
+        next_effort = sampled_defender_policy * self.patrol_problem.total_budget
+        next_effort[np.where(next_effort > 1)] = 1
+        return DefenderPolicy(next_effort)
 
 
 def defender_best_response(
@@ -196,69 +240,38 @@ def defender_best_response(
     # a state is a concatenation of (wildlife, patrol effort, timestep index)
     num_states = 2 * actions_dim + 1
     learner = ddpg.DDPG(actions_dim=actions_dim, states_dim=num_states)
-    shape = patrol_problem.wildlife.shape
 
     for t in range(training_rounds):
-        initial_wildlife = patrol_problem.wildlife.flatten()
-        initial_effort = np.zeros(shape=patrol_problem.wildlife.shape).flatten()
-        initial_state = np.concatenate([initial_wildlife, initial_effort, [0]])
-        state = initial_state
+        game_state = GameState(patrol_problem)
 
-        for step in range(planning_horizon):
-            # simulate one round of the wildlife evolution
-            wildlife = state[:actions_dim].reshape(shape)
-            effort = state[actions_dim : 2 * actions_dim].reshape(shape)
-
+        def draw_poacher_policy() -> PoacherPolicy:
             sampled_poacher_policy = random.choices(
                 poacher_strategies,
                 weights=poacher_distribution,
             )[0]
-            sampled_defender_policy = learner.select_action(state).reshape(shape)
-            p_attack = build_attack_model(
-                poacher_policy=PoacherPolicy(sampled_poacher_policy),
-                patrol_problem=patrol_problem,
-                # the last step patrol effort, which is what the poachers observe
-                defender_policy=DefenderPolicy(effort),
-            )
-            poacher_activity = draw_poacher_activity(p_attack)
+            return PoacherPolicy(sampled_poacher_policy)
 
-            # The sampled action is a softmax probability over the cells. We
-            # interpret that as a budget allocation, but the model forces each
-            # cell to have at most effort=1, so we clip anything exceeding 1.
-            # This will impicitly teach the DDPG not to allocate any cell a
-            # value more than budget / grid_size.
-            next_effort = sampled_defender_policy * patrol_problem.total_budget
-            next_effort[np.where(next_effort > 1)] = 1
-
-            next_wildlife = update_wildlife(
+        def per_step_callable(step, wildlife, p_attack, defender_policy, reward):
+            old_state, next_state = game_state.update_state(
                 wildlife,
-                poacher_activity,
-                next_effort,
-                patrol_problem,
+                defender_policy.patrol_effort,
+                step,
             )
-
-            # use the expected wildlife at this step as an intermediate reward
-            reward = np.sum(
-                update_wildlife(wildlife, p_attack, next_effort, patrol_problem),
-            )
-            next_state = np.concatenate(
-                [next_wildlife.flatten(), next_effort.flatten(), [step + 1]],
-            )
-
             learner.remember(
-                state,
-                sampled_defender_policy.flatten(),
+                old_state,
+                defender_policy.patrol_effort.flatten(),
                 np.array([reward]),
                 next_state,
                 step == planning_horizon - 1,
             )
             learner.update()
-            state = next_state
 
-        print(f"{wildlife.round(2)=}")
-        print(f"{p_attack.round(2)=}")
-        print(f"{poacher_activity.round(2)=}")
-        print(f"{effort.round(2)=}")
+        simulate_game(
+            patrol_problem,
+            draw_poacher_policy,
+            lambda: game_state.draw_defender_policy(learner),
+            per_step_callable,
+        )
 
     return learner
 
