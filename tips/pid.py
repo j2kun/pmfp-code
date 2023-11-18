@@ -6,7 +6,7 @@ def clamp(n, smallest, largest):
 
 
 @dataclass
-class PID:
+class PrincipalIntegralDerviativeController:
     kp: float
     ki: float
     kd: float

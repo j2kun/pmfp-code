@@ -3,7 +3,7 @@ from dataclasses import dataclass, replace
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from tips.pid import PID
+from tips.pid import PrincipalIntegralDerviativeController as PID
 
 
 # A symmetric linear system: the control is directly proportional to the system
