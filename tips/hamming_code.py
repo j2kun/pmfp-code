@@ -53,7 +53,7 @@ def decode(bits: BitStream) -> BitStream:
     return output
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import os
     import timeit
 
