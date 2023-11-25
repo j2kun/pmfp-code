@@ -42,8 +42,8 @@ class PrincipalIntegralDerviativeController:
         return clamp(output, self.output_min, self.output_max)
 
 
-# Plot the PID control in a simulated environment
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
+    # Plot the PID control in a simulated environment
     from dataclasses import dataclass, replace
 
     import matplotlib.pyplot as plt
