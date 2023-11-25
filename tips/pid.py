@@ -53,7 +53,7 @@ if __name__ == "__main__":
         value: float = 0
         time: int = 0
 
-        def run(self, control: int):
+        def run(self, control: float):
             change = control / 20
             new_value = self.value + change
             return replace(self, value=new_value, time=self.time + 1)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         system = SimpleLinearSystem(value=initial)
         control_values = []
         system_values = []
-        for i in range(samples):
+        for _ in range(samples):
             control = pid.run(system.value, dt=dt)
             system = system.run(control)
             control_values.append(control)
