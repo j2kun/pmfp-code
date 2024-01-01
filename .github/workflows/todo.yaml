@@ -1,0 +1,14 @@
+name: Update TODO backlinks
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: todo-backlinks
+      uses: j2kun/todo-backlinks@v0.0.1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
