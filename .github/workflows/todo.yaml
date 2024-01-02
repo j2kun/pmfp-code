@@ -9,6 +9,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: todo-backlinks
-      uses: j2kun/todo-backlinks@v0.0.1
+      uses: j2kun/todo-backlinks@v0.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
