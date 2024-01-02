@@ -10,6 +10,8 @@ RESOURCES = ["flour", "leather"]
 SERVICES = ["miller", "leathersmith"]
 CUSTOMERS = ["cake", "handbag"]
 
+# TODO(#4): finish testing
+
 
 def test_empty_inputs():
     resources = []
