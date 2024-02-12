@@ -19,7 +19,8 @@ line-length = 88
 target-version = ['py310']
 
 [tool.pytest.ini_options]
-addopts = "-n auto --mypy -v --cov-report html:cov_html --cov-report annotate:cov_annotate --junitxml=test-results/pytest/results.xml --cov-report term-missing:skip-covered --cov ."
+addopts = "--mypy -v"
+# addopts = "-n auto --mypy -v --cov-report html:cov_html --cov-report annotate:cov_annotate --junitxml=test-results/pytest/results.xml --cov-report term-missing:skip-covered --cov ."
 norecursedirs = [
   ".git",
   "__pycache__",
@@ -53,6 +54,7 @@ module = [
   "scipy.spatial.distance",
   "shapely",
   "shapely.affinity",
+  "igraph",
 ]
 ignore_missing_imports = true
 
