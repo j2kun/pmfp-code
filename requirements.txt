@@ -46,7 +46,7 @@ mypy-extensions==1.0.0
 nashpy==0.0.40
 networkx==3.0
 nodeenv==1.8.0
-numpy==1.24.1
+numpy==1.26.4
 nvidia-cublas-cu11==11.10.3.66
 nvidia-cuda-cupti-cu11==11.7.101
 nvidia-cuda-nvrtc-cu11==11.7.99
