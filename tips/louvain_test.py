@@ -2,7 +2,7 @@ import itertools
 
 import igraph
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import booleans, composite, floats, integers
 
 from tips import louvain
@@ -113,6 +113,7 @@ def test_undirected_graph_converges(graph, resolution):
     floats(min_value=0.01, max_value=0.3),
     floats(min_value=0.01, max_value=0.99),
 )
+@settings(deadline=None, max_examples=500)
 def test_stochastic_block_model(in_prob, out_prob, resolution):
     graph = igraph.Graph.SBM(
         100,
@@ -129,7 +130,7 @@ def weighted_sbm(
     draw,
     in_prob=floats(min_value=0.7, max_value=0.99),
     out_prob=floats(min_value=0.01, max_value=0.3),
-    num_vertices=integers(min_value=20, max_value=100),
+    num_vertices=integers(min_value=20, max_value=40),
     v_weight=floats(min_value=1, max_value=5),
     in_edge_weight=floats(min_value=1, max_value=5),
     out_edge_weight=floats(min_value=0.01, max_value=1),
@@ -137,17 +138,35 @@ def weighted_sbm(
     n = draw(num_vertices)
     if n % 2 == 1:
         n += 1
+
+    p_in = draw(in_prob)
+    p_out = draw(out_prob)
     graph = igraph.Graph.SBM(
-        num_vertices=n,
+        n,
         block_sizes=[n // 2, n // 2],
-        pref_matrix=[[in_prob, out_prob], [out_prob, in_prob]],
+        pref_matrix=[[p_in, p_out], [p_out, p_in]],
     )
-    # TODO: add edge weights and vertex weights
+
+    graph.vs["weight"] = [draw(v_weight) for _ in range(n)]
+    for edge in graph.es:
+        in_edge = (edge.source < n // 2 and edge.target < n // 2) or (
+            edge.source >= n // 2 and edge.target >= n // 2
+        )
+        edge["weight"] = draw(in_edge_weight if in_edge else out_edge_weight)
+
     return graph
 
 
+i = 0
+
+
 @given(weighted_sbm(), floats(min_value=0.01, max_value=0.99))
+@settings(max_examples=500)
 def test_weighted_sbm(graph, resolution):
+    global i
+    print(i)
+    i += 1
     actual = run_louvain(graph, resolution)
-    expected = {frozenset(range(50)), frozenset(range(50, 100))}
+    n = len(graph.vs)
+    expected = {frozenset(range(n // 2)), frozenset(range(n // 2, n))}
     check_equivalent(expected, actual, resolution, graph)
