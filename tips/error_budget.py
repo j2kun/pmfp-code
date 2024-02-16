@@ -96,7 +96,12 @@ if __name__ == "__main__":
         result.time_until_exhausted or timedelta(minutes=0)
     )
 
-    plt.plot(d[:index], values[:index], linewidth=3, label=r"error budget")
+    plt.plot(
+        [dates.date2num(x) for x in d[:index]],
+        values[:index],
+        linewidth=3,
+        label=r"error budget",
+    )
 
     xaxis_sample_width = dates.date2num(d[1]) - dates.date2num(d[0])
     plt.axline(
@@ -108,7 +113,7 @@ if __name__ == "__main__":
         label="burn rate",
     )
     plt.axvline(
-        violation_time,
+        dates.date2num(violation_time),
         linewidth=1,
         color="red",
         linestyle=":",
