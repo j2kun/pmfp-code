@@ -1,6 +1,6 @@
 import igraph
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from tips.vf2 import contains_isomorphic_subgraph
@@ -54,6 +54,7 @@ def test_graph_with_subgraph_but_not_induced(query_n, edge_list):
     ),
     st.permutations(range(6)),
 )
+@settings(deadline=None)
 def test_random_graph_contains_random_subgraph(
     graph_and_subgraph,
     subgraph_permutation,

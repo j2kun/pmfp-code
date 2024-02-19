@@ -101,7 +101,6 @@ def should_cut(
     u, v = extension
 
     unmapped_graph_neighbors = strict_neighbors(graph, mapping.values())
-    # FIXME: simplify this
     unmapped_graph_neighbors_and_mapping = flatten(
         graph.neighborhood(
             list(mapping.values()),
