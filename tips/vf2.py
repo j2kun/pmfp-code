@@ -9,7 +9,6 @@ from bidict import bidict
 # keys are indices of vertices in the subgraph query, and the values are indices
 # of vertices in the target graph the subgraph is sought within.
 Mapping = bidict[int, int]
-
 Extension = tuple[int, int]
 
 
@@ -32,11 +31,16 @@ def generate_extensions(
 ) -> list[Extension]:
     """Generate a list of the next extensions of `mapping` to try.
 
-    Note that the extensions chosen correspond to the "matching order" of the query
-    graph, which is noted in the literature as a cornerstone of VF2's optimizations.
+    Note that the extensions chosen correspond to specifying a preference order over
+    which nodes to try to add to the mapping next. This "matching order" is noted in the
+    literature as a cornerstone of VF2's optimizations.
 
-    For this demonstration, we use the basic matching order of selecting unmapped
-    neighbors of currently mapped vertices.
+    For this demonstration, I use the trivial matching order of selecting unmapped
+    neighbors of currently mapped vertices. As such, this algorithm is quite slow. For a
+    more sophisticated matching order, see
+
+    VF2++—An improved subgraph isomorphism algorithm; Alpár Jüttner, Péter Madarasi;
+    https://doi.org/10.1016/j.dam.2018.02.018
     """
     unmapped_graph_neighbors = strict_neighbors(graph, mapping.values())
     unmapped_query_neighbors = strict_neighbors(query, mapping.keys())
@@ -92,11 +96,7 @@ def should_cut(
     """Check if `extension` should be cut from the search.
 
     Generally this routine would contain a suite of fast heuristics to help prune the
-    search space. I include a simple one, and refer the reader to the following paper
-    for more.
-
-    VF2++—An improved subgraph isomorphism algorithm Alpár Jüttner, Péter Madarasi
-    https://doi.org/10.1016/j.dam.2018.02.018
+    search space.
     """
     u, v = extension
 
@@ -185,8 +185,8 @@ def contains_isomorphic_subgraph(graph: igraph.Graph, query: igraph.Graph) -> bo
 if __name__ == "__main__":
     import random
 
-    graph = igraph.Graph.Erdos_Renyi(n=20, p=0.5)
-    subgraph_indices = random.sample(range(graph.vcount()), 8)
+    graph = igraph.Graph.Erdos_Renyi(n=50, p=0.1)
+    subgraph_indices = random.sample(range(graph.vcount()), 15)
     subgraph = graph.induced_subgraph(subgraph_indices)
     result = contains_isomorphic_subgraph(graph, subgraph)
     assert result, "incorrect!"
