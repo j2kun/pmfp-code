@@ -68,18 +68,18 @@ def is_consistent(
     u, v = extension
     for u_neighbor in query.neighbors(u):
         if u_neighbor in mapping and not graph.are_connected(v, mapping[u_neighbor]):
-            print(f"\tInconsistent mapping {extension}")
+            # print(f"\tInconsistent mapping {extension}")
             return False
 
     for v_neighbor in graph.neighbors(v):
-        if v_neighbor in mapping.values() and not graph.are_connected(
+        if v_neighbor in mapping.values() and not query.are_connected(
             u,
             mapping.inverse[v_neighbor],
         ):
-            print(f"\tInconsistent mapping {extension}")
+            # print(f"\tInconsistent mapping {extension}")
             return False
 
-    print(f"\tConsistent mapping {extension}")
+    # print(f"\tConsistent mapping {extension}")
     return True
 
 
@@ -136,12 +136,12 @@ def should_cut(
     ) or len(v_neighbors & unmapped_graph_vertices_not_adjacent_to_mapping) < len(
         u_neighbors & unmapped_query_vertices_not_adjacent_to_mapping,
     ):
-        print(f"\tCutting {extension}")
+        # print(f"\tCutting {extension}")
         return True
 
     # other heuristics...
 
-    print(f"\tNot cutting {extension}")
+    # print(f"\tNot cutting {extension}")
     return False
 
 
@@ -157,20 +157,20 @@ def vf2(
 
     candidates = generate_extensions(graph, query, mapping)
     for extension in candidates:
-        print(f"Trying to map {extension}")
+        # print(f"Trying to map {extension}")
         if is_consistent(graph, query, mapping, extension) and not should_cut(
             graph,
             query,
             mapping,
             extension,
         ):
-            print(f"\tAdding mapping {extension}")
+            # print(f"\tAdding mapping {extension}")
             source, target = extension
             mapping[source] = target
             result = vf2(graph, query, mapping)
             if result:
                 return result
-            print(f"\tRemoving mapping {extension}")
+            # print(f"\tRemoving mapping {extension}")
             del mapping[source]
 
     return None
@@ -180,3 +180,13 @@ def contains_isomorphic_subgraph(graph: igraph.Graph, query: igraph.Graph) -> bo
     """Check if `query` is isomorphic to a subgraph of `graph`."""
     result = vf2(graph, query, bidict())
     return result is not None
+
+
+if __name__ == "__main__":
+    import random
+
+    graph = igraph.Graph.Erdos_Renyi(n=20, p=0.5)
+    subgraph_indices = random.sample(range(graph.vcount()), 8)
+    subgraph = graph.induced_subgraph(subgraph_indices)
+    result = contains_isomorphic_subgraph(graph, subgraph)
+    assert result, "incorrect!"
