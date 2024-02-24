@@ -2,6 +2,10 @@
 
 
 def cosine_similarity(a, b):
+    """Return a number between -1 and 1 indicating how similar two vectors are.
+
+    A value of -1 is maximally dissimilar, while 1 is maximally similar.
+    """
     dot_product = 0
     a_norm = 0
     b_norm = 0
