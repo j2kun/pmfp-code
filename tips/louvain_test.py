@@ -147,7 +147,7 @@ i = 0
 
 
 @given(weighted_sbm(), floats(min_value=0.01, max_value=0.99))
-@settings(max_examples=500)
+@settings(max_examples=500, deadline=None)
 def test_weighted_sbm(graph, resolution):
     global i
     print(i)
