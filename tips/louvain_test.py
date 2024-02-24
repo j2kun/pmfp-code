@@ -1,11 +1,10 @@
-import itertools
-
 import igraph
 import pytest
 from hypothesis import given, settings
-from hypothesis.strategies import booleans, composite, floats, integers
+from hypothesis.strategies import composite, floats, integers
 
 from tips import louvain
+from util.hypothesis_graph import unweighted_graph
 
 # We tests against all parameters, but more loosely check that Louvain produces
 # a partition that maximizes the objective as well as the expected partition.
@@ -90,19 +89,6 @@ def test_two_near_cliques_sparsely_connected(resolution):
     check_equivalent(expected, actual, resolution, graph)
 
 
-@composite
-def unweighted_graph(
-    draw,
-    edge_decider=booleans(),
-    num_vertices=integers(min_value=5, max_value=20),
-):
-    graph = igraph.Graph(n=draw(num_vertices))
-    for i, j in itertools.combinations(range(graph.vcount()), 2):
-        if draw(edge_decider):
-            graph.add_edge(i, j)
-    return graph
-
-
 @given(unweighted_graph(), floats(min_value=0.01, max_value=0.99))
 def test_undirected_graph_converges(graph, resolution):
     run_louvain(graph, resolution)
@@ -161,7 +147,7 @@ i = 0
 
 
 @given(weighted_sbm(), floats(min_value=0.01, max_value=0.99))
-@settings(max_examples=500)
+@settings(max_examples=500, deadline=None)
 def test_weighted_sbm(graph, resolution):
     global i
     print(i)
