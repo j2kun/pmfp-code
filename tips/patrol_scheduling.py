@@ -121,11 +121,16 @@ def update_wildlife(
 
 
 # A callback whose args are:
+#
 # - step number
 # - current wildlife
 # - probability of poacher attack
 # - current defender policy
 # - intermediate reward representing the expected wildlife at the next step
+#
+# This is used for the player to update their internal policy at each game step,
+# and so it crucially should not include the actual poacher activity, which is
+# not observable to the player.
 SimulationStepCallback = Callable[
     [int, np.ndarray, np.ndarray, DefenderPolicy, float],
     None,
@@ -232,6 +237,7 @@ def defender_best_response(
     poacher_distribution: Sequence[float],
     training_rounds: int = 100,
     planning_horizon: int = 5,
+    debug_callback: Optional[Callable[[int, ddpg.DDPG], None]] = None,
 ):
     """Returns the defender's best response pure strategy for fixed attacker
     parameters."""
@@ -270,8 +276,11 @@ def defender_best_response(
             patrol_problem,
             draw_poacher_policy,
             lambda: game_state.draw_defender_policy(learner),
-            per_step_callable,
+            per_step_callable=per_step_callable,
+            planning_horizon=planning_horizon,
         )
+        if debug_callback:
+            debug_callback(t, learner)
 
     return learner
 
