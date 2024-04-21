@@ -28,7 +28,7 @@ filelock==3.12.3
 fonttools==4.47.2
 hypothesis==6.8.9
 identify==2.5.27
-idna==2.10
+idna==3.7
 igraph==0.11.3
 iniconfig==1.1.1
 ipdb==0.13.13
