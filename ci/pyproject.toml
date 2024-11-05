@@ -1,3 +1,5 @@
+# A copy of pyproject.toml with CI-specific options
+
 [tool.ruff]
 line-length = 88
 select = ["E", "F"]
@@ -19,14 +21,14 @@ line-length = 88
 target-version = ['py310']
 
 [tool.pytest.ini_options]
-addopts = "--mypy -v"
+# Run multithreaded tests in CI, and add coverage outputs
+addopts = "-n auto --mypy -v --cov-report html:cov_html --junitxml=test-results/pytest/results.xml --cov-report term-missing:skip-covered --cov ."
 norecursedirs = [
   ".git",
   "__pycache__",
   "data",
   "node_modules",
   "venv",
-  ".hypothesis",
 ]
 
 [tool.isort]
