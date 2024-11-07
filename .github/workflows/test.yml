@@ -28,6 +28,6 @@ jobs:
       - uses: chartboost/ruff-action@v1
       - name: Run tests
         run: |
-          python -m pytest
+          python -m pytest -c ci/pyproject.toml
       - name: Coveralls
         uses: coverallsapp/github-action@v2
