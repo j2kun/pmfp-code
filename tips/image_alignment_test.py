@@ -6,7 +6,10 @@ from tips.image_alignment import align_images
 
 @pytest.mark.parametrize(
     "row_shift, col_shift",
-    [(x, y) for x in range(50) for y in range(40)],
+    # I manually tested with the cross product of range(50)xrange(40), but to
+    # reduce the obscenely large number of tests, now I just test a
+    # pseudorandomly chosen subset of those.
+    list({((2 * x + 1) % 50, (3 * x + 5) % 40) for x in range(100)}),
 )
 def test_align_delta_functions(row_shift, col_shift):
     num_rows = 50
