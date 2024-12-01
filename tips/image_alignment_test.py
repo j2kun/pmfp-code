@@ -29,3 +29,18 @@ def test_align_delta_functions(row_shift, col_shift):
         (row2 + actual_row_shift) % num_rows,
         (col2 + actual_col_shift) % num_cols,
     )
+
+
+def test_shifted_image():
+    import numpy as np
+    from PIL import Image
+    from PIL.ImageOps import grayscale
+
+    cat = np.array(grayscale(Image.open("data/cat.jpg")))
+    cat_moved = np.array(grayscale(Image.open("data/cat_moved.jpg")))
+    # cat_moved is cat, but shifted
+    # 67-pixels in the vertical direction
+    # and 152 pixels in the horizontal direction
+
+    row_shift, col_shift = align_images(cat, cat_moved)
+    assert (row_shift, col_shift) == (-67, -152)
