@@ -28,8 +28,7 @@ class DecisionStump:
 
 def most_common_label(data: Dataset) -> int:
     """Compute the label that occurs most commonly in the set of labeled examples."""
-    if not data:
-        return -1
+    assert data
     return Counter([label for (_, label) in data]).most_common(1)[0][0]
 
 
