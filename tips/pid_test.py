@@ -1,5 +1,6 @@
 from dataclasses import dataclass, replace
 
+import hypothesis
 from hypothesis import given
 from hypothesis.strategies import floats
 
@@ -50,6 +51,7 @@ def test_achieves_setpoint():
     floats(min_value=0.1, max_value=3, allow_nan=False, allow_infinity=False),
     floats(min_value=0.1, max_value=3, allow_nan=False, allow_infinity=False),
 )
+@hypothesis.settings(print_blob=True)
 def test_achieves_setpoint_parameter_range(kp, ki, kd):
     setpoint = 72
     pid = PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint)

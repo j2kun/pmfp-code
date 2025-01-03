@@ -3,7 +3,7 @@ from itertools import combinations
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import booleans, composite, integers
+from hypothesis.strategies import booleans, composite, integers, sampled_from
 
 from tips.topological_sort import topological_sort
 
@@ -132,7 +132,7 @@ def random_dag_with_loop(
 
     # the cycle must have at least one node, and the picker may always return
     # false.
-    chosen_nodes = {random.choice(list(dag.keys()))}
+    chosen_nodes = {draw(sampled_from((list(dag.keys()))))}
 
     for node in dag.keys():
         if draw(loop_member_picker):

@@ -71,12 +71,12 @@ def is_consistent(
     """
     u, v = extension
     for u_neighbor in query.neighbors(u):
-        if u_neighbor in mapping and not graph.are_connected(v, mapping[u_neighbor]):
+        if u_neighbor in mapping and not graph.are_adjacent(v, mapping[u_neighbor]):
             # print(f"\tInconsistent mapping {extension}")
             return False
 
     for v_neighbor in graph.neighbors(v):
-        if v_neighbor in mapping.values() and not query.are_connected(
+        if v_neighbor in mapping.values() and not query.are_adjacent(
             u,
             mapping.inverse[v_neighbor],
         ):
