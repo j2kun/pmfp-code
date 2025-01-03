@@ -132,7 +132,7 @@ def random_dag_with_loop(
 
     # the cycle must have at least one node, and the picker may always return
     # false.
-    chosen_nodes = {draw(sampled_from((list(dag.keys()))))}
+    chosen_nodes = {draw(sampled_from(list(dag.keys())))}
 
     for node in dag.keys():
         if draw(loop_member_picker):
