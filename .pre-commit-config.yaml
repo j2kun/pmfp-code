@@ -50,7 +50,7 @@ repos:
     additional_dependencies: [tomli]
     args: [--black, --in-place]
 - repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.16
+  rev: 0.7.21
   hooks:
   - id: mdformat
     additional_dependencies:
