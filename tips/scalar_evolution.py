@@ -136,7 +136,9 @@ class Recurrence:
             case Recurrence(base=0, op=operator.mul, increment=_):
                 return 0
             case Recurrence(base=b, op=operator.add, increment=0) | Recurrence(
-                base=b, op=operator.mul, increment=1
+                base=b,
+                op=operator.mul,
+                increment=1,
             ):
                 return b
             case Recurrence(increment=Recurrence()) as r:
