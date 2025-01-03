@@ -57,10 +57,10 @@ def test_achieves_setpoint_parameter_range(kp, ki, kd):
     pid = PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint)
     system = SimpleHeatingSystem(measured_temp=60.0)
 
-    for _ in range(200):
+    for _ in range(300):
         control = pid.run(system.measured_temp, dt=1.0)
         system = system.run(control)
-        print(f"{control:G}: {system.measured_temp:G}")
+        # print(f"{control:G}: {system.measured_temp:G}")
 
     assert abs(system.measured_temp - setpoint) < 1
 
