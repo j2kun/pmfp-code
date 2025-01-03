@@ -128,7 +128,7 @@ def random_shape_difference(draw, min_points=3, max_points=10):
     )
     poly1 = geo.MultiPoint([[p.x, p.y] for p in poly1_points]).convex_hull
     poly2 = geo.MultiPoint([[p.x, p.y] for p in poly2_points]).convex_hull
-    diff =  poly1.difference(poly2)
+    diff = poly1.difference(poly2)
 
     shape = diff
     if isinstance(diff, geo.GeometryCollection):
@@ -141,7 +141,6 @@ def random_shape_difference(draw, min_points=3, max_points=10):
         assert found, "Test setup failed"
 
     return shape, angle
-
 
 
 @given(random_shape_difference())
