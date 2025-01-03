@@ -1,4 +1,5 @@
 """Compute a topological sort of a directed, acyclic graph."""
+
 from collections import deque
 
 # The key is the node's unique id, and the value for node N is the list of node

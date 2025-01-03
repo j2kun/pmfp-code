@@ -4,6 +4,7 @@ The Gaussain Process Regressor was adapted from the sci-kit learn implementation
 
 https://github.com/scikit-learn/scikit-learn/blob/8c9c1f27b7e21201cfffb118934999025fd50cca/sklearn/gaussian_process/_gpr.py
 """
+
 import itertools
 
 import numpy as np

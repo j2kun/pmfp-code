@@ -1,4 +1,5 @@
 """Partition a graph into communities using Louvain with the lambdaCC objective."""
+
 import itertools
 import random
 from dataclasses import dataclass

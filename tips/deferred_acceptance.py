@@ -1,4 +1,5 @@
 """An implementation of the student-proposing deferred acceptance algorithm."""
+
 import heapq
 import itertools
 from dataclasses import dataclass, field

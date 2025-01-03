@@ -1,4 +1,5 @@
 """An implementation of the student-proposing instability chaining algorithm."""
+
 import heapq
 import logging
 from abc import ABC, abstractmethod

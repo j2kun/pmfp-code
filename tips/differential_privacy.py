@@ -141,8 +141,7 @@ class LaplaceMechanism(ABC):
         value: int,
         privacy_parameter: float,
         sensitivity: float,
-    ) -> Tuple[int, int]:
-        ...
+    ) -> Tuple[int, int]: ...
 
 
 class InsecureLaplaceMechanism(LaplaceMechanism):
