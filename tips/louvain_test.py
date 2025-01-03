@@ -49,7 +49,7 @@ def test_two_stars_with_one_edge(resolution):
     )
     actual = run_louvain(graph, resolution)
     expected = {frozenset([0, 1, 2, 3, 4]), frozenset([5, 6, 7, 8, 9])}
-    check_equivalent(expected, actual, resolution, graph)
+    check_equivalent(expected, actual, resolution, graph, debug=True)
 
 
 @pytest.mark.parametrize("resolution", ALL_RESOLUTIONS)
