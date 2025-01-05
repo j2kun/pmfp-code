@@ -31,7 +31,6 @@ def align_images(image1, image2):
     # R. Hovden, Y. Jiang, H. Xin, L.F. Kourkoutis (2015). "Periodic Artifact
     # Reduction in Fourier Transforms of Full Field Atomic Resolution Images".
     # Microscopy and Microanalysis. 21 (2): 436–441. arXiv:2210.09024
-    y, x = np.ogrid[: image1.shape[0], : image1.shape[1]]
     window = np.hamming(image1.shape[0])[:, None] * np.hamming(image1.shape[1])[None, :]
     image1_windowed = image1 * window
     image2_windowed = image2 * window
