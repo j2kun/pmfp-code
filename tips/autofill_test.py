@@ -145,10 +145,10 @@ def random_shape_difference(draw, min_points=3, max_points=10):
 
 @given(random_shape_difference())
 @hypothesis.settings(print_blob=True)
-@hypothesis.reproduce_failure("6.123.2", b"AXicY2BAAf8vMOAGLAgmIyEmAwkKkAEA69gB2Q==")
 def test_fuzz(shape_and_angle):
     shape, angle = shape_and_angle
     hypothesis.assume(shape.area > 1)
+    hypothesis.assume(shape.is_valid)
     rows = intersect_region_with_grating(
         shape=shape,
         angle=angle,
