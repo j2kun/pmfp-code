@@ -1,4 +1,5 @@
 """Partition a graph into communities using Louvain with the lambdaCC objective."""
+
 import itertools
 import random
 from dataclasses import dataclass
@@ -40,7 +41,7 @@ def _compute_objective(graph: igraph.Graph, resolution: float) -> float:
     objective = 0
     for i, j in itertools.combinations(range(vertex_count), 2):
         rescaled_weight = -resolution * graph.vs[i]["weight"] * graph.vs[j]["weight"]
-        if graph.are_connected(i, j):
+        if graph.are_adjacent(i, j):
             rescaled_weight += graph.es[graph.get_eid(i, j)]["weight"]
         distance = 0 if graph.vs[i]["community"] == graph.vs[j]["community"] else 1
         objective += rescaled_weight * (1 - distance)
@@ -101,7 +102,7 @@ def compute_objective_change(
             continue
         other_community = graph.vs[other_id]["community"]
         rescaled_weight = -resolution * vertex_weight * graph.vs[other_id]["weight"]
-        if graph.are_connected(vertex_id, other_id):
+        if graph.are_adjacent(vertex_id, other_id):
             rescaled_weight += graph.es[graph.get_eid(vertex_id, other_id)]["weight"]
 
         # This is more complicated than it needs to be, to match the formulas

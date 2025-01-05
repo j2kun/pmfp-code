@@ -10,6 +10,7 @@ This module contains three implementations:
 Running this file via `python tips/sobel.py path/to/file.jpg` applies the Sobel
 kernel to an image, and saves the resulting image to disk.
 """
+
 from itertools import product
 from typing import List
 

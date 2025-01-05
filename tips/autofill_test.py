@@ -109,7 +109,7 @@ def test_box_with_hole_non_aligned_grating():
 
 @composite
 def random_shape_difference(draw, min_points=3, max_points=10):
-    """Generate a matrix, and a kernel with strictly smaller dimension."""
+    """Generate a random shape and angle."""
     n_points = draw(integers(min_value=min_points, max_value=max_points))
     my_floats = floats(min_value=0, max_value=10, allow_nan=False, allow_infinity=False)
     poly1_points = [
@@ -128,17 +128,31 @@ def random_shape_difference(draw, min_points=3, max_points=10):
     )
     poly1 = geo.MultiPoint([[p.x, p.y] for p in poly1_points]).convex_hull
     poly2 = geo.MultiPoint([[p.x, p.y] for p in poly2_points]).convex_hull
-    return poly1.difference(poly2), angle
+    diff = poly1.difference(poly2)
+
+    shape = diff
+    if isinstance(diff, geo.GeometryCollection):
+        found = False
+        for geom in diff.geoms:
+            if isinstance(geom, geo.Polygon):
+                shape = geom
+                found = True
+                break
+        assert found, "Test setup failed"
+
+    return shape, angle
 
 
 @given(random_shape_difference())
+@hypothesis.settings(print_blob=True)
 def test_fuzz(shape_and_angle):
     shape, angle = shape_and_angle
     hypothesis.assume(shape.area > 1)
+    hypothesis.assume(shape.is_valid)
     rows = intersect_region_with_grating(
         shape=shape,
         angle=angle,
-        row_spacing=1,
+        row_spacing=shape.area / 10,
     )
     segments = [tuple(point for point in segment) for row in rows for segment in row]
     starting_segment = segments[0]

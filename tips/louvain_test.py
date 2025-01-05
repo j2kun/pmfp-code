@@ -15,13 +15,13 @@ DENSE_SUBGRAPH_RESOLUTIONS = [0.01, 0.1, 0.2, 0.3]
 ALL_RESOLUTIONS = SPARSE_CUT_RESOLUTIONS + DENSE_SUBGRAPH_RESOLUTIONS
 
 
-def run_louvain(graph, resolution):
+def run_louvain(graph, resolution, debug=False):
     """Run louvain and normalize the results for easier test assertions."""
-    output = louvain.louvain(graph, resolution)
+    output = louvain.louvain(graph, resolution, debug=debug)
     return {frozenset(c.vertices) for c in sorted(output, key=lambda c: c.id)}
 
 
-def check_equivalent(expected, actual, resolution, graph):
+def check_equivalent(expected, actual, resolution, graph, debug=False):
     """Assert that the objectives for the expected and actual communities are the
     same."""
     actual_objective = louvain._compute_objective(graph, resolution)
@@ -47,7 +47,7 @@ def test_two_stars_with_one_edge(resolution):
         n=10,
         edges=[(0, 1), (0, 2), (0, 3), (0, 4), (5, 6), (5, 7), (5, 8), (5, 9)],
     )
-    actual = run_louvain(graph, resolution)
+    actual = run_louvain(graph, resolution, debug=True)
     expected = {frozenset([0, 1, 2, 3, 4]), frozenset([5, 6, 7, 8, 9])}
     check_equivalent(expected, actual, resolution, graph)
 

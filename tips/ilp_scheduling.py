@@ -1,4 +1,5 @@
 """An integer linear program that schedules a sports season."""
+
 import itertools
 from abc import ABC, abstractmethod
 from collections import defaultdict

@@ -27,6 +27,7 @@ norecursedirs = [
   "data",
   "node_modules",
   "venv",
+  ".hypothesis",
 ]
 
 [tool.isort]
