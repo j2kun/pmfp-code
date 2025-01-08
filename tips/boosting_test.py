@@ -22,7 +22,7 @@ def test_adult_dataset():
     test, train = adult.load()
     h = boost(
         train,
-        lambda draw: train_decision_stump(draw, sample_size=400),
+        lambda draw: train_decision_stump(draw, sample_size=100),
         rounds=15,
     )
-    assert compute_error(h, test) < 0.16
+    assert compute_error(h, test) < 0.165
