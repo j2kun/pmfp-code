@@ -102,12 +102,12 @@ def test_undirected_graph_converges(graph, resolution):
 @settings(deadline=None, max_examples=500)
 def test_stochastic_block_model(in_prob, out_prob, resolution):
     graph = igraph.Graph.SBM(
-        100,
-        block_sizes=[50, 50],
+        40,
+        block_sizes=[20, 20],
         pref_matrix=[[in_prob, out_prob], [out_prob, in_prob]],
     )
     actual = run_louvain(graph, resolution)
-    expected = {frozenset(range(50)), frozenset(range(50, 100))}
+    expected = {frozenset(range(20)), frozenset(range(20, 40))}
     check_equivalent(expected, actual, resolution, graph)
 
 
@@ -116,7 +116,7 @@ def weighted_sbm(
     draw,
     in_prob=floats(min_value=0.7, max_value=0.99),
     out_prob=floats(min_value=0.01, max_value=0.3),
-    num_vertices=integers(min_value=20, max_value=40),
+    num_vertices=integers(min_value=15, max_value=30),
     v_weight=floats(min_value=1, max_value=5),
     in_edge_weight=floats(min_value=1, max_value=5),
     out_edge_weight=floats(min_value=0.01, max_value=1),
