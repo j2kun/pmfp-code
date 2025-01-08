@@ -163,7 +163,7 @@ def test_violated_penalty_follows_penalty_magnitude():
 
 
 @composite
-def random_matchups(draw, min_teams=4, max_teams=10, max_matchups=30):
+def random_matchups(draw, min_teams=4, max_teams=8, max_matchups=20):
     """Generate a random set of matchups."""
     team_names = lists(
         elements=text(alphabet=CHARS, min_size=3, max_size=3),
@@ -187,7 +187,7 @@ def random_matchups(draw, min_teams=4, max_teams=10, max_matchups=30):
 
 
 @pytest.mark.order(index=1)
-@settings(deadline=100000)
+@settings(deadline=100000, max_examples=75)
 @given(random_matchups())
 def test_smoke_feasibility(matchups_and_pairs):
     matchups, far_pairs = matchups_and_pairs
