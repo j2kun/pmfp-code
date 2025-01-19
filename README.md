@@ -6,7 +6,7 @@ This is the source code respository for the book, Practical Math for Programmers
 
 ## Running tests
 
-Requires at least Python 3.10.
+Requires Python 3.12.
 
 ```
 virtualenv -p python3 venv
