@@ -12,9 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # giving up on Python 3.11, too many bugs with the CI system e.g.,
-        # can't get pytest-cov to work properly (phantom uncovered lines)
-        python-version: ["3.10"]
+        python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}

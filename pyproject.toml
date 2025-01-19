@@ -16,7 +16,7 @@ ignore = [
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py312']
 
 [tool.pytest.ini_options]
 addopts = "--mypy -v"
@@ -33,7 +33,7 @@ norecursedirs = [
 profile = "open_stack"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 
 [[tool.mypy.overrides]]
 module = [
