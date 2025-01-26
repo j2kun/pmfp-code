@@ -1,8 +1,21 @@
+import random
+from dataclasses import dataclass
 from typing import Iterable, Union
 
 import scipy.stats
 
 
+@dataclass
+class SingleSamplingScheme:
+    # The number of items to sample from the lot
+    sample_size: int
+
+    # The maximum number of defective items in the sample before the lot is
+    # rejected
+    acceptance_number: int
+
+
+# FIXME: convert to plotter function in __main__
 def calculate_oc_hypergeom(
     sample_size: int,
     acceptance_number: int,
@@ -98,5 +111,21 @@ def find_plan_hypergeom(
     return (sample_size, defects_accepted)
 
 
-def single_sampling_scheme():
-    pass
+def simulate_single_sampling_scheme(
+    population_size: int,
+    actual_defective: int,
+    plan: tuple[int, int],
+    seed: int = 0,
+    rounds: int = 1000,
+):
+    items = list(range(population_size))
+    random.seed(seed)
+
+    accepted_count = 0
+    for i in range(rounds):
+        defective_items = random.sample(items, actual_defective)
+        sample = random.sample(items, plan[0])
+        accepted = len(set(sample) & set(defective_items)) <= plan[1]
+        accepted_count += int(accepted)
+
+    return accepted_count / rounds
