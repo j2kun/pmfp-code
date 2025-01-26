@@ -1,6 +1,6 @@
 from typing import Iterable, Union
 
-from scipy.stats import hypergeom
+import scipy.stats
 
 
 def calculate_oc_hypergeom(
@@ -19,7 +19,7 @@ def calculate_oc_hypergeom(
         defective_count = [defective_count]
 
     p_accept = [
-        hypergeom.cdf(
+        scipy.stats.hypergeom.cdf(
             k=acceptance_number,  # accept if we find <= c defects in the sample
             M=population_size,  # population size
             n=sample_size,  # sample size
@@ -32,6 +32,21 @@ def calculate_oc_hypergeom(
     if len(p_accept) == 1:
         return p_accept[0]
     return p_accept
+
+
+def hypergeom(
+    sample_size: int,
+    acceptance_number: int,
+    population_size: int,
+    defective_count: int,
+) -> float:
+    """Calculate the hypergeometric function as used by the single sampling scheme."""
+    return scipy.stats.hypergeom.cdf(
+        k=acceptance_number,  # accept if we find <= c defects in the sample
+        M=population_size,  # population size
+        n=sample_size,  # sample size
+        N=defective_count,  # number of defects in the population
+    )
 
 
 def find_plan_hypergeom(
@@ -59,17 +74,17 @@ def find_plan_hypergeom(
     sample_size = defects_accepted + 1
 
     while True:
-        prob_accept_bad_lot = calculate_oc_hypergeom(
+        prob_accept_bad_lot = hypergeom(
             sample_size=sample_size,
             acceptance_number=defects_accepted,
             population_size=population_size,
-            defective_count=consumer_risk_point[0] * population_size,
+            defective_count=int(consumer_risk_point[0] * population_size),
         )
-        prob_accept_good_lot = calculate_oc_hypergeom(
+        prob_accept_good_lot = hypergeom(
             sample_size=sample_size,
             acceptance_number=defects_accepted,
             population_size=population_size,
-            defective_count=producer_risk_point[0] * population_size,
+            defective_count=int(producer_risk_point[0] * population_size),
         )
 
         if prob_accept_bad_lot > consumer_risk_point[1]:
