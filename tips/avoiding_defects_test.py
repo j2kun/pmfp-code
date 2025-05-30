@@ -19,6 +19,21 @@ def test_simple():
     assert acceptance_number == 5
 
 
+def test_degenerate():
+    producer_risk_point = (0.05, 0.95)
+    consumer_risk_point = (0.15, 0.20)
+    population_size = 1
+
+    sample_size, acceptance_number = find_plan_hypergeom(
+        producer_risk_point,
+        consumer_risk_point,
+        population_size,
+    )
+
+    assert sample_size == 2
+    assert acceptance_number == 0
+
+
 def floats(min_value, max_value):
     return st.floats(
         min_value=min_value,
