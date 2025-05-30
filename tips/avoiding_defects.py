@@ -1,6 +1,5 @@
 import random
 from dataclasses import dataclass
-from typing import Iterable, Union
 
 import scipy.stats
 
@@ -13,38 +12,6 @@ class SingleSamplingScheme:
     # The maximum number of defective items in the sample before the lot is
     # rejected
     acceptance_number: int
-
-
-# FIXME: convert to plotter function in __main__
-def calculate_oc_hypergeom(
-    sample_size: int,
-    acceptance_number: int,
-    population_size: int,
-    defective_count: Union[int, Iterable[int]],
-) -> Union[float, list[float]]:
-    """Calculate the Operating Characteristic (OC) probability for a single-stage
-    hypergeometric sampling plan.
-
-    Returns float or list of floats computing the probability of accepting the lot given
-    the sampling plan.
-    """
-    if not hasattr(defective_count, "__iter__"):
-        defective_count = [defective_count]
-
-    p_accept = [
-        scipy.stats.hypergeom.cdf(
-            k=acceptance_number,  # accept if we find <= c defects in the sample
-            M=population_size,  # population size
-            n=sample_size,  # sample size
-            N=defects,  # number of defects in the population
-        )
-        for defects in defective_count
-    ]
-
-    # If input was single number, return single number
-    if len(p_accept) == 1:
-        return p_accept[0]
-    return p_accept
 
 
 def hypergeom(
@@ -129,3 +96,31 @@ def simulate_single_sampling_scheme(
         accepted_count += int(accepted)
 
     return accepted_count / rounds
+
+
+if __name__ == "__main__":
+    sample_size = 50
+    acceptance_number = 10
+    population_size = 1000
+    defective_count = list(range(500))
+
+    # Calculate the Operating Characteristic (OC) probability for a
+    # single-stage hypergeometric sampling plan. The graph depicts the
+    # probability of accepting the lot given the sampling plan.
+    p_accept = [
+        hypergeom(sample_size, acceptance_number, population_size, defects)
+        for defects in defective_count
+    ]
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(
+        defective_count,
+        p_accept,
+        linewidth=2,
+    )
+    plt.xlabel("actual defect count")
+    plt.ylabel("acceptance probability")
+    plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    plt.tight_layout()
+    plt.show()
