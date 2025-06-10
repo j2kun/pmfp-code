@@ -99,28 +99,55 @@ def simulate_single_sampling_plan(
 
 
 if __name__ == "__main__":
-    sample_size = 50
-    acceptance_number = 10
+    import matplotlib.pyplot as plt
+
     population_size = 1000
-    defective_count = list(range(500))
+
+    # This represents a bad plan for the consumer risk point below. The plan
+    # will accept a lot with too many defects.
+    #
+    # sample_size = 50
+    # acceptance_number = 10
+
+    # plot two points on the graph
+    producer_risk_point = (0.05, 0.95)  # (defect rate, acceptance probability)
+    consumer_risk_point = (0.15, 0.05)  # (defect rate, acceptance probability)
+    # find the plan that satisfies these points
+    plan = find_plan_hypergeom(
+        producer_risk_point,
+        consumer_risk_point,
+        population_size,
+    )
 
     # Calculate the Operating Characteristic (OC) probability for a
     # single-stage hypergeometric sampling plan. The graph depicts the
     # probability of accepting the lot given the sampling plan.
+    defective_count = list(range(500))
     p_accept = [
-        hypergeom(sample_size, acceptance_number, population_size, defects)
+        hypergeom(plan.sample_size, plan.acceptance_number, population_size, defects)
         for defects in defective_count
     ]
-
-    import matplotlib.pyplot as plt
 
     plt.plot(
         defective_count,
         p_accept,
         linewidth=2,
     )
-    plt.xlabel("actual defect count")
-    plt.ylabel("acceptance probability")
-    plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    plt.xlabel("Actual defect count")
+    plt.ylabel("Acceptance probability")
+
+    plt.scatter(
+        [producer_risk_point[0] * population_size],
+        [producer_risk_point[1]],
+        color="red",
+        label="Producer Risk Points",
+    )
+    plt.scatter(
+        [consumer_risk_point[0] * population_size],
+        [consumer_risk_point[1]],
+        color="blue",
+        label="Consumer Risk Points",
+    )
+
     plt.tight_layout()
-    plt.show()
+    plt.savefig("good_oc_curve.pdf")
