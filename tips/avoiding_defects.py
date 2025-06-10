@@ -108,6 +108,12 @@ def plot_plan(
 
     The graph depicts the probability of accepting the lot given the sampling plan.
     """
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    font = {"size": 14}
+    matplotlib.rc("font", **font)
+
     defective_count = list(range(500))
     p_accept = [
         hypergeom(plan.sample_size, plan.acceptance_number, population_size, defects)
@@ -120,31 +126,32 @@ def plot_plan(
     plt.plot(
         defective_count,
         p_accept,
-        linewidth=2,
+        linewidth=4,
     )
-    plt.xlabel("Actual defect count")
-    plt.ylabel("Acceptance probability")
+    plt.xlabel("Actual defect count", fontsize=16)
+    plt.ylabel("Acceptance probability", fontsize=16)
 
     plt.scatter(
         [producer_risk_point[0] * population_size],
         [producer_risk_point[1]],
         color="red",
-        label="Producer Risk Points",
+        s=100,
+        zorder=5,
     )
     plt.scatter(
         [consumer_risk_point[0] * population_size],
         [consumer_risk_point[1]],
-        color="blue",
-        label="Consumer Risk Points",
+        color="black",
+        s=100,
+        zorder=5,
     )
 
     plt.tight_layout()
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=300)
     plt.clf()
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
 
     population_size = 1000
 
