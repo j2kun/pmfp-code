@@ -98,35 +98,24 @@ def simulate_single_sampling_plan(
     return accepted_count / rounds
 
 
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+def plot_plan(
+    population_size: int,
+    plan: SingleSamplingPlan,
+    filename: str,
+):
+    """Plot the Operating Characteristic (OC) probability for a single-stage
+    hypergeometric sampling plan.
 
-    population_size = 1000
-
-    # This represents a bad plan for the consumer risk point below. The plan
-    # will accept a lot with too many defects.
-    #
-    # sample_size = 50
-    # acceptance_number = 10
-
-    # plot two points on the graph
-    producer_risk_point = (0.05, 0.95)  # (defect rate, acceptance probability)
-    consumer_risk_point = (0.15, 0.05)  # (defect rate, acceptance probability)
-    # find the plan that satisfies these points
-    plan = find_plan_hypergeom(
-        producer_risk_point,
-        consumer_risk_point,
-        population_size,
-    )
-
-    # Calculate the Operating Characteristic (OC) probability for a
-    # single-stage hypergeometric sampling plan. The graph depicts the
-    # probability of accepting the lot given the sampling plan.
+    The graph depicts the probability of accepting the lot given the sampling plan.
+    """
     defective_count = list(range(500))
     p_accept = [
         hypergeom(plan.sample_size, plan.acceptance_number, population_size, defects)
         for defects in defective_count
     ]
+    print(
+        f"Sample size: {plan.sample_size}, Acceptance number: {plan.acceptance_number}",
+    )
 
     plt.plot(
         defective_count,
@@ -150,4 +139,31 @@ if __name__ == "__main__":
     )
 
     plt.tight_layout()
-    plt.savefig("good_oc_curve.pdf")
+    plt.savefig(filename)
+    plt.clf()
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+    population_size = 1000
+
+    # plot two points on the graph
+    producer_risk_point = (0.05, 0.95)  # (defect rate, acceptance probability)
+    consumer_risk_point = (0.15, 0.05)  # (defect rate, acceptance probability)
+    # find the plan that satisfies these points
+    good_plan = find_plan_hypergeom(
+        producer_risk_point,
+        consumer_risk_point,
+        population_size,
+    )
+
+    plot_plan(population_size, good_plan, "good_oc_curve.pdf")
+
+    # This represents a bad plan for the consumer risk point below. The plan
+    # will accept a lot with too many defects.
+    bad_plan = SingleSamplingPlan(
+        sample_size=50,
+        acceptance_number=10,
+    )
+    plot_plan(population_size, bad_plan, "bad_oc_curve.pdf")
