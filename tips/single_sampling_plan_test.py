@@ -1,7 +1,7 @@
 import hypothesis.strategies as st
 from hypothesis import example, given, settings
 
-from tips.avoiding_defects import find_plan_hypergeom, simulate_single_sampling_plan
+from tips.single_sampling_plan import find_plan_hypergeom, simulate_single_sampling_plan
 
 
 def test_simple():
