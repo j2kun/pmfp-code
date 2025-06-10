@@ -5,7 +5,7 @@ import scipy.stats
 
 
 @dataclass
-class SingleSamplingScheme:
+class SingleSamplingPlan:
     # The number of items to sample from the lot
     sample_size: int
 
@@ -20,7 +20,7 @@ def hypergeom(
     population_size: int,
     defective_count: int,
 ) -> float:
-    """Calculate the hypergeometric function as used by the single sampling scheme."""
+    """Calculate the hypergeometric function as used by the single sampling plan."""
     return scipy.stats.hypergeom.cdf(
         k=acceptance_number,  # accept if we find <= c defects in the sample
         M=population_size,  # population size
@@ -33,8 +33,8 @@ def find_plan_hypergeom(
     producer_risk_point: tuple[float, float],
     consumer_risk_point: tuple[float, float],
     population_size: int,
-) -> tuple[int, int]:
-    """Find the best single-scheme sampling plan.
+) -> SingleSamplingPlan:
+    """Find the best single sampling plan.
 
     Args:
         producer_risk_point: (d, p) implying lots with defect rate <= d are
@@ -75,10 +75,10 @@ def find_plan_hypergeom(
             # If both checks pass, the plan is good
             break
 
-    return (sample_size, defects_accepted)
+    return SingleSamplingPlan(sample_size, defects_accepted)
 
 
-def simulate_single_sampling_scheme(
+def simulate_single_sampling_plan(
     population_size: int,
     actual_defective: int,
     plan: tuple[int, int],

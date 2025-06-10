@@ -1,7 +1,7 @@
 import hypothesis.strategies as st
 from hypothesis import example, given, settings
 
-from tips.avoiding_defects import find_plan_hypergeom, simulate_single_sampling_scheme
+from tips.avoiding_defects import find_plan_hypergeom, simulate_single_sampling_plan
 
 
 def test_simple():
@@ -9,14 +9,14 @@ def test_simple():
     consumer_risk_point = (0.15, 0.20)
     population_size = 500
 
-    sample_size, acceptance_number = find_plan_hypergeom(
+    plan = find_plan_hypergeom(
         producer_risk_point,
         consumer_risk_point,
         population_size,
     )
 
-    assert sample_size == 51
-    assert acceptance_number == 5
+    assert plan.sample_size == 51
+    assert plan.acceptance_number == 5
 
 
 def floats(min_value, max_value):
@@ -47,7 +47,7 @@ def test_acceptance_threshold(
     # the consumer's defect rate is for the prob of accepting a bad lot. In
     # order to make this consistent, the defect rate assumed by the consumer
     # must be larger than the defect rate assumed by the producer, or else the
-    # scheme will trivially require 100% inspection. This materializes as the
+    # plan will trivially require 100% inspection. This materializes as the
     # hypergeometric function having invalid inputs or else producing a target
     # sample size that equals the population size.
     consumer_risk_defect_rate = (
@@ -58,21 +58,21 @@ def test_acceptance_threshold(
     consumer_risk_point = (consumer_risk_defect_rate, consumer_risk_prob)
     population_size = 500
 
-    sample_size, acceptance_number = find_plan_hypergeom(
+    plan = find_plan_hypergeom(
         producer_risk_point,
         consumer_risk_point,
         population_size,
     )
     print(producer_risk_point, consumer_risk_point)
-    print((population_size, sample_size, acceptance_number))
+    print((population_size, plan.sample_size, plan.acceptance_number))
 
-    if sample_size >= population_size:
+    if plan.sample_size >= population_size:
         return  # hypothesis picked unreasonable parameters
 
-    proportion_accepted = simulate_single_sampling_scheme(
+    proportion_accepted = simulate_single_sampling_plan(
         population_size=population_size,
-        actual_defective=acceptance_number,
-        plan=(sample_size, acceptance_number),
+        actual_defective=plan.acceptance_number,
+        plan=(plan.sample_size, plan.acceptance_number),
         seed=0,
         rounds=1000,
     )
