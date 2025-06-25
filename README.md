@@ -20,5 +20,5 @@ To run the test suite:
 pytest
 
 # with code coverage
-pytest --cov-report html:cov_html  --cov-report annotate:cov_annotate --cov
+pytest --cov-report html:cov_html  --cov-report term-missing --cov
 ```

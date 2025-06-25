@@ -2,7 +2,7 @@
 
 import math
 import random
-from typing import Callable, Iterable, Iterator
+from typing import Callable, Iterator
 
 LabeledExample = tuple[list[float], int]
 Dataset = list[LabeledExample]
@@ -14,20 +14,6 @@ Learner = Callable[[DrawIter], Hypothesis]
 
 def sign(x: float) -> int:
     return 1 if x >= 0 else -1
-
-
-def draw(weights: Iterable[float]) -> int:
-    """Draw an index from the input list, treated as an (unnormalized) distribution."""
-    choice = random.uniform(0, sum(weights))
-    index = 0
-
-    for weight in weights:
-        choice -= weight
-        if choice <= 0:
-            return index
-        index += 1
-
-    raise ValueError("unreachable")  # pragma: no cover
 
 
 def normalize(weights: list[float]) -> tuple[float, ...]:
@@ -51,7 +37,9 @@ class DrawExample:
         return self  # pragma: no cover
 
     def __next__(self):
-        return self.examples[draw(self.distr)]
+        weights = self.distr
+        index = random.choices(list(range(len(weights))), weights=weights)[0]
+        return self.examples[index]
 
 
 def boost(examples: Dataset, weak_learner: Learner, rounds: int) -> Hypothesis:
