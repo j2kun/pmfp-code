@@ -46,11 +46,22 @@ provider_data = [
 async def main(provider_id: int):
     secint = mpc.SecInt(16)
     await mpc.start()
-    provider_shares = mpc.input(secint.array(provider_data[provider_id]))
-    result = mpc.sum(
-        secint(1) for row in provider_shares if row[1] >= 4 and row[2] <= 2
-    )
-    print("Result:", await mpc.output(result))
+
+    # all_rows is a list of secret-shared arrays, one for each provider.
+    #
+    # The mpyc library works by having each process provides its data to
+    # `mpc.input`, and the returned value is a secret-shared array of values
+    # from all processes.
+    all_rows = mpc.input(secint.array(provider_data[provider_id]))
+    total = 0
+    for provider in all_rows:
+        for row in provider:
+            # We can't use "and" for conditionals because the branch taken
+            # would leak security. The MPC guarantee makes even trying this
+            # impossible. Using multiplication and converting conditions to 0-1
+            # valued integers avoids this.
+            total += (row[1] >= 4) * (row[2] <= 2)
+    print("Result:", await mpc.output(total))
     await mpc.shutdown()
 
 
