@@ -45,6 +45,7 @@ module = [
   "matplotlib.dates",
   "matplotlib.patches",
   "matplotlib.pyplot",
+  "mpyc",
   "mypy-numpy",
   "networkx",
   "ortools.linear_solver",
