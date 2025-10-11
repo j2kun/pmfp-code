@@ -40,6 +40,18 @@ def test_cheb_relu():
     assert error < 0.01
 
 
+@pytest.mark.parametrize("degree, error", [(8, 1e-9), (12, 1e-14)])
+def test_cf_sin_reference(degree, error):
+    def f(x):
+        x = x.astype(np.float64)
+        return np.sin(x)
+
+    interval = (0, 1.5707)
+    cf_approx = cf_approximation(f, degree, interval)
+    cf_approx_error = inf_norm(f, cf_approx, interval)
+    assert cf_approx_error < error
+
+
 SMOOTH_FNS = [np.exp, np.sin, np.cos, np.tan]
 
 
