@@ -263,7 +263,8 @@ def chebyshev_interpolant(
     return interpolant
 
 
-def _cf_approximation_on_standard_interval(f, degree: int) -> ChebFun:
+def cf_approximation_on_standard_interval(f, degree: int) -> ChebFun:
+    """Compute the Caratheodory-Fejer approximation of f on the interval [-1, 1]."""
     coefs = get_cheb_fun_coefs(f)
     cheb_degree = len(coefs) - 1
     if cheb_degree <= degree:
@@ -299,7 +300,7 @@ def cf_approximation(f: Function, degree: int, interval: Interval = (-1, 1)) -> 
 
     else:
         f_scaled = f
-    approximant = _cf_approximation_on_standard_interval(f_scaled, degree)
+    approximant = cf_approximation_on_standard_interval(f_scaled, degree)
     if needs_scaling:
         approximant._interval = interval
     return approximant
