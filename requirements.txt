@@ -26,7 +26,7 @@ exceptiongroup==1.2.2
 execnet==2.1.1
 executing==2.1.0
 filelock==3.16.1
-fonttools==4.55.3
+fonttools==4.61.0
 hypothesis==6.124.1
 identify==2.6.5
 idna==3.10
