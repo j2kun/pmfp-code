@@ -283,7 +283,7 @@ class InkstitchPoint:
 
 
 def intersect_region_with_grating(shape, angle, row_spacing):
-    (minx, miny, maxx, maxy) = shape.bounds
+    minx, miny, maxx, maxy = shape.bounds
     upper_left = InkstitchPoint(minx, miny)
     lower_right = InkstitchPoint(maxx, maxy)
     length = (upper_left - lower_right).length()
