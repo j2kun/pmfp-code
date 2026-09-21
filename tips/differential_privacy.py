@@ -45,7 +45,6 @@ def sample_geometric(rng, exponent):
     1 - e^-exponent, i.e., the number of Bernoulli trials until the first
     success where the success probability is 1 - e^-exponent.
     """
-
     max_value = 1 << 64
     # Return truncated sample in the case that the sample exceeds the max value.
     if rng.random() > -1.0 * math.expm1(-1.0 * exponent * max_value):
