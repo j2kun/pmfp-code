@@ -10,6 +10,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 class Student:
     id: int
     """Preferences of School.id, from highest priority to lowest priority."""
+
     preferences: List[int]
     """The highest priority school this student has yet to be rejected from."""
     best_unrejected: int = 0
@@ -22,10 +23,12 @@ class Student:
 class School:
     id: int
     """Preferences of Student.id, from highest priority to lowest priority."""
+
     preferences: List[int]
     """The number of open seats at the school."""
     capacity: int
     """A list of size at most self.capacity containing held applications."""
+
     held: List[int] = field(default_factory=list)
 
 

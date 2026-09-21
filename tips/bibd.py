@@ -79,38 +79,38 @@ class BIBDParams:
     @property
     def v(self):
         return self.treatments
+    \
+    """The number of test subjects.
 
-    """
-    The number of test subjects. In HCD, the number of blocks b.
+    In HCD, the number of blocks b.
     """
     subjects: int
 
     @property
     def b(self):
         return self.subjects
+    """The number of replications of each treatment.
 
-    """
-    The number of replications of each treatment. In HCD, r.
+    In HCD, r.
     """
     subjects_per_treatment: int
 
     @property
     def r(self):
         return self.subjects_per_treatment
+    """The number of treatments to apply to each test subject.
 
-    """
-    The number of treatments to apply to each test subject. In HCD, the size k
-    of a block.
+    In HCD, the size k of a block.
     """
     treatments_per_subject: int
 
     @property
     def k(self):
         return self.treatments_per_subject
+    \
+    """The number of times each pair of treatments occurs in a block.
 
-    """
-    The number of times each pair of treatments occurs in a block. In HCD,
-    the parameter lambda.
+    In HCD, the parameter lambda.
     """
     subjects_per_treatment_pair: int
 
