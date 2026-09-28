@@ -72,8 +72,10 @@ class Applicant(ABC):
 class Student(Applicant):
     id: int
     """Preferences on ResidencyProgram.id, from highest priority to lowest priority."""
+
     preferences: List[int]
     """The highest priority program this student has yet to be rejected from."""
+
     best_unrejected: int = 0
 
     def to_apply(self):
@@ -191,8 +193,10 @@ class Couple(Applicant):
 class ResidencyProgram:
     id: int
     """Preferences on Student.id, from highest priority to lowest priority."""
+
     preferences: List[int]
     """The number of open spots."""
+
     capacity: int
 
     def select(self, pool: Set[Student]) -> Set[Student]:
