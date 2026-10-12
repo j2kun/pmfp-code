@@ -183,7 +183,7 @@ def test_normalize(input, expected):
 def parse_to_binop(expr: str):
     # Can ignore type checker because input is assumed to be a BinOp, which has
     # the attribute
-    return ast.parse(expr).body[0].value  # type:ignore
+    return ast.parse(expr).body[0].value  # type: ignore
 
 
 def test_reduce_strength():
