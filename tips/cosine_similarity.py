@@ -1,6 +1,5 @@
 """An implementation of cosine similarity."""
 
-
 def cosine_similarity(a, b):
     """Return a number between -1 and 1 indicating how similar two vectors are.
 

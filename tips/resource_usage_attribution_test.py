@@ -120,19 +120,14 @@ def test_equal_split_at_service():
 
     def usageFn(x, y):
         return usages.get((x, y), 0)
+    \
+    """Markov transition matrix is.
 
+    flour  leather  miller  leathersmith  cake  handbag 0      0        0.5     0.5
+    0     0 0      0        0.5     0.5           0     0 0      0        0       0
+    1     0 0      0        0       0             0     1 0      0        0       0
+    1     0 0      0        0       0             0     1
     """
-    Markov transition matrix is
-
-    flour  leather  miller  leathersmith  cake  handbag
-    0      0        0.5     0.5           0     0
-    0      0        0.5     0.5           0     0
-    0      0        0       0             1     0
-    0      0        0       0             0     1
-    0      0        0       0             1     0
-    0      0        0       0             0     1
-    """
-
     expected_attribution = {
         "flour": {
             "cake": 0.5,
@@ -161,19 +156,14 @@ def test_equal_split_at_customer():
 
     def usageFn(x, y):
         return usages.get((x, y), 0)
+    \
+    """Markov transition matrix is.
 
+    flour  leather  miller  leathersmith  cake  handbag 0      0        1       0
+    0     0 0      0        0       1             0     0 0      0        0       0
+    0.5   0.5 0      0        0       0             0.5   0.5 0      0        0       0
+    1     0 0      0        0       0             0     1
     """
-    Markov transition matrix is
-
-    flour  leather  miller  leathersmith  cake  handbag
-    0      0        1       0             0     0
-    0      0        0       1             0     0
-    0      0        0       0             0.5   0.5
-    0      0        0       0             0.5   0.5
-    0      0        0       0             1     0
-    0      0        0       0             0     1
-    """
-
     expected_attribution = {
         "flour": {
             "cake": 0.5,
@@ -204,12 +194,9 @@ def test_unequal_split_at_both_service_and_customer():
 
     def usageFn(x, y):
         return usages.get((x, y), 0)
-
-    """
-    Since it's still a DAG, absorbing probabilities are the sums
-    of products of probabilities along all paths.
-    """
-
+    \
+    """Since it's still a DAG, absorbing probabilities are the sums of products of
+    probabilities along all paths."""
     expected_attribution = {
         "flour": {
             "cake": 0.6 * 0.8 + 0.4 * 0.3,
@@ -314,7 +301,6 @@ def test_exact_solution_matches_simulated_approximation(
     flow. To help avoid numerical error messing things up, lower bound each transition
     probability to 0.1.
     """
-
     def normalize_rows(array):
         """Return a new array containing the normalized rows of the input array."""
         row_sums = array.sum(axis=1, keepdims=True)
