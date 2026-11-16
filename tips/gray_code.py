@@ -27,8 +27,10 @@ class SettingsChange:
 
     num_settings: int
     """The choice of values for the settings, as a bit mask of length num_settings."""
+
     settings: int
     """Which bit was flipped last."""
+
     flipped_bit: Optional[int]
 
 

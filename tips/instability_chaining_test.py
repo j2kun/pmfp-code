@@ -77,7 +77,7 @@ def err_msg(matching, unstable_pair):
     applicant, program = unstable_pair
     student, partner = applicant, None
     if isinstance(applicant, Couple):
-        (student, partner) = applicant.members
+        student, partner = applicant.members
 
     assigned_to_program = [
         str(x) for (x, y) in matching.matches.items() if y == program

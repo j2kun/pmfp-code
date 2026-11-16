@@ -4,8 +4,8 @@ Based on https://github.com/inkstitch/inkstitch/blob/main/lib/stitches/auto_fill
 """
 
 from collections import deque
-from itertools import pairwise  # type: ignore
 from itertools import groupby
+from itertools import pairwise  # type: ignore
 from typing import Any, Deque, Dict, Iterable, List, Tuple
 
 import networkx
